@@ -1,0 +1,22 @@
+Consultas aplicación:
+
+Consulta de producto a serie
+
+SELECT s.nombre FROM producto p, serie s where s.producto_id = p.producto_id;
+
+Consulta serie a material
+
+SELECT m.nombre
+FROM material m
+JOIN serie_material sm ON m.material_id = sm.id_material
+JOIN serie s ON sm.id_serie = s.serie_id
+WHERE s.serie_id = 4;
+
+Consulta material a color
+
+SELECT c.nombre
+FROM material m
+JOIN material_color mc ON m.material_id = mc.id_material
+JOIN color c ON mc.id_color = c.color_id
+WHERE m.material_id = 1;
+
