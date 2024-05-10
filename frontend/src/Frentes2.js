@@ -135,6 +135,22 @@ function Frentes() {
     selectedMaterialFranjaId: selectedOptionsH.materialFranja || "",
     selectedColorFranjaId: selectedOptionsH.colorFranja || ""
   });
+  useEffect(() => {
+    setLocalData({
+      selectedProductoId: selectedProductoId || "",
+      selectedProductoNombre: selectedProductoNombre || "",
+      selectedSerieId: selectedOptionsH.serie || "",
+      selectedSerieNombre: selectedSerieNombre || "",
+      selectedArticuloId: selectedOptionsH.articulo || "",
+      selectedArticuloNombre: selectedArticuloNombre || "",
+      selectedMaterialId: selectedOptionsH.material || "",
+      selectedMaterialNombre : selectedMaterialNombre || "",
+      selectedColorId: selectedOptionsH.color || "",
+      selectedMedidasId: selectedOptionsH.medidas || "",
+      selectedMaterialFranjaId: selectedOptionsH.materialFranja || "",
+      selectedColorFranjaId: selectedOptionsH.colorFranja || "",
+    });
+  }, [selectedOptionsH]);
   const location = useLocation();
 useEffect(() => {
     // Función para guardar los datos

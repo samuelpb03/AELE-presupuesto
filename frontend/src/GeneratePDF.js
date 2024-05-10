@@ -1,25 +1,24 @@
 import { jsPDF } from "jspdf";
 
 const labelsMap = {
-  selectedProductoId: "Producto",
-  selectedSerieId: "Serie",
-  selectedArticuloId: "Artículo",
-  selectedMaterialId: "Material",
-  selectedColorId: "Color",
-  selectedMedidasId: "Medidas",
-  selectedMaterialFranjaId: "Material Franja",
-  selectedColorFranjaId: "Color Franja"
+  selectedProductoNombre: "Producto",
+  selectedSerieNombre: "Serie",
+  selectedArticuloNombre: "Artículo",
+  selectedMaterialNombre: "Material",
+  selectedColorNombre: "Color",
+  selectedMedidasNombre: "Medidas",
+  selectedMaterialFranjaNombre: "Material Franja",
+  selectedColorFranjaNombre: "Color Franja"
 };
 
 export const generatePDF = (data) => {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
-  const columnPadding = 5; // Espacio de relleno entre columnas
-  const cellPadding = 5; // Espacio de relleno dentro de las celdas
-  const cellHeight = 10; // Altura de cada celda de datos, incrementada para más espacio
-  const colWidth = (pageWidth - 3 * columnPadding) / 2; // Ancho de cada columna ajustado para dos columnas por fila
+  const columnPadding = 5;  // Espacio de relleno entre columnas
+  const cellPadding = 5;    // Espacio de relleno dentro de las celdas
+  const cellHeight = 10;    // Altura de cada celda de datos
+  const colWidth = (pageWidth - 3 * columnPadding) / 2; // Ancho de cada columna
 
-  // Título del documento
   doc.setFontSize(18);
   doc.text("Presupuesto: ", pageWidth / 2, 15, null, null, 'center');
 
@@ -34,24 +33,19 @@ export const generatePDF = (data) => {
     let column = index % 2; // 0 o 1 para dos columnas
     let xPos = columnPadding + column * (colWidth + columnPadding);
 
-    if (index === 2) { // Ajusta yPos al iniciar la segunda fila
-      yPos[0] = Math.max(yPos[0], yPos[1]) + 30; // 30 es el espacio vertical adicional entre las filas
-      yPos[1] = yPos[0]; // Asegura que ambas columnas de la segunda fila comiencen en la misma posición Y
+    if (index === 2) {
+      yPos[0] = Math.max(yPos[0], yPos[1]) + 30;
+      yPos[1] = yPos[0];
     }
 
-    // Título de la sección
     doc.setFillColor(211, 211, 211);
     doc.rect(xPos, yPos[column], colWidth, cellHeight, 'F');
     doc.text(section.charAt(0).toUpperCase() + section.slice(1), xPos + cellPadding, yPos[column] + (cellHeight / 2));
 
     yPos[column] += cellHeight + 2;
 
-    // Iterar a través de los campos de cada sección
     Object.entries(data[section] || {}).forEach(([key, value]) => {
-      if (key.endsWith('Id') && data[section][`${key.replace('Id', 'Nombre')}`]) {
-        value = data[section][`${key.replace('Id', 'Nombre')}`]; // Reemplaza ID por Nombre si es posible
-      }
-      const label = labelsMap[key] || key;
+      const label = labelsMap[key.replace('Id', 'Nombre')] || key;
       const labelWidth = colWidth / 2;
       const valueX = xPos + labelWidth + cellPadding;
 

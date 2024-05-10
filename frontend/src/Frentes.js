@@ -292,7 +292,7 @@ useEffect(() => {
      // Guarda el nombre
   
     // Asegúrate de que handleSelectChange pueda manejar un nombre además del valor
-    handleSelectChange("producto", index, nombre);
+    handleSelectChange("producto", event.target.value);
   };
 
   const handleSelectSerieChange = (event) => {
