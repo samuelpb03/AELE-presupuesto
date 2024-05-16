@@ -1,50 +1,26 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useLocation } from 'react-router-dom';
 import axios from "axios";
 import { useTabs } from "./TabsContext";
 import { useData } from './context/DataContext';
+import { generatePDF } from "./GeneratePDF";
 
-function Tiradores() {
-  const { selectedOptionsF, handleSelectChangeF } = useTabs();
+function Equipamiento2() {
+  const { selectedOptionsE2, handleSelectChangeE2 } = useTabs();
+  const { data, saveData } = useData();
   const [listProducto, setListProducto] = useState([]);
   const [listSerie, setListSerie] = useState([]);
-  const [listMaterial, setListMaterial] = useState([]);
   const [listArticulo, setListArticulo] = useState([]);
-  const [listColor, setListColor] = useState([]);
-  const { data, saveData } = useData();
+  const [listMaterial, setListMaterial] = useState([]);
 
-  const [selectedProductoId, setSelectedProductoId] = useState(
-    selectedOptionsF.producto?.optionId || ""
-  );
-  const [selectedProductoNombre, setSelectedProductoNombre] = useState(
-    selectedOptionsF.producto?.optionName || ""
-  );
-  const [selectedSerieId, setSelectedSerieId] = useState(
-    selectedOptionsF.serie?.optionId || ""
-  );
-  const [selectedSerieNombre, setSelectedSerieNombre] = useState(
-    selectedOptionsF.serie?.optionName || ""
-  );
-  const [selectedArticuloId, setSelectedArticuloId] = useState(
-    selectedOptionsF.articulo?.optionId || ""
-  );
-  const [selectedArticuloNombre, setSelectedArticuloNombre] = useState(
-    selectedOptionsF.articulo?.optionName || ""
-  );
-  const [selectedMaterialId, setSelectedMaterialId] = useState(
-    selectedOptionsF.material?.optionId || ""
-  );
-  const [selectedMaterialNombre, setSelectedMaterialNombre] = useState(
-    selectedOptionsF.material?.optionName || ""
-  );
-  const [selectedColorId, setSelectedColorId] = useState(
-    selectedOptionsF.color?.optionId || ""
-  );
-  const [selectedColorNombre, setSelectedColorNombre] = useState(
-    selectedOptionsF.color?.optionName || ""
-  );
-
-  const location = useLocation();
+  const [selectedProductoId, setSelectedProductoId] = useState(selectedOptionsE2.producto?.optionId || "");
+  const [selectedProductoNombre, setSelectedProductoNombre] = useState(selectedOptionsE2.producto?.optionName || "");
+  const [selectedSerieId, setSelectedSerieId] = useState(selectedOptionsE2.serie?.optionId || "");
+  const [selectedSerieNombre, setSelectedSerieNombre] = useState(selectedOptionsE2.serie?.optionName || "");
+  const [selectedArticuloId, setSelectedArticuloId] = useState(selectedOptionsE2.articulo?.optionId || "");
+  const [selectedArticuloNombre, setSelectedArticuloNombre] = useState(selectedOptionsE2.articulo?.optionName || "");
+  const [selectedMaterialId, setSelectedMaterialId] = useState(selectedOptionsE2.material?.optionId || "");
+  const [selectedMaterialNombre, setSelectedMaterialNombre] = useState(selectedOptionsE2.material?.optionName || "");
 
   const [localData, setLocalData] = useState({
     selectedProductoId,
@@ -55,8 +31,6 @@ function Tiradores() {
     selectedArticuloNombre,
     selectedMaterialId,
     selectedMaterialNombre,
-    selectedColorId,
-    selectedColorNombre,
   });
 
   useEffect(() => {
@@ -70,23 +44,17 @@ function Tiradores() {
       selectedArticuloNombre,
       selectedMaterialId,
       selectedMaterialNombre,
-      selectedColorId,
-      selectedColorNombre
     }));
   }, [
     selectedProductoId, selectedProductoNombre, selectedSerieId, selectedSerieNombre,
-    selectedArticuloId, selectedArticuloNombre, selectedMaterialId, selectedMaterialNombre,
-    selectedColorId, selectedColorNombre
+    selectedArticuloId, selectedArticuloNombre, selectedMaterialId, selectedMaterialNombre
   ]);
-
-  useEffect(() => {
-    saveData('tiradores', localData);
-  }, [localData]);
 
   useEffect(() => {
     axios.get("http://localhost:6969/producto").then((res) => {
       if (Array.isArray(res.data)) {
-        setListProducto(res.data);
+        const filteredProducts = res.data.filter((producto) => [7, 5].includes(producto.producto_id));
+        setListProducto(filteredProducts);
       } else {
         console.error("Error fetching productos: res.data is not an array");
       }
@@ -109,7 +77,6 @@ function Tiradores() {
       });
       document.getElementById("articulo").disabled = true;
       document.getElementById("material").disabled = true;
-      document.getElementById("color").disabled = true;
     }
   }, [selectedProductoId]);
 
@@ -119,8 +86,6 @@ function Tiradores() {
         if (Array.isArray(res.data)) {
           setListArticulo(res.data);
           document.getElementById("articulo").disabled = false;
-          document.getElementById("material").disabled = false;
-          document.getElementById("color").disabled = false;
         } else {
           console.error("Error fetching articulos: res.data is not an array");
         }
@@ -143,75 +108,63 @@ function Tiradores() {
         console.error("Error fetching materiales:", error);
       });
     }
-    document.getElementById("color").disabled = false;
   }, [selectedArticuloId, selectedSerieId]);
-
-  useEffect(() => {
-    if (selectedMaterialId) {
-      axios.get("http://localhost:6969/color", { params: { materialId: selectedMaterialId } }).then((res) => {
-        if (Array.isArray(res.data)) {
-          setListColor(res.data);
-          document.getElementById("color").disabled = false;
-        } else {
-          console.error("Error fetching colores: res.data is not an array");
-        }
-      }).catch(error => {
-        console.error("Error fetching colores:", error);
-      });
-    }
-  }, [selectedMaterialId]);
 
   const handleSelectProductChange = (event) => {
     const index = event.target.selectedIndex;
     const nombre = event.target.options[index].text;
-    setSelectedProductoId(event.target.value);
+    const id = event.target.value;
+    setSelectedProductoId(id);
     setSelectedProductoNombre(nombre);
-    handleSelectChangeF("producto", event.target.value, nombre);
+    handleSelectChangeE2("producto", id, nombre);
   };
 
   const handleSelectSerieChange = (event) => {
     const index = event.target.selectedIndex;
     const nombre = event.target.options[index].text;
-    setSelectedSerieId(event.target.value);
+    const id = event.target.value;
+    setSelectedSerieId(id);
     setSelectedSerieNombre(nombre);
-    handleSelectChangeF("serie", event.target.value, nombre);
+    handleSelectChangeE2("serie", id, nombre);
   };
 
   const handleSelectArticuloChange = (event) => {
     const index = event.target.selectedIndex;
     const nombre = event.target.options[index].text;
+    const id = event.target.value;
+    setSelectedArticuloId(id);
     setSelectedArticuloNombre(nombre);
-    setSelectedArticuloId(event.target.value);
-    handleSelectChangeF("articulo", event.target.value, nombre);
+    handleSelectChangeE2("articulo", id, nombre);
   };
 
   const handleSelectMaterialChange = (event) => {
     const index = event.target.selectedIndex;
     const nombre = event.target.options[index].text;
+    const id = event.target.value;
+    setSelectedMaterialId(id);
     setSelectedMaterialNombre(nombre);
-    setSelectedMaterialId(event.target.value);
-    handleSelectChangeF("material", event.target.value, nombre);
+    handleSelectChangeE2("material", id, nombre);
   };
 
-  const handleSelectColorChange = (event) => {
-    const index = event.target.selectedIndex;
-    const nombre = event.target.options[index].text;
-    setSelectedColorNombre(nombre);
-    setSelectedColorId(event.target.value);
-    handleSelectChangeF("color", event.target.value, nombre);
+  const handleSaveToLocalContext = () => {
+    saveData('equipamiento2', localData);
+    console.log(localData);
   };
 
   useEffect(() => {
-    console.log("Datos actualizados:", data);
-  }, [data]);
+    saveData('equipamiento2', localData);
+  }, [localData, saveData]);
+
+  const handleGeneratePDF = () => {
+    generatePDF(data);
+  };
 
   return (
     <div className="container">
       <div className="container2">
-        <h1>Tiradores</h1>
-        {/* Producto */}
+        <h1>Equipamiento 2</h1>
         <label htmlFor="producto">Producto:</label>
-        <select id="producto" onChange={handleSelectProductChange} value={localData.selectedProductoId} name="selectedProductoId">
+        <select id="producto" onChange={handleSelectProductChange} value={selectedProductoId || ""}>
           <option disabled={selectedProductoId !== ""}>--Selecciona una opción--</option>
           {listProducto.map((producto) => (
             <option key={producto.producto_id} value={producto.producto_id}>
@@ -220,10 +173,9 @@ function Tiradores() {
           ))}
         </select>
 
-        {/* Serie */}
         <label htmlFor="serie">Serie:</label>
-        <select id="serie" disabled={true} onChange={handleSelectSerieChange} value={selectedSerieId || ""} name="selectedSerieId">
-          <option value="" disabled={selectedProductoId !== ""}>--Selecciona una opción--</option>
+        <select id="serie" disabled={true} onChange={handleSelectSerieChange} value={selectedSerieId || ""}>
+          <option value="" disabled={selectedProductoId === ""}>--Selecciona una opción--</option>
           {listSerie.map((serie) => (
             <option key={serie.serie_id} value={serie.serie_id}>
               {serie.nombre}
@@ -231,7 +183,6 @@ function Tiradores() {
           ))}
         </select>
 
-        {/* Articulo */}
         <label htmlFor="articulo">Artículo:</label>
         <select id="articulo" disabled={true} onChange={handleSelectArticuloChange} value={selectedArticuloId || ""}>
           <option value="" disabled={selectedProductoId === ""}>--Selecciona una opción--</option>
@@ -243,7 +194,6 @@ function Tiradores() {
         </select>
       </div>
       <div className="container3">
-        {/* Material */}
         <label htmlFor="material">Material:</label>
         <select id="material" disabled={true} onChange={handleSelectMaterialChange} value={selectedMaterialId || ""}>
           <option value="" disabled={selectedArticuloId === ""}>--Selecciona una opción--</option>
@@ -253,20 +203,10 @@ function Tiradores() {
             </option>
           ))}
         </select>
-
-        {/* Color */}
-        <label htmlFor="color">Color:</label>
-        <select id="color" disabled={true} onChange={handleSelectColorChange} value={selectedColorId || ""}>
-          <option value="" disabled={selectedMaterialId === ""}>--Selecciona una opción--</option>
-          {listColor.map((color) => (
-            <option key={color.color_id} value={color.color_id}>
-              {color.nombre}
-            </option>
-          ))}
-        </select>
+        <button id="generatePDF" onClick={handleGeneratePDF}> Generar PDF</button>
       </div>
     </div>
   );
 }
 
-export default Tiradores;
+export default Equipamiento2;

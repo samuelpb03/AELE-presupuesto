@@ -5,8 +5,8 @@ import { useTabs } from "./TabsContext";
 import { useData } from './context/DataContext';
 import { generatePDF } from "./GeneratePDF";
 
-function Frentes() {
-  const { selectedOptions, handleSelectChange } = useTabs();
+function Frentes3() {
+  const { selectedOptionsI, handleSelectChangeI } = useTabs();
   const { data, saveData } = useData();
   const [listProducto, setListProducto] = useState([]);
   const [listSerie, setListSerie] = useState([]);
@@ -17,24 +17,22 @@ function Frentes() {
   const [listMaterialFranja, setListMaterialFranja] = useState([]);
   const [listColorFranja, setListColorFranja] = useState([]);
 
-  const [selectedProductoId, setSelectedProductoId] = useState(selectedOptions.producto?.optionId || "");
-  const [selectedProductoNombre, setSelectedProductoNombre] = useState(selectedOptions.producto?.optionName || "");
-  const [selectedSerieId, setSelectedSerieId] = useState(selectedOptions.serie?.optionId || "");
-  const [selectedSerieNombre, setSelectedSerieNombre] = useState(selectedOptions.serie?.optionName || "");
-  const [selectedArticuloId, setSelectedArticuloId] = useState(selectedOptions.articulo?.optionId || "");
-  const [selectedArticuloNombre, setSelectedArticuloNombre] = useState(selectedOptions.articulo?.optionName || "");
-  const [selectedMaterialId, setSelectedMaterialId] = useState(selectedOptions.material?.optionId || "");
-  const [selectedMaterialNombre, setSelectedMaterialNombre] = useState(selectedOptions.material?.optionName || "");
-  const [selectedColorId, setSelectedColorId] = useState(selectedOptions.color?.optionId || "");
-  const [selectedColorNombre, setSelectedColorNombre] = useState(selectedOptions.color?.optionName || "");
-  const [selectedMedidasId, setSelectedMedidasId] = useState(selectedOptions.medidas?.optionId || "");
-  const [selectedMedidasNombre, setSelectedMedidasNombre] = useState(selectedOptions.medidas?.optionName || "");
-  const [selectedMaterialFranjaId, setSelectedMaterialFranjaId] = useState(selectedOptions.materialFranja?.optionId || "");
-  const [selectedMaterialFranjaNombre, setSelectedMaterialFranjaNombre] = useState(selectedOptions.materialFranja?.optionName || "");
-  const [selectedColorFranjaId, setSelectedColorFranjaId] = useState(selectedOptions.colorFranja?.optionId || "");
-  const [selectedColorFranjaNombre, setSelectedColorFranjaNombre] = useState(selectedOptions.colorFranja?.optionName || "");
-  const [puntos, setPuntos] = useState(0); // Estado para puntos
-  const [cantidad, setCantidad] = useState(1); // Estado para cantidad
+  const [selectedProductoId, setSelectedProductoId] = useState(selectedOptionsI.producto?.optionId || "");
+  const [selectedProductoNombre, setSelectedProductoNombre] = useState(selectedOptionsI.producto?.optionName || "");
+  const [selectedSerieId, setSelectedSerieId] = useState(selectedOptionsI.serie?.optionId || "");
+  const [selectedSerieNombre, setSelectedSerieNombre] = useState(selectedOptionsI.serie?.optionName || "");
+  const [selectedArticuloId, setSelectedArticuloId] = useState(selectedOptionsI.articulo?.optionId || "");
+  const [selectedArticuloNombre, setSelectedArticuloNombre] = useState(selectedOptionsI.articulo?.optionName || "");
+  const [selectedMaterialId, setSelectedMaterialId] = useState(selectedOptionsI.material?.optionId || "");
+  const [selectedMaterialNombre, setSelectedMaterialNombre] = useState(selectedOptionsI.material?.optionName || "");
+  const [selectedColorId, setSelectedColorId] = useState(selectedOptionsI.color?.optionId || "");
+  const [selectedColorNombre, setSelectedColorNombre] = useState(selectedOptionsI.color?.optionName || "");
+  const [selectedMedidasId, setSelectedMedidasId] = useState(selectedOptionsI.medidas?.optionId || "");
+  const [selectedMedidasNombre, setSelectedMedidasNombre] = useState(selectedOptionsI.medidas?.optionName || "");
+  const [selectedMaterialFranjaId, setSelectedMaterialFranjaId] = useState(selectedOptionsI.materialFranja?.optionId || "");
+  const [selectedMaterialFranjaNombre, setSelectedMaterialFranjaNombre] = useState(selectedOptionsI.materialFranja?.optionName || "");
+  const [selectedColorFranjaId, setSelectedColorFranjaId] = useState(selectedOptionsI.colorFranja?.optionId || "");
+  const [selectedColorFranjaNombre, setSelectedColorFranjaNombre] = useState(selectedOptionsI.colorFranja?.optionName || "");
 
   const [localData, setLocalData] = useState({
     selectedProductoId,
@@ -53,8 +51,6 @@ function Frentes() {
     selectedMaterialFranjaNombre,
     selectedColorFranjaId,
     selectedColorFranjaNombre,
-    puntos,
-    cantidad,
   });
 
   useEffect(() => {
@@ -76,15 +72,12 @@ function Frentes() {
       selectedMaterialFranjaNombre,
       selectedColorFranjaId,
       selectedColorFranjaNombre,
-      puntos,
-      cantidad,
     }));
   }, [
     selectedProductoId, selectedProductoNombre, selectedSerieId, selectedSerieNombre,
     selectedArticuloId, selectedArticuloNombre, selectedMaterialId, selectedMaterialNombre,
     selectedColorId, selectedColorNombre, selectedMedidasId, selectedMedidasNombre,
-    selectedMaterialFranjaId, selectedMaterialFranjaNombre, selectedColorFranjaId, selectedColorFranjaNombre,
-    puntos, cantidad
+    selectedMaterialFranjaId, selectedMaterialFranjaNombre, selectedColorFranjaId, selectedColorFranjaNombre
   ]);
 
   useEffect(() => {
@@ -228,7 +221,7 @@ function Frentes() {
     const id = event.target.value;
     setSelectedProductoId(id);
     setSelectedProductoNombre(nombre);
-    handleSelectChange("producto", id, nombre);
+    handleSelectChangeI("producto", id, nombre);
   };
 
   const handleSelectSerieChange = (event) => {
@@ -237,7 +230,7 @@ function Frentes() {
     const id = event.target.value;
     setSelectedSerieId(id);
     setSelectedSerieNombre(nombre);
-    handleSelectChange("serie", id, nombre);
+    handleSelectChangeI("serie", id, nombre);
   };
 
   const handleSelectArticuloChange = (event) => {
@@ -246,7 +239,7 @@ function Frentes() {
     const id = event.target.value;
     setSelectedArticuloId(id);
     setSelectedArticuloNombre(nombre);
-    handleSelectChange("articulo", id, nombre);
+    handleSelectChangeI("articulo", id, nombre);
   };
 
   const handleSelectMaterialChange = (event) => {
@@ -255,7 +248,7 @@ function Frentes() {
     const id = event.target.value;
     setSelectedMaterialId(id);
     setSelectedMaterialNombre(nombre);
-    handleSelectChange("material", id, nombre);
+    handleSelectChangeI("material", id, nombre);
   };
 
   const handleSelectColorChange = (event) => {
@@ -264,18 +257,16 @@ function Frentes() {
     const id = event.target.value;
     setSelectedColorId(id);
     setSelectedColorNombre(nombre);
-    handleSelectChange("color", id, nombre);
+    handleSelectChangeI("color", id, nombre);
   };
 
   const handleSelectMedidasChange = (event) => {
     const index = event.target.selectedIndex;
     const nombre = event.target.options[index].text;
     const id = event.target.value;
-    const selectedMedida = listMedidas.find(medida => medida.medidas_id === parseInt(id));
     setSelectedMedidasId(id);
     setSelectedMedidasNombre(nombre);
-    setPuntos(selectedMedida.puntos); // Actualiza los puntos
-    handleSelectChange("medidas", id, nombre);
+    handleSelectChangeI("medidas", id, nombre);
   };
 
   const handleSelectMaterialFranjaChange = (event) => {
@@ -284,7 +275,7 @@ function Frentes() {
     const id = event.target.value;
     setSelectedMaterialFranjaId(id);
     setSelectedMaterialFranjaNombre(nombre);
-    handleSelectChange("materialFranja", id, nombre);
+    handleSelectChangeI("materialFranja", id, nombre);
   };
 
   const handleSelectColorFranjaChange = (event) => {
@@ -293,32 +284,22 @@ function Frentes() {
     const id = event.target.value;
     setSelectedColorFranjaId(id);
     setSelectedColorFranjaNombre(nombre);
-    handleSelectChange("colorFranja", id, nombre);
-  };
-
-  const handleCantidadChange = (event) => {
-    const newCantidad = parseInt(event.target.value, 10);
-    setCantidad(newCantidad);
-    setLocalData(prevLocalData => ({
-      ...prevLocalData,
-      cantidad: newCantidad,
-      puntos: newCantidad * puntos // Actualiza los puntos multiplicados por la cantidad
-    }));
+    handleSelectChangeI("colorFranja", id, nombre);
   };
 
   const handleSaveToLocalContext = () => {
-    saveData('frentes', localData);
+    saveData('frentes3', localData);
     console.log(localData);
   };
 
   useEffect(() => {
-    saveData('frentes', localData);
+    saveData('frentes3', localData);
   }, [localData, saveData]);
 
   return (
     <div className="container">
       <div className="container2">
-        <h1>Frentes</h1>
+        <h1>Frentes 3</h1>
         {/* Producto */}
         <label htmlFor="producto">Producto:</label>
         <select id="producto" onChange={handleSelectProductChange} value={selectedProductoId || ""}>
@@ -407,16 +388,10 @@ function Frentes() {
             </option>
           ))}
         </select>
-
-        {/* Cantidad */}
-        <label htmlFor="cantidad">Cantidad:</label>
-        <input type="number" id="cantidad" value={cantidad} onChange={handleCantidadChange} min="1" />
-
-        {/* Puntos */}
-        <label htmlFor="puntos">Puntos: {puntos * cantidad}</label>
+        <button onClick={handleSaveToLocalContext}>Guardar y Continuar</button>
       </div>
     </div>
   );
 }
 
-export default Frentes;
+export default Frentes3;

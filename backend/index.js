@@ -112,6 +112,25 @@ app.get("/colorFranja", (req, res) => {
     return res.json(data);
   });
 });
+//Funcion Express GET para medidas con puntos.
+app.get("/medidasConPuntos", (req, res) => {
+  const articuloId = req.query.articuloId;
+  const materialId = req.query.materialId;
+
+  const query = `
+    SELECT m.medidas_id, m.medidas, m.puntos
+    FROM medidas m
+    WHERE m.articulos_id = ? AND m.material = ?
+  `;
+
+  dbConnection.query(query, [articuloId, materialId], (err, data) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json(err);
+    }
+    return res.json(data);
+  });
+});
 
 //Monta Express en el puerto.
 app.listen(port, () => {

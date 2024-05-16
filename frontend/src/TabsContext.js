@@ -9,7 +9,10 @@ export const TabsProvider = ({ children }) => {
   const [selectedOptionsE, setSelectedOptionsE] = useState({});
   const [selectedOptionsF, setSelectedOptionsF] = useState({});
   const [selectedOptionsG, setSelectedOptionsG] = useState({});
-  const [selectedOptionsH, setSelectedOptionsH] = useState({});
+  const [selectedOptionsH, setSelectedOptionsH] = useState({}); 
+  const [selectedOptionsI, setSelectedOptionsI] = useState({});
+  const [selectedOptionsE2, setSelectedOptionsE2] = useState({});
+  const [selectedOptionsE3, setSelectedOptionsE3] = useState({});
 
   const handleSelectChange = (tabId, optionId, optionName) => {
     setSelectedOptions(prev => ({ ...prev, [tabId]: { optionId, optionName } }));
@@ -30,6 +33,17 @@ export const TabsProvider = ({ children }) => {
   const handleSelectChangeH = (tabId, optionId, optionName) => {
     setSelectedOptionsH(prev => ({ ...prev, [tabId]: { optionId, optionName } }));
   };
+  const handleSelectChangeI = (tabId, optionId, optionName) => {
+    setSelectedOptionsI(prev => ({ ...prev, [tabId]: { optionId, optionName } }));
+  };
+  const handleSelectChangeE2 = (tabId, optionId, optionName) => {
+    setSelectedOptionsE2(prev => ({ ...prev, [tabId]: { optionId, optionName } }));
+  };
+  const handleSelectChangeE3 = (tabId, optionId, optionName) => {
+    setSelectedOptionsE3(prev => ({ ...prev, [tabId]: { optionId, optionName } }));
+  };
+
+
   
   return (
     <TabsContext.Provider value={{
@@ -43,6 +57,12 @@ export const TabsProvider = ({ children }) => {
       handleSelectChangeG,
       selectedOptionsH,
       handleSelectChangeH,
+      selectedOptionsI,
+      handleSelectChangeI,
+      selectedOptionsE2,
+      handleSelectChangeE2,
+      selectedOptionsE3,
+      handleSelectChangeE3,
     }}>
       {children}
     </TabsContext.Provider>

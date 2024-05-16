@@ -1,4 +1,5 @@
 import { jsPDF } from "jspdf";
+import autoTable from 'jspdf-autotable';
 
 const labelsMap = {
   selectedProductoNombre: "Producto",
@@ -8,66 +9,84 @@ const labelsMap = {
   selectedColorNombre: "Color",
   selectedMedidasNombre: "Medidas",
   selectedMaterialFranjaNombre: "Material Franja",
-  selectedColorFranjaNombre: "Color Franja"
+  selectedColorFranjaNombre: "Color Franja",
+  cantidad: "Cantidad",
+  puntos: "Puntos"
 };
 
 export const generatePDF = (data) => {
   const doc = new jsPDF();
-  const pageWidth = doc.internal.pageSize.getWidth();
-  const columnPadding = 5;  // Espacio de relleno entre columnas
-  const cellPadding = 5;    // Espacio de relleno dentro de las celdas
-  const cellHeight = 10;    // Altura de cada celda de datos
-  const colWidth = (pageWidth - 3 * columnPadding) / 2; // Ancho de cada columna
 
+  // Agregar logotipo
+  const logo = 'logoAELE.png'; // Ruta al logotipo
+  doc.addImage(logo, 'PNG', 10, 10, 50, 20);
+
+  // Detalles de la empresa
+  doc.setFontSize(12);
+  doc.text("AELE Beniparrell", 70, 20);
+  doc.text("Teléfono: 9696969", 70, 35);
+
+  // Título
   doc.setFontSize(18);
-  doc.text("Presupuesto: ", pageWidth / 2, 15, null, null, 'center');
+  doc.text("AELE Presupuesto", doc.internal.pageSize.getWidth() / 2, 60, null, null, 'center');
 
-  doc.setFontSize(11);
-  doc.setTextColor(0);
+  // Tabla de datos
+  const sections = {
+    frentes: "Frentes",
+    frentes2: "Frentes 2",
+    frentes3: "Frentes 3",
+    tiradores: "Tiradores",
+    interiores: "Interiores",
+    equipamiento: "Equipamiento",
+    equipamiento2: "Equipamiento 2",
+    equipamiento3: "Equipamiento 3"
+  };
 
-  let yPos = [30, 30]; // Posiciones Y iniciales para las columnas en la primera fila
+  let startY = 70;
+  Object.entries(sections).forEach(([section, title]) => {
+    if (data[section]) {
+      const sectionData = Object.entries(data[section]).map(([key, value]) => {
+        if ((key.endsWith('Nombre') || key === 'cantidad' || key === 'puntos') && value) {
+          return [labelsMap[key] || key, value];
+        }
+        return null;
+      }).filter(row => row);
 
-  const sections = ['frentes', 'frentes2', 'tiradores', 'interiores','equipamiento']; // Secciones a procesar
+      if (sectionData.length > 0) {
+        // Agregar título de sección
+        doc.setFontSize(14);
+        doc.text(title, 14, startY);
+        startY += 10;
 
-  sections.forEach((section, index) => {
-    let column = index % 2; // 0 o 1 para dos columnas
-    let xPos = columnPadding + column * (colWidth + columnPadding);
+        autoTable(doc, {
+          head: [['Concepto', 'Detalles']],
+          body: sectionData,
+          startY: startY,
+          theme: 'grid'
+        });
 
-    if (index === 2) {
-      yPos[0] = Math.max(yPos[0], yPos[1]) + 30;
-      yPos[1] = yPos[0];
-    }
-
-    doc.setFillColor(211, 211, 211);
-    doc.rect(xPos, yPos[column], colWidth, cellHeight, 'F');
-    doc.text(section.charAt(0).toUpperCase() + section.slice(1), xPos + cellPadding, yPos[column] + (cellHeight / 2));
-
-    yPos[column] += cellHeight + 2;
-
-    Object.entries(data[section] || {}).forEach(([key, value]) => {
-      // Filtra solo las entradas que terminan en 'Nombre'
-      if (!key.endsWith('Nombre')) return;
-
-      const label = labelsMap[key] || key;
-      const labelWidth = colWidth / 2;
-      const valueX = xPos + labelWidth + cellPadding;
-
-      doc.setFillColor(255, 255, 255);
-      doc.rect(xPos, yPos[column], labelWidth, cellHeight, 'F');
-      doc.text(label + ":", xPos + cellPadding, yPos[column] + (cellHeight / 2));
-
-      doc.setFillColor(255, 255, 255);
-      doc.rect(valueX, yPos[column], labelWidth - cellPadding, cellHeight, 'F');
-      doc.text(String(value), valueX + cellPadding, yPos[column] + (cellHeight / 2));
-
-      yPos[column] += cellHeight;
-    });
-
-    if (yPos[column] > doc.internal.pageSize.getHeight() - 20) {
-      doc.addPage();
-      yPos = [30, 30];
+        startY = doc.lastAutoTable.finalY + 10;
+      }
     }
   });
 
-  doc.save("reporte.pdf");
+  // Calcular totales
+  const totalPuntos = Object.values(data).reduce((total, section) => {
+    return total + Object.entries(section).reduce((subTotal, [key, value]) => {
+      if (key === 'puntos') {
+        return subTotal + Number(value);
+      }
+      return subTotal;
+    }, 0);
+  }, 0);
+
+  // Mostrar totales
+  doc.setFontSize(12);
+  doc.text(`Total Puntos: ${totalPuntos}`, 14, startY);
+
+  doc.save("presupuesto2.pdf");
 };
+
+
+
+
