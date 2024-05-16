@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { useLocation } from 'react-router-dom';
 import axios from "axios";
 import { useTabs } from "./TabsContext";
@@ -13,36 +13,16 @@ function Tiradores() {
   const [listColor, setListColor] = useState([]);
   const { data, saveData } = useData();
 
-  const [selectedProductoId, setSelectedProductoId] = useState(
-    selectedOptionsF.producto?.optionId || ""
-  );
-  const [selectedProductoNombre, setSelectedProductoNombre] = useState(
-    selectedOptionsF.producto?.optionName || ""
-  );
-  const [selectedSerieId, setSelectedSerieId] = useState(
-    selectedOptionsF.serie?.optionId || ""
-  );
-  const [selectedSerieNombre, setSelectedSerieNombre] = useState(
-    selectedOptionsF.serie?.optionName || ""
-  );
-  const [selectedArticuloId, setSelectedArticuloId] = useState(
-    selectedOptionsF.articulo?.optionId || ""
-  );
-  const [selectedArticuloNombre, setSelectedArticuloNombre] = useState(
-    selectedOptionsF.articulo?.optionName || ""
-  );
-  const [selectedMaterialId, setSelectedMaterialId] = useState(
-    selectedOptionsF.material?.optionId || ""
-  );
-  const [selectedMaterialNombre, setSelectedMaterialNombre] = useState(
-    selectedOptionsF.material?.optionName || ""
-  );
-  const [selectedColorId, setSelectedColorId] = useState(
-    selectedOptionsF.color?.optionId || ""
-  );
-  const [selectedColorNombre, setSelectedColorNombre] = useState(
-    selectedOptionsF.color?.optionName || ""
-  );
+  const [selectedProductoId, setSelectedProductoId] = useState(selectedOptionsF.producto?.optionId || "");
+  const [selectedProductoNombre, setSelectedProductoNombre] = useState(selectedOptionsF.producto?.optionName || "");
+  const [selectedSerieId, setSelectedSerieId] = useState(selectedOptionsF.serie?.optionId || "");
+  const [selectedSerieNombre, setSelectedSerieNombre] = useState(selectedOptionsF.serie?.optionName || "");
+  const [selectedArticuloId, setSelectedArticuloId] = useState(selectedOptionsF.articulo?.optionId || "");
+  const [selectedArticuloNombre, setSelectedArticuloNombre] = useState(selectedOptionsF.articulo?.optionName || "");
+  const [selectedMaterialId, setSelectedMaterialId] = useState(selectedOptionsF.material?.optionId || "");
+  const [selectedMaterialNombre, setSelectedMaterialNombre] = useState(selectedOptionsF.material?.optionName || "");
+  const [selectedColorId, setSelectedColorId] = useState(selectedOptionsF.color?.optionId || "");
+  const [selectedColorNombre, setSelectedColorNombre] = useState(selectedOptionsF.color?.optionName || "");
 
   const location = useLocation();
 
@@ -59,7 +39,6 @@ function Tiradores() {
     selectedColorNombre,
   });
 
-  // Update localData only when one of the dependencies change
   useEffect(() => {
     setLocalData(prevLocalData => ({
       ...prevLocalData,
@@ -80,7 +59,10 @@ function Tiradores() {
     selectedColorId, selectedColorNombre
   ]);
 
-  // Save data only when localData changes
+  useEffect(() => {
+    saveData('tiradores', localData);
+  }, [localData, saveData]);
+
   useEffect(() => {
     axios.get("http://localhost:6969/producto").then((res) => {
       if (Array.isArray(res.data)) {
@@ -94,21 +76,6 @@ function Tiradores() {
     });
   }, []);
 
-  // Fetch listProducto on mount
-  useEffect(() => {
-    axios.get("http://localhost:6969/producto").then((res) => {
-      if (Array.isArray(res.data)) {
-        const filteredProducts = res.data.filter((producto) => [2].includes(producto.producto_id));
-        setListProducto(filteredProducts);
-      } else {
-        console.error("Error fetching productos: res.data is not an array");
-      }
-    }).catch(error => {
-      console.error("Error fetching productos:", error);
-    });
-  }, []);
-
-  // Fetch listSerie when selectedProductoId changes
   useEffect(() => {
     if (selectedProductoId) {
       axios.get("http://localhost:6969/serie", { params: { productoId: selectedProductoId } }).then((res) => {
@@ -127,7 +94,6 @@ function Tiradores() {
     }
   }, [selectedProductoId]);
 
-  // Fetch listArticulo when selectedSerieId changes
   useEffect(() => {
     if (selectedSerieId) {
       axios.get("http://localhost:6969/articulo", { params: { serieId: selectedSerieId } }).then((res) => {
@@ -145,7 +111,6 @@ function Tiradores() {
     }
   }, [selectedSerieId]);
 
-  // Fetch listMaterial when selectedArticuloId or selectedSerieId changes
   useEffect(() => {
     if (selectedArticuloId) {
       axios.get("http://localhost:6969/material", { params: { serieId: selectedSerieId } }).then((res) => {
@@ -161,7 +126,6 @@ function Tiradores() {
     }
   }, [selectedArticuloId, selectedSerieId]);
 
-  // Fetch listColor when selectedMaterialId changes
   useEffect(() => {
     if (selectedMaterialId) {
       axios.get("http://localhost:6969/color", { params: { materialId: selectedMaterialId } }).then((res) => {
@@ -180,46 +144,47 @@ function Tiradores() {
   const handleSelectProductChange = (event) => {
     const index = event.target.selectedIndex;
     const nombre = event.target.options[index].text;
-    setSelectedProductoId(event.target.value);
+    const value = event.target.value;
+    setSelectedProductoId(value);
     setSelectedProductoNombre(nombre);
-    handleSelectChangeF("producto", event.target.value, nombre);
+    handleSelectChangeF("producto", value, nombre);
   };
 
   const handleSelectSerieChange = (event) => {
     const index = event.target.selectedIndex;
     const nombre = event.target.options[index].text;
-    setSelectedSerieId(event.target.value);
+    const value = event.target.value;
+    setSelectedSerieId(value);
     setSelectedSerieNombre(nombre);
-    handleSelectChangeF("serie", event.target.value, nombre);
+    handleSelectChangeF("serie", value, nombre);
   };
 
   const handleSelectArticuloChange = (event) => {
     const index = event.target.selectedIndex;
     const nombre = event.target.options[index].text;
+    const value = event.target.value;
     setSelectedArticuloNombre(nombre);
-    setSelectedArticuloId(event.target.value);
-    handleSelectChangeF("articulo", event.target.value, nombre);
+    setSelectedArticuloId(value);
+    handleSelectChangeF("articulo", value, nombre);
   };
 
   const handleSelectMaterialChange = (event) => {
     const index = event.target.selectedIndex;
     const nombre = event.target.options[index].text;
+    const value = event.target.value;
     setSelectedMaterialNombre(nombre);
-    setSelectedMaterialId(event.target.value);
-    handleSelectChangeF("material", event.target.value, nombre);
+    setSelectedMaterialId(value);
+    handleSelectChangeF("material", value, nombre);
   };
 
   const handleSelectColorChange = (event) => {
     const index = event.target.selectedIndex;
     const nombre = event.target.options[index].text;
+    const value = event.target.value;
     setSelectedColorNombre(nombre);
-    setSelectedColorId(event.target.value);
-    handleSelectChangeF("color", event.target.value, nombre);
+    setSelectedColorId(value);
+    handleSelectChangeF("color", value, nombre);
   };
-
-  useEffect(() => {
-    console.log("Datos actualizados:", data);
-  }, [data]);
 
   return (
     <div className="container">
@@ -227,7 +192,7 @@ function Tiradores() {
         <h1>Tiradores</h1>
         {/* Producto */}
         <label htmlFor="producto">Producto:</label>
-        <select id="producto" onChange={handleSelectProductChange} value={localData.selectedProductoId} name="selectedProductoId">
+        <select id="producto" onChange={handleSelectProductChange} value={selectedProductoId} name="selectedProductoId">
           <option disabled={selectedProductoId !== ""}>--Selecciona una opción--</option>
           {listProducto.map((producto) => (
             <option key={producto.producto_id} value={producto.producto_id}>
