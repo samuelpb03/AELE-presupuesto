@@ -14,10 +14,10 @@ const labelsMap = {
 export const generatePDF = (data) => {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
-  const columnPadding = 5;
-  const cellPadding = 5;
-  const cellHeight = 10;
-  const colWidth = (pageWidth - 3 * columnPadding) / 2;
+  const columnPadding = 5;  // Espacio de relleno entre columnas
+  const cellPadding = 5;    // Espacio de relleno dentro de las celdas
+  const cellHeight = 10;    // Altura de cada celda de datos
+  const colWidth = (pageWidth - 3 * columnPadding) / 2; // Ancho de cada columna
 
   doc.setFontSize(18);
   doc.text("Presupuesto: ", pageWidth / 2, 15, null, null, 'center');
@@ -25,12 +25,12 @@ export const generatePDF = (data) => {
   doc.setFontSize(11);
   doc.setTextColor(0);
 
-  let yPos = [30, 30];
+  let yPos = [30, 30]; // Posiciones Y iniciales para las columnas en la primera fila
 
-  const sections = ['frentes', 'frentes2', 'tiradores', 'equipamiento'];
+  const sections = ['frentes', 'frentes2', 'tiradores', 'interiores','equipamiento']; // Secciones a procesar
 
   sections.forEach((section, index) => {
-    let column = index % 2;
+    let column = index % 2; // 0 o 1 para dos columnas
     let xPos = columnPadding + column * (colWidth + columnPadding);
 
     if (index === 2) {
@@ -45,6 +45,9 @@ export const generatePDF = (data) => {
     yPos[column] += cellHeight + 2;
 
     Object.entries(data[section] || {}).forEach(([key, value]) => {
+      // Filtra solo las entradas que terminan en 'Nombre'
+      if (!key.endsWith('Nombre')) return;
+
       const label = labelsMap[key] || key;
       const labelWidth = colWidth / 2;
       const valueX = xPos + labelWidth + cellPadding;
@@ -68,4 +71,3 @@ export const generatePDF = (data) => {
 
   doc.save("reporte.pdf");
 };
-

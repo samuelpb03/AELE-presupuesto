@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useTabs } from "./TabsContext";
+import { useData } from './context/DataContext';
 
 function Interiores() {
   const { selectedOptionsG, handleSelectChangeG } = useTabs();
+  const { data, saveData } = useData();
   const [listProducto, setListProducto] = useState([]);
   const [listSerie, setListSerie] = useState([]);
   const [listMaterial, setListMaterial] = useState([]);
@@ -182,6 +184,15 @@ function Interiores() {
     handleSelectChangeG("medidas", id, nombre);
   };
 
+  const handleSaveToLocalContext = () => {
+    saveData('interiores', localData);
+    console.log(localData);
+  };
+
+  useEffect(() => {
+    saveData('interiores', localData);
+  }, [localData, saveData]);
+
   return (
     <div className="container">
       <div className="container2">
@@ -241,6 +252,7 @@ function Interiores() {
             </option>
           ))}
         </select>
+        <button onClick={handleSaveToLocalContext}>Guardar y Continuar</button>
       </div>
     </div>
   );
