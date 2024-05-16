@@ -203,7 +203,6 @@ function Equipamiento2() {
             </option>
           ))}
         </select>
-        <button id="generatePDF" onClick={handleGeneratePDF}> Generar PDF</button>
       </div>
     </div>
   );

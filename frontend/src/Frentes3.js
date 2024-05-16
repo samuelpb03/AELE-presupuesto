@@ -388,7 +388,6 @@ function Frentes3() {
             </option>
           ))}
         </select>
-        <button onClick={handleSaveToLocalContext}>Guardar y Continuar</button>
       </div>
     </div>
   );

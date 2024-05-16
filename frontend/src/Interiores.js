@@ -252,7 +252,6 @@ function Interiores() {
             </option>
           ))}
         </select>
-        <button onClick={handleSaveToLocalContext}>Guardar y Continuar</button>
       </div>
     </div>
   );
