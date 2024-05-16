@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useLocation } from 'react-router-dom';
 import axios from "axios";
 import { useTabs } from "./TabsContext";
@@ -59,6 +59,7 @@ function Tiradores() {
     selectedColorNombre,
   });
 
+  // Update localData only when one of the dependencies change
   useEffect(() => {
     setLocalData(prevLocalData => ({
       ...prevLocalData,
@@ -79,14 +80,12 @@ function Tiradores() {
     selectedColorId, selectedColorNombre
   ]);
 
-  useEffect(() => {
-    saveData('tiradores', localData);
-  }, [localData]);
-
+  // Save data only when localData changes
   useEffect(() => {
     axios.get("http://localhost:6969/producto").then((res) => {
       if (Array.isArray(res.data)) {
-        setListProducto(res.data);
+        const filteredProducts = res.data.filter((producto) => [2].includes(producto.producto_id));
+        setListProducto(filteredProducts);
       } else {
         console.error("Error fetching productos: res.data is not an array");
       }
@@ -95,6 +94,21 @@ function Tiradores() {
     });
   }, []);
 
+  // Fetch listProducto on mount
+  useEffect(() => {
+    axios.get("http://localhost:6969/producto").then((res) => {
+      if (Array.isArray(res.data)) {
+        const filteredProducts = res.data.filter((producto) => [2].includes(producto.producto_id));
+        setListProducto(filteredProducts);
+      } else {
+        console.error("Error fetching productos: res.data is not an array");
+      }
+    }).catch(error => {
+      console.error("Error fetching productos:", error);
+    });
+  }, []);
+
+  // Fetch listSerie when selectedProductoId changes
   useEffect(() => {
     if (selectedProductoId) {
       axios.get("http://localhost:6969/serie", { params: { productoId: selectedProductoId } }).then((res) => {
@@ -113,6 +127,7 @@ function Tiradores() {
     }
   }, [selectedProductoId]);
 
+  // Fetch listArticulo when selectedSerieId changes
   useEffect(() => {
     if (selectedSerieId) {
       axios.get("http://localhost:6969/articulo", { params: { serieId: selectedSerieId } }).then((res) => {
@@ -130,6 +145,7 @@ function Tiradores() {
     }
   }, [selectedSerieId]);
 
+  // Fetch listMaterial when selectedArticuloId or selectedSerieId changes
   useEffect(() => {
     if (selectedArticuloId) {
       axios.get("http://localhost:6969/material", { params: { serieId: selectedSerieId } }).then((res) => {
@@ -143,9 +159,9 @@ function Tiradores() {
         console.error("Error fetching materiales:", error);
       });
     }
-    document.getElementById("color").disabled = false;
   }, [selectedArticuloId, selectedSerieId]);
 
+  // Fetch listColor when selectedMaterialId changes
   useEffect(() => {
     if (selectedMaterialId) {
       axios.get("http://localhost:6969/color", { params: { materialId: selectedMaterialId } }).then((res) => {

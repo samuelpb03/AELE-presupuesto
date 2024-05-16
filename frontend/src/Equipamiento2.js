@@ -53,7 +53,7 @@ function Equipamiento2() {
   useEffect(() => {
     axios.get("http://localhost:6969/producto").then((res) => {
       if (Array.isArray(res.data)) {
-        const filteredProducts = res.data.filter((producto) => [7, 5].includes(producto.producto_id));
+        const filteredProducts = res.data.filter((producto) => [7].includes(producto.producto_id));
         setListProducto(filteredProducts);
       } else {
         console.error("Error fetching productos: res.data is not an array");
