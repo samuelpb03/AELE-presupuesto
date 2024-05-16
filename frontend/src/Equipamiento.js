@@ -135,7 +135,6 @@ function Equipamiento() {
   }, [selectedOptionsE.serie, selectedSerieId]);
 
   //Cuando cambia selectedArticuloId
-  
 
   //Cuando cambia selectedMaterialId
   useEffect(() => {

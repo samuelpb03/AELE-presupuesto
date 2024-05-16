@@ -1,9 +1,7 @@
-// TabsContext.js
 import React, { createContext, useState, useContext } from 'react';
 
 // Crea el contexto
 const TabsContext = createContext();
-
 
 // Crea un componente proveedor
 export const TabsProvider = ({ children }) => {
@@ -13,22 +11,26 @@ export const TabsProvider = ({ children }) => {
   const [selectedOptionsG, setSelectedOptionsG] = useState({});
   const [selectedOptionsH, setSelectedOptionsH] = useState({});
 
-  const handleSelectChange = (tabId, optionId) => {
-    setSelectedOptions(prev => ({ ...prev, [tabId]: optionId }));
+  const handleSelectChange = (tabId, optionId, optionName) => {
+    setSelectedOptions(prev => ({ ...prev, [tabId]: { optionId, optionName } }));
+  };
   
+  const handleSelectChangeE = (tabId, optionId, optionName) => {
+    setSelectedOptionsE(prev => ({ ...prev, [tabId]: { optionId, optionName } }));
   };
-  const handleSelectChangeE = (tabId, optionId) => {
-    setSelectedOptionsE(prev => ({ ...prev, [tabId]: optionId}));
+  
+  const handleSelectChangeF = (tabId, optionId, optionName) => {
+    setSelectedOptionsF(prev => ({ ...prev, [tabId]: { optionId, optionName } }));
   };
-  const handleSelectChangeF = (tabId, optionId) => {
-    setSelectedOptionsF(prev => ({ ...prev, [tabId]: optionId}));
+  
+  const handleSelectChangeG = (tabId, optionId, optionName) => {
+    setSelectedOptionsG(prev => ({ ...prev, [tabId]: { optionId, optionName } }));
   };
-  const handleSelectChangeG = (tabId, optionId) => {
-    setSelectedOptionsG(prev => ({ ...prev, [tabId]: optionId}));
+  
+  const handleSelectChangeH = (tabId, optionId, optionName) => {
+    setSelectedOptionsH(prev => ({ ...prev, [tabId]: { optionId, optionName } }));
   };
-  const handleSelectChangeH = (tabId, optionId) => {
-    setSelectedOptionsH(prev => ({ ...prev, [tabId]: optionId}));
-  };
+  
   return (
     <TabsContext.Provider value={{
       selectedOptions,
