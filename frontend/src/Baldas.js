@@ -75,11 +75,21 @@ function Baldas() {
 
   const handleSelectArticuloChange = (index, event) => {
     const updatedArticulos = [...selectedArticulos];
+    const updatedCantidades = [...cantidades];
     const selectedIndex = event.target.selectedIndex;
     const nombre = event.target.options[selectedIndex].text;
     const id = event.target.value;
+
     updatedArticulos[index] = { id, nombre };
     setSelectedArticulos(updatedArticulos);
+
+    if (id) {
+      updatedCantidades[index] = 1; // Set the initial value to 1 when an article is selected
+    } else {
+      updatedCantidades[index] = 0; // Reset the value to 0 if no article is selected
+    }
+    setCantidades(updatedCantidades);
+
     handleSelectChangeB(`articulo${index + 1}`, id, nombre);
   };
 
@@ -110,7 +120,7 @@ function Baldas() {
         id={`cantidad${index + 1}`}
         value={cantidades[index]}
         onChange={(event) => handleCantidadChange(index, event)}
-        min="0"
+        min="1"
         disabled={!selectedArticulos[index].id}
       />
     </div>
@@ -136,3 +146,4 @@ function Baldas() {
 }
 
 export default Baldas;
+

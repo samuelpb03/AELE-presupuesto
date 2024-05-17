@@ -11,6 +11,7 @@ const labelsMap = {
   selectedMaterialFranjaNombre: "Material Franja",
   selectedColorFranjaNombre: "Color Franja",
   puntos: "Puntos",
+  cantidad: "Cantidad",
   // No need to add defaultArticuloNombre as we will handle it dynamically
 };
 
@@ -52,14 +53,21 @@ export const generatePDF = (data) => {
 
       Object.entries(data[section]).forEach(([key, value]) => {
         if (key.endsWith('Nombre') && value) {
-          sectionData.push([`Artículo ${articuloCounter++}`, value]);
+          if (key.startsWith('articulo')) {
+            sectionData.push([`Artículo ${articuloCounter}`, value]);
+          } else {
+            sectionData.push([labelsMap[key] || key, value]);
+          }
         } else if (key.startsWith('cantidad') && value && value !== 0) {
           const match = key.match(/\d+/);
           if (match) {
-            sectionData.push([`Cantidad ${match[0]}`, value]);
+            sectionData.push([`Cantidad ${articuloCounter}`, value]);
+            articuloCounter++; // Increment counter for the next Artículo
           }
         } else if (key === 'puntos' && value) {
-          sectionData.push([labelsMap[key] || key, value]);
+          const cantidadKey = `cantidad${articuloCounter - 1}`;
+          const cantidad = data[section][cantidadKey] || 1;
+          sectionData.push([labelsMap[key] || key, value * cantidad]);
         }
       });
 
@@ -85,7 +93,12 @@ export const generatePDF = (data) => {
   const totalPuntos = Object.values(data).reduce((total, section) => {
     return total + Object.entries(section).reduce((subTotal, [key, value]) => {
       if (key === 'puntos') {
-        return subTotal + Number(value);
+        const match = key.match(/\d+/);
+        if (match) {
+          const cantidadKey = `cantidad${match[0]}`;
+          const cantidad = section[cantidadKey] || 1;
+          return subTotal + (Number(value) * cantidad);
+        }
       }
       return subTotal;
     }, 0);
@@ -97,6 +110,9 @@ export const generatePDF = (data) => {
 
   doc.save("presupuesto2.pdf");
 };
+
+
+
 
 
 
