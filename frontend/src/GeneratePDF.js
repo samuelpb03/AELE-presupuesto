@@ -10,8 +10,8 @@ const labelsMap = {
   selectedMedidasNombre: "Medidas",
   selectedMaterialFranjaNombre: "Material Franja",
   selectedColorFranjaNombre: "Color Franja",
-  cantidad: "Cantidad",
-  puntos: "Puntos"
+  puntos: "Puntos",
+  // No need to add defaultArticuloNombre as we will handle it dynamically
 };
 
 export const generatePDF = (data) => {
@@ -39,18 +39,29 @@ export const generatePDF = (data) => {
     interiores: "Interiores",
     equipamiento: "Equipamiento",
     equipamiento2: "Equipamiento 2",
-    equipamiento3: "Equipamiento 3"
+    equipamiento3: "Equipamiento 3",
+    cerraduras: "Cerraduras",
+    baldas: "Baldas e iluminación"
   };
 
   let startY = 70;
   Object.entries(sections).forEach(([section, title]) => {
     if (data[section]) {
-      const sectionData = Object.entries(data[section]).map(([key, value]) => {
-        if ((key.endsWith('Nombre') || key === 'cantidad' || key === 'puntos') && value) {
-          return [labelsMap[key] || key, value];
+      let articuloCounter = 1; // Counter for Artículo
+      const sectionData = [];
+
+      Object.entries(data[section]).forEach(([key, value]) => {
+        if (key.endsWith('Nombre') && value) {
+          sectionData.push([`Artículo ${articuloCounter++}`, value]);
+        } else if (key.startsWith('cantidad') && value && value !== 0) {
+          const match = key.match(/\d+/);
+          if (match) {
+            sectionData.push([`Cantidad ${match[0]}`, value]);
+          }
+        } else if (key === 'puntos' && value) {
+          sectionData.push([labelsMap[key] || key, value]);
         }
-        return null;
-      }).filter(row => row);
+      });
 
       if (sectionData.length > 0) {
         // Agregar título de sección
@@ -86,6 +97,12 @@ export const generatePDF = (data) => {
 
   doc.save("presupuesto2.pdf");
 };
+
+
+
+
+
+
 
 
 

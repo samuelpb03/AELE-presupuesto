@@ -100,6 +100,38 @@ app.get("/materialFranja", (req, res) => {
     return res.json(data);
   });
 });
+app.get("/articulo/baldas", (req, res) => {
+  const query = `
+    SELECT * FROM articulo
+    WHERE serie_id IN (
+      SELECT serie_id FROM serie
+      WHERE nombre IN ('Baldas', 'Divisores')
+    )
+  `;
+  dbConnection.query(query, (err, data) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json(err);
+    }
+    return res.json(data);
+  });
+});
+app.get("/articulo/iluminacion", (req, res) => {
+  const query = `
+    SELECT * FROM articulo
+    WHERE serie_id = (
+      SELECT serie_id FROM serie
+      WHERE nombre = 'Iluminacion'
+    )
+  `;
+  dbConnection.query(query, (err, data) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json(err);
+    }
+    return res.json(data);
+  });
+});
 
 //Funcion Express GET para color franja.
 app.get("/colorFranja", (req, res) => {

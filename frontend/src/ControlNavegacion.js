@@ -13,7 +13,7 @@ function NavigationController() {
   const navigateSequentially = () => {
     // Función que simula la navegación por todas las pestañas antes de la destino
     if (targetPath) {
-      const paths = ['/Frentes', '/Frentes2', '/Frentes3','/Tiradores', '/Interiores', '/Equipamiento', '/Equipamiento2', '/Equipamiento3'];
+      const paths = ['/Frentes', '/Frentes2', '/Frentes3','/Tiradores', '/Interiores', '/Equipamiento', '/Equipamiento2', '/Equipamiento3','/Cerraduras','/Baldas'];
       const currentIndex = paths.indexOf(targetPath);
       const nextPath = paths.slice(0, currentIndex + 1);
 
@@ -38,10 +38,13 @@ function NavigationController() {
       <Link to="#" onClick={() => handleLinkClick('/Frentes2')}>Frente 2</Link>
       <Link to="#" onClick={() => handleLinkClick('/Frentes3')}>Frente 3</Link>
       <Link to="#" onClick={() => handleLinkClick('/Tiradores')}>Tiradores</Link>
+      <Link to="#" onClick={() => handleLinkClick('/Cerraduras')}>Cerraduras</Link>
       <Link to="#" onClick={() => handleLinkClick('/Interiores')}>Interiores</Link>
+      <Link to="#" onClick={() => handleLinkClick('/Baldas')}>Baldas</Link>
       <Link to="#" onClick={() => handleLinkClick('/Equipamiento')}>Equipamiento</Link>
       <Link to="#" onClick={() => handleLinkClick('/Equipamiento2')}>Equipamiento 2</Link>
       <Link to="#" onClick={() => handleLinkClick('/Equipamiento3')}>Equipamiento 3</Link>
+      
     </div>
   );
 }

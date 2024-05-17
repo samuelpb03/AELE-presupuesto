@@ -13,6 +13,8 @@ export const TabsProvider = ({ children }) => {
   const [selectedOptionsI, setSelectedOptionsI] = useState({});
   const [selectedOptionsE2, setSelectedOptionsE2] = useState({});
   const [selectedOptionsE3, setSelectedOptionsE3] = useState({});
+  const [selectedOptionsC, setSelectedOptionsC] = useState({});
+  const [selectedOptionsB, setSelectedOptionsB] = useState({}); // Nueva opción para Baldas
 
   const handleSelectChange = (tabId, optionId, optionName) => {
     setSelectedOptions(prev => ({ ...prev, [tabId]: { optionId, optionName } }));
@@ -33,18 +35,27 @@ export const TabsProvider = ({ children }) => {
   const handleSelectChangeH = (tabId, optionId, optionName) => {
     setSelectedOptionsH(prev => ({ ...prev, [tabId]: { optionId, optionName } }));
   };
+
   const handleSelectChangeI = (tabId, optionId, optionName) => {
     setSelectedOptionsI(prev => ({ ...prev, [tabId]: { optionId, optionName } }));
   };
+
   const handleSelectChangeE2 = (tabId, optionId, optionName) => {
     setSelectedOptionsE2(prev => ({ ...prev, [tabId]: { optionId, optionName } }));
   };
+
   const handleSelectChangeE3 = (tabId, optionId, optionName) => {
     setSelectedOptionsE3(prev => ({ ...prev, [tabId]: { optionId, optionName } }));
   };
 
+  const handleSelectChangeC = (tabId, optionId, optionName) => {
+    setSelectedOptionsC(prev => ({ ...prev, [tabId]: { optionId, optionName } }));
+  };
 
-  
+  const handleSelectChangeB = (tabId, optionId, optionName) => {
+    setSelectedOptionsB(prev => ({ ...prev, [tabId]: { optionId, optionName } })); // Función para manejar cambios en Baldas
+  };
+
   return (
     <TabsContext.Provider value={{
       selectedOptions,
@@ -63,6 +74,10 @@ export const TabsProvider = ({ children }) => {
       handleSelectChangeE2,
       selectedOptionsE3,
       handleSelectChangeE3,
+      selectedOptionsC,
+      handleSelectChangeC,
+      selectedOptionsB, // Agrega el estado de Baldas al proveedor
+      handleSelectChangeB // Agrega la función de cambio de Baldas al proveedor
     }}>
       {children}
     </TabsContext.Provider>
