@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { useLocation } from 'react-router-dom';
 import axios from "axios";
 import { useTabs } from "./TabsContext";
 import { useData } from './context/DataContext';
 import { generatePDF } from "./GeneratePDF";
 
 function Frentes3() {
-  const { selectedOptionsI, handleSelectChangeI } = useTabs();
+  const { handleSelectChange } = useTabs();
   const { data, saveData } = useData();
   const [listProducto, setListProducto] = useState([]);
   const [listSerie, setListSerie] = useState([]);
@@ -17,67 +16,92 @@ function Frentes3() {
   const [listMaterialFranja, setListMaterialFranja] = useState([]);
   const [listColorFranja, setListColorFranja] = useState([]);
 
-  const [selectedProductoId, setSelectedProductoId] = useState(selectedOptionsI.producto?.optionId || "");
-  const [selectedProductoNombre, setSelectedProductoNombre] = useState(selectedOptionsI.producto?.optionName || "");
-  const [selectedSerieId, setSelectedSerieId] = useState(selectedOptionsI.serie?.optionId || "");
-  const [selectedSerieNombre, setSelectedSerieNombre] = useState(selectedOptionsI.serie?.optionName || "");
-  const [selectedArticuloId, setSelectedArticuloId] = useState(selectedOptionsI.articulo?.optionId || "");
-  const [selectedArticuloNombre, setSelectedArticuloNombre] = useState(selectedOptionsI.articulo?.optionName || "");
-  const [selectedMaterialId, setSelectedMaterialId] = useState(selectedOptionsI.material?.optionId || "");
-  const [selectedMaterialNombre, setSelectedMaterialNombre] = useState(selectedOptionsI.material?.optionName || "");
-  const [selectedColorId, setSelectedColorId] = useState(selectedOptionsI.color?.optionId || "");
-  const [selectedColorNombre, setSelectedColorNombre] = useState(selectedOptionsI.color?.optionName || "");
-  const [selectedMedidasId, setSelectedMedidasId] = useState(selectedOptionsI.medidas?.optionId || "");
-  const [selectedMedidasNombre, setSelectedMedidasNombre] = useState(selectedOptionsI.medidas?.optionName || "");
-  const [selectedMaterialFranjaId, setSelectedMaterialFranjaId] = useState(selectedOptionsI.materialFranja?.optionId || "");
-  const [selectedMaterialFranjaNombre, setSelectedMaterialFranjaNombre] = useState(selectedOptionsI.materialFranja?.optionName || "");
-  const [selectedColorFranjaId, setSelectedColorFranjaId] = useState(selectedOptionsI.colorFranja?.optionId || "");
-  const [selectedColorFranjaNombre, setSelectedColorFranjaNombre] = useState(selectedOptionsI.colorFranja?.optionName || "");
-
-  const [localData, setLocalData] = useState({
-    selectedProductoId,
-    selectedProductoNombre,
-    selectedSerieId,
-    selectedSerieNombre,
-    selectedArticuloId,
-    selectedArticuloNombre,
-    selectedMaterialId,
-    selectedMaterialNombre,
-    selectedColorId,
-    selectedColorNombre,
-    selectedMedidasId,
-    selectedMedidasNombre,
-    selectedMaterialFranjaId,
-    selectedMaterialFranjaNombre,
-    selectedColorFranjaId,
-    selectedColorFranjaNombre,
-  });
+  const [selectedProducto, setSelectedProducto] = useState({ id: "", nombre: "" });
+  const [selectedSerie, setSelectedSerie] = useState({ id: "", nombre: "" });
+  const [selectedArticulo, setSelectedArticulo] = useState({ id: "", nombre: "" });
+  const [selectedMaterial, setSelectedMaterial] = useState({ id: "", nombre: "" });
+  const [selectedColor, setSelectedColor] = useState({ id: "", nombre: "" });
+  const [selectedMedidas, setSelectedMedidas] = useState({ id: "", nombre: "", puntos: 0 });
+  const [selectedMaterialFranja, setSelectedMaterialFranja] = useState({ id: "", nombre: "" });
+  const [selectedColorFranja, setSelectedColorFranja] = useState({ id: "", nombre: "" });
+  const [cantidad, setCantidad] = useState(1); // Estado para cantidad
+  const [puntos, setPuntos] = useState(0); // Estado para puntos
 
   useEffect(() => {
-    setLocalData(prevLocalData => ({
-      ...prevLocalData,
-      selectedProductoId,
-      selectedProductoNombre,
-      selectedSerieId,
-      selectedSerieNombre,
-      selectedArticuloId,
-      selectedArticuloNombre,
-      selectedMaterialId,
-      selectedMaterialNombre,
-      selectedColorId,
-      selectedColorNombre,
-      selectedMedidasId,
-      selectedMedidasNombre,
-      selectedMaterialFranjaId,
-      selectedMaterialFranjaNombre,
-      selectedColorFranjaId,
-      selectedColorFranjaNombre,
-    }));
+    // Restore data from context when component mounts
+    if (data.frentes3) {
+      setSelectedProducto({
+        id: data.frentes3.selectedProductoId || "",
+        nombre: data.frentes3.selectedProductoNombre || "",
+      });
+      setSelectedSerie({
+        id: data.frentes3.selectedSerieId || "",
+        nombre: data.frentes3.selectedSerieNombre || "",
+      });
+      setSelectedArticulo({
+        id: data.frentes3.selectedArticuloId || "",
+        nombre: data.frentes3.selectedArticuloNombre || "",
+      });
+      setSelectedMaterial({
+        id: data.frentes3.selectedMaterialId || "",
+        nombre: data.frentes3.selectedMaterialNombre || "",
+      });
+      setSelectedColor({
+        id: data.frentes3.selectedColorId || "",
+        nombre: data.frentes3.selectedColorNombre || "",
+      });
+      setSelectedMedidas({
+        id: data.frentes3.selectedMedidasId || "",
+        nombre: data.frentes3.selectedMedidasNombre || "",
+        puntos: data.frentes3.selectedMedidasPuntos || 0,
+      });
+      setSelectedMaterialFranja({
+        id: data.frentes3.selectedMaterialFranjaId || "",
+        nombre: data.frentes3.selectedMaterialFranjaNombre || "",
+      });
+      setSelectedColorFranja({
+        id: data.frentes3.selectedColorFranjaId || "",
+        nombre: data.frentes3.selectedColorFranjaNombre || "",
+      });
+      setCantidad(data.frentes3.cantidad || 1);
+      setPuntos(data.frentes3.selectedMedidasPuntos || 0);
+    }
+  }, []);
+
+  useEffect(() => {
+    const formattedData = {
+      selectedProductoId: selectedProducto.id,
+      selectedProductoNombre: selectedProducto.nombre,
+      selectedSerieId: selectedSerie.id,
+      selectedSerieNombre: selectedSerie.nombre,
+      selectedArticuloId: selectedArticulo.id,
+      selectedArticuloNombre: selectedArticulo.nombre,
+      selectedMaterialId: selectedMaterial.id,
+      selectedMaterialNombre: selectedMaterial.nombre,
+      selectedColorId: selectedColor.id,
+      selectedColorNombre: selectedColor.nombre,
+      selectedMedidasId: selectedMedidas.id,
+      selectedMedidasNombre: selectedMedidas.nombre,
+      selectedMedidasPuntos: selectedMedidas.puntos,
+      selectedMaterialFranjaId: selectedMaterialFranja.id,
+      selectedMaterialFranjaNombre: selectedMaterialFranja.nombre,
+      selectedColorFranjaId: selectedColorFranja.id,
+      selectedColorFranjaNombre: selectedColorFranja.nombre,
+      cantidad,
+      puntos: selectedMedidas.puntos * cantidad, // Actualiza los puntos multiplicados por la cantidad
+    };
+    saveData("frentes3", formattedData);
   }, [
-    selectedProductoId, selectedProductoNombre, selectedSerieId, selectedSerieNombre,
-    selectedArticuloId, selectedArticuloNombre, selectedMaterialId, selectedMaterialNombre,
-    selectedColorId, selectedColorNombre, selectedMedidasId, selectedMedidasNombre,
-    selectedMaterialFranjaId, selectedMaterialFranjaNombre, selectedColorFranjaId, selectedColorFranjaNombre
+    selectedProducto,
+    selectedSerie,
+    selectedArticulo,
+    selectedMaterial,
+    selectedColor,
+    selectedMedidas,
+    selectedMaterialFranja,
+    selectedColorFranja,
+    cantidad,
+    saveData,
   ]);
 
   useEffect(() => {
@@ -94,8 +118,8 @@ function Frentes3() {
   }, []);
 
   useEffect(() => {
-    if (selectedProductoId) {
-      axios.get("http://localhost:6969/serie", { params: { productoId: selectedProductoId } }).then((res) => {
+    if (selectedProducto.id) {
+      axios.get("http://localhost:6969/serie", { params: { productoId: selectedProducto.id } }).then((res) => {
         if (Array.isArray(res.data)) {
           setListSerie(res.data);
           document.getElementById("serie").disabled = false;
@@ -112,11 +136,11 @@ function Frentes3() {
       document.getElementById("materialFranja").disabled = true;
       document.getElementById("colorFranja").disabled = true;
     }
-  }, [selectedProductoId]);
+  }, [selectedProducto.id]);
 
   useEffect(() => {
-    if (selectedSerieId) {
-      axios.get("http://localhost:6969/articulo", { params: { serieId: selectedSerieId } }).then((res) => {
+    if (selectedSerie.id) {
+      axios.get("http://localhost:6969/articulo", { params: { serieId: selectedSerie.id } }).then((res) => {
         if (Array.isArray(res.data)) {
           setListArticulo(res.data);
           const franjaActiva = res.data.some((articulo) => articulo.franja === 1);
@@ -133,11 +157,11 @@ function Frentes3() {
         console.error("Error fetching articulos:", error);
       });
     }
-  }, [selectedSerieId]);
+  }, [selectedSerie.id]);
 
   useEffect(() => {
-    if (selectedArticuloId) {
-      axios.get("http://localhost:6969/material", { params: { serieId: selectedSerieId } }).then((res) => {
+    if (selectedArticulo.id) {
+      axios.get("http://localhost:6969/material", { params: { serieId: selectedSerie.id } }).then((res) => {
         if (Array.isArray(res.data)) {
           setListMaterial(res.data);
           document.getElementById("material").disabled = false;
@@ -148,11 +172,11 @@ function Frentes3() {
         console.error("Error fetching materiales:", error);
       });
     }
-  }, [selectedArticuloId, selectedSerieId]);
+  }, [selectedArticulo.id, selectedSerie.id]);
 
   useEffect(() => {
-    if (selectedMaterialId) {
-      axios.get("http://localhost:6969/color", { params: { materialId: selectedMaterialId } }).then((res) => {
+    if (selectedMaterial.id) {
+      axios.get("http://localhost:6969/color", { params: { materialId: selectedMaterial.id } }).then((res) => {
         if (Array.isArray(res.data)) {
           setListColor(res.data);
           document.getElementById("color").disabled = false;
@@ -163,14 +187,14 @@ function Frentes3() {
         console.error("Error fetching colores:", error);
       });
     }
-  }, [selectedMaterialId]);
+  }, [selectedMaterial.id]);
 
   useEffect(() => {
-    if (selectedArticuloId && selectedMaterialId) {
+    if (selectedArticulo.id && selectedMaterial.id) {
       axios.get("http://localhost:6969/medidas", {
         params: {
-          articuloId: selectedArticuloId,
-          materialId: selectedMaterialId,
+          articuloId: selectedArticulo.id,
+          materialId: selectedMaterial.id,
         },
       }).then((res) => {
         if (Array.isArray(res.data)) {
@@ -183,11 +207,11 @@ function Frentes3() {
         console.error("Error fetching medidas:", error);
       });
     }
-  }, [selectedArticuloId, selectedMaterialId]);
+  }, [selectedArticulo.id, selectedMaterial.id]);
 
   useEffect(() => {
-    if (selectedMaterialId) {
-      axios.get("http://localhost:6969/materialFranja", { params: { materialId: selectedMaterialId } }).then((res) => {
+    if (selectedMaterial.id) {
+      axios.get("http://localhost:6969/materialFranja", { params: { materialId: selectedMaterial.id } }).then((res) => {
         if (Array.isArray(res.data)) {
           setListMaterialFranja(res.data);
           document.getElementById("materialFranja").disabled = false;
@@ -198,11 +222,11 @@ function Frentes3() {
         console.error("Error fetching materialFranja:", error);
       });
     }
-  }, [selectedMaterialId]);
+  }, [selectedMaterial.id]);
 
   useEffect(() => {
-    if (selectedMaterialFranjaId) {
-      axios.get("http://localhost:6969/colorFranja", { params: { materialFranjaId: selectedMaterialFranjaId } }).then((res) => {
+    if (selectedMaterialFranja.id) {
+      axios.get("http://localhost:6969/colorFranja", { params: { materialFranjaId: selectedMaterialFranja.id } }).then((res) => {
         if (Array.isArray(res.data)) {
           setListColorFranja(res.data);
           document.getElementById("colorFranja").disabled = false;
@@ -213,88 +237,82 @@ function Frentes3() {
         console.error("Error fetching colorFranja:", error);
       });
     }
-  }, [selectedMaterialFranjaId]);
+  }, [selectedMaterialFranja.id]);
 
   const handleSelectProductChange = (event) => {
     const index = event.target.selectedIndex;
     const nombre = event.target.options[index].text;
     const id = event.target.value;
-    setSelectedProductoId(id);
-    setSelectedProductoNombre(nombre);
-    handleSelectChangeI("producto", id, nombre);
+    setSelectedProducto({ id, nombre });
+    handleSelectChange("producto3", id, nombre);
   };
 
   const handleSelectSerieChange = (event) => {
     const index = event.target.selectedIndex;
     const nombre = event.target.options[index].text;
     const id = event.target.value;
-    setSelectedSerieId(id);
-    setSelectedSerieNombre(nombre);
-    handleSelectChangeI("serie", id, nombre);
+    setSelectedSerie({ id, nombre });
+    handleSelectChange("serie3", id, nombre);
   };
 
   const handleSelectArticuloChange = (event) => {
     const index = event.target.selectedIndex;
     const nombre = event.target.options[index].text;
     const id = event.target.value;
-    setSelectedArticuloId(id);
-    setSelectedArticuloNombre(nombre);
-    handleSelectChangeI("articulo", id, nombre);
+    setSelectedArticulo({ id, nombre });
+    handleSelectChange("articulo3", id, nombre);
   };
 
   const handleSelectMaterialChange = (event) => {
     const index = event.target.selectedIndex;
     const nombre = event.target.options[index].text;
     const id = event.target.value;
-    setSelectedMaterialId(id);
-    setSelectedMaterialNombre(nombre);
-    handleSelectChangeI("material", id, nombre);
+    setSelectedMaterial({ id, nombre });
+    handleSelectChange("material3", id, nombre);
   };
 
   const handleSelectColorChange = (event) => {
     const index = event.target.selectedIndex;
     const nombre = event.target.options[index].text;
     const id = event.target.value;
-    setSelectedColorId(id);
-    setSelectedColorNombre(nombre);
-    handleSelectChangeI("color", id, nombre);
+    setSelectedColor({ id, nombre });
+    handleSelectChange("color3", id, nombre);
   };
 
   const handleSelectMedidasChange = (event) => {
     const index = event.target.selectedIndex;
     const nombre = event.target.options[index].text;
     const id = event.target.value;
-    setSelectedMedidasId(id);
-    setSelectedMedidasNombre(nombre);
-    handleSelectChangeI("medidas", id, nombre);
+    const selectedMedida = listMedidas.find(medida => medida.medidas_id === parseInt(id));
+    setSelectedMedidas({ id, nombre, puntos: selectedMedida.puntos });
+    setPuntos(selectedMedida.puntos); // Actualiza los puntos
+    handleSelectChange("medidas3", id, nombre);
   };
 
   const handleSelectMaterialFranjaChange = (event) => {
     const index = event.target.selectedIndex;
     const nombre = event.target.options[index].text;
     const id = event.target.value;
-    setSelectedMaterialFranjaId(id);
-    setSelectedMaterialFranjaNombre(nombre);
-    handleSelectChangeI("materialFranja", id, nombre);
+    setSelectedMaterialFranja({ id, nombre });
+    handleSelectChange("materialFranja3", id, nombre);
   };
 
   const handleSelectColorFranjaChange = (event) => {
     const index = event.target.selectedIndex;
     const nombre = event.target.options[index].text;
     const id = event.target.value;
-    setSelectedColorFranjaId(id);
-    setSelectedColorFranjaNombre(nombre);
-    handleSelectChangeI("colorFranja", id, nombre);
+    setSelectedColorFranja({ id, nombre });
+    handleSelectChange("colorFranja3", id, nombre);
   };
 
-  const handleSaveToLocalContext = () => {
-    saveData('frentes3', localData);
-    console.log(localData);
+  const handleCantidadChange = (event) => {
+    const newCantidad = parseInt(event.target.value, 10);
+    setCantidad(newCantidad);
   };
 
-  useEffect(() => {
-    saveData('frentes3', localData);
-  }, [localData, saveData]);
+  const handleGeneratePDF = () => {
+    generatePDF(data);
+  };
 
   return (
     <div className="container">
@@ -302,8 +320,8 @@ function Frentes3() {
         <h1>Frentes 3</h1>
         {/* Producto */}
         <label htmlFor="producto">Producto:</label>
-        <select id="producto" onChange={handleSelectProductChange} value={selectedProductoId || ""}>
-          <option disabled={selectedProductoId !== ""}>--Selecciona una opción--</option>
+        <select id="producto" onChange={handleSelectProductChange} value={selectedProducto.id || ""}>
+          <option disabled={selectedProducto.id !== ""}>--Selecciona una opción--</option>
           {listProducto.map((producto) => (
             <option key={producto.producto_id} value={producto.producto_id}>
               {producto.nombre}
@@ -313,8 +331,8 @@ function Frentes3() {
 
         {/* Serie */}
         <label htmlFor="serie">Serie:</label>
-        <select id="serie" disabled={true} onChange={handleSelectSerieChange} value={selectedSerieId || ""}>
-          <option value="" disabled={selectedProductoId === ""}>--Selecciona una opción--</option>
+        <select id="serie" disabled={true} onChange={handleSelectSerieChange} value={selectedSerie.id || ""}>
+          <option value="" disabled={selectedProducto.id === ""}>--Selecciona una opción--</option>
           {listSerie.map((serie) => (
             <option key={serie.serie_id} value={serie.serie_id}>
               {serie.nombre}
@@ -324,8 +342,8 @@ function Frentes3() {
 
         {/* Articulo */}
         <label htmlFor="articulo">Artículo:</label>
-        <select id="articulo" disabled={true} onChange={handleSelectArticuloChange} value={selectedArticuloId || ""}>
-          <option value="" disabled={selectedProductoId === ""}>--Selecciona una opción--</option>
+        <select id="articulo" disabled={true} onChange={handleSelectArticuloChange} value={selectedArticulo.id || ""}>
+          <option value="" disabled={selectedProducto.id === ""}>--Selecciona una opción--</option>
           {listArticulo.map((articulo) => (
             <option key={articulo.articulo_id} value={articulo.articulo_id}>
               {articulo.nombre}
@@ -335,8 +353,8 @@ function Frentes3() {
 
         {/* Material */}
         <label htmlFor="material">Material:</label>
-        <select id="material" disabled={true} onChange={handleSelectMaterialChange} value={selectedMaterialId || ""}>
-          <option value="" disabled={selectedArticuloId === ""}>--Selecciona una opción--</option>
+        <select id="material" disabled={true} onChange={handleSelectMaterialChange} value={selectedMaterial.id || ""}>
+          <option value="" disabled={selectedArticulo.id === ""}>--Selecciona una opción--</option>
           {listMaterial.map((material) => (
             <option key={material.material_id} value={material.material_id}>
               {material.nombre}
@@ -347,8 +365,8 @@ function Frentes3() {
       <div className="container3">
         {/* Color */}
         <label htmlFor="color">Color:</label>
-        <select id="color" disabled={true} onChange={handleSelectColorChange} value={selectedColorId || ""}>
-          <option value="" disabled={selectedProductoId === ""}>--Selecciona una opción--</option>
+        <select id="color" disabled={true} onChange={handleSelectColorChange} value={selectedColor.id || ""}>
+          <option value="" disabled={selectedProducto.id === ""}>--Selecciona una opción--</option>
           {listColor.map((color) => (
             <option key={color.color_id} value={color.color_id}>
               {color.nombre}
@@ -358,8 +376,8 @@ function Frentes3() {
 
         {/* Medidas */}
         <label htmlFor="medidas">Medidas:</label>
-        <select id="medidas" disabled={true} onChange={handleSelectMedidasChange} value={selectedMedidasId || ""}>
-          <option value="" disabled={selectedArticuloId === ""}>--Selecciona una opción--</option>
+        <select id="medidas" disabled={true} onChange={handleSelectMedidasChange} value={selectedMedidas.id || ""}>
+          <option value="" disabled={selectedArticulo.id === ""}>--Selecciona una opción--</option>
           {listMedidas.map((medidas) => (
             <option key={medidas.medidas_id} value={medidas.medidas_id}>
               {medidas.medidas}
@@ -369,8 +387,8 @@ function Frentes3() {
 
         {/* Material Franja */}
         <label htmlFor="materialFranja">Material Franja:</label>
-        <select id="materialFranja" disabled={true} onChange={handleSelectMaterialFranjaChange} value={selectedMaterialFranjaId || ""}>
-          <option value="" disabled={selectedArticuloId === ""}>--Selecciona una opción--</option>
+        <select id="materialFranja" disabled={true} onChange={handleSelectMaterialFranjaChange} value={selectedMaterialFranja.id || ""}>
+          <option value="" disabled={selectedArticulo.id === ""}>--Selecciona una opción--</option>
           {listMaterialFranja.map((material) => (
             <option key={material.material_id} value={material.material_id}>
               {material.nombre}
@@ -380,17 +398,26 @@ function Frentes3() {
 
         {/* Color Franja */}
         <label htmlFor="colorFranja">Color Franja:</label>
-        <select id="colorFranja" disabled={true} onChange={handleSelectColorFranjaChange} value={selectedColorFranjaId || ""}>
-          <option value="" disabled={selectedArticuloId === ""}>--Selecciona una opción--</option>
+        <select id="colorFranja" disabled={true} onChange={handleSelectColorFranjaChange} value={selectedColorFranja.id || ""}>
+          <option value="" disabled={selectedArticulo.id === ""}>--Selecciona una opción--</option>
           {listColorFranja.map((color) => (
             <option key={color.color_id} value={color.color_id}>
               {color.nombre}
             </option>
           ))}
         </select>
+
+        {/* Cantidad */}
+        <label htmlFor="cantidad">Cantidad:</label>
+        <input type="number" id="cantidad" value={cantidad} onChange={handleCantidadChange} min="1" />
+
+        {/* Puntos */}
+        <label htmlFor="puntos">Puntos: {puntos * cantidad}</label>
       </div>
     </div>
   );
 }
 
 export default Frentes3;
+
+

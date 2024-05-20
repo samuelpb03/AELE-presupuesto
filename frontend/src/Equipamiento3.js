@@ -1,159 +1,206 @@
 import React, { useState, useEffect } from "react";
-import { useLocation } from 'react-router-dom';
 import axios from "axios";
 import { useTabs } from "./TabsContext";
-import { useData } from './context/DataContext';
+import { useData } from "./context/DataContext";
 import { generatePDF } from "./GeneratePDF";
 
 function Equipamiento3() {
-  const { selectedOptionsE3, handleSelectChangeE3 } = useTabs();
+  const { handleSelectChangeE3 } = useTabs();
   const { data, saveData } = useData();
-  const [listProducto, setListProducto] = useState([]);
-  const [listSerie, setListSerie] = useState([]);
-  const [listArticulo, setListArticulo] = useState([]);
-  const [listMaterial, setListMaterial] = useState([]);
-
-  const [selectedProductoId, setSelectedProductoId] = useState(selectedOptionsE3.producto?.optionId || "");
-  const [selectedProductoNombre, setSelectedProductoNombre] = useState(selectedOptionsE3.producto?.optionName || "");
-  const [selectedSerieId, setSelectedSerieId] = useState(selectedOptionsE3.serie?.optionId || "");
-  const [selectedSerieNombre, setSelectedSerieNombre] = useState(selectedOptionsE3.serie?.optionName || "");
-  const [selectedArticuloId, setSelectedArticuloId] = useState(selectedOptionsE3.articulo?.optionId || "");
-  const [selectedArticuloNombre, setSelectedArticuloNombre] = useState(selectedOptionsE3.articulo?.optionName || "");
-  const [selectedMaterialId, setSelectedMaterialId] = useState(selectedOptionsE3.material?.optionId || "");
-  const [selectedMaterialNombre, setSelectedMaterialNombre] = useState(selectedOptionsE3.material?.optionName || "");
-
-  const [localData, setLocalData] = useState({
-    selectedProductoId,
-    selectedProductoNombre,
-    selectedSerieId,
-    selectedSerieNombre,
-    selectedArticuloId,
-    selectedArticuloNombre,
-    selectedMaterialId,
-    selectedMaterialNombre,
-  });
+  const [listArticuloEquipamiento, setListArticuloEquipamiento] = useState([]);
+  const [listArticuloAntracita, setListArticuloAntracita] = useState([]);
+  const [listMedidas, setListMedidas] = useState(Array(9).fill([]));
+  const [cantidades, setCantidades] = useState(Array(9).fill(0));
+  const [selectedArticulos, setSelectedArticulos] = useState(
+    Array(9).fill({
+      id: "",
+      nombre: "",
+    })
+  );
+  const [selectedMedidas, setSelectedMedidas] = useState(
+    Array(9).fill({
+      id: "",
+      nombre: "",
+      puntos: 0,
+    })
+  );
 
   useEffect(() => {
-    setLocalData(prevLocalData => ({
-      ...prevLocalData,
-      selectedProductoId,
-      selectedProductoNombre,
-      selectedSerieId,
-      selectedSerieNombre,
-      selectedArticuloId,
-      selectedArticuloNombre,
-      selectedMaterialId,
-      selectedMaterialNombre,
-    }));
-  }, [
-    selectedProductoId, selectedProductoNombre, selectedSerieId, selectedSerieNombre,
-    selectedArticuloId, selectedArticuloNombre, selectedMaterialId, selectedMaterialNombre
-  ]);
+    if (data.equipamiento3) {
+      const restoredArticulos = Array(9).fill({ id: "", nombre: "" });
+      const restoredMedidas = Array(9).fill({ id: "", nombre: "", puntos: 0 });
+      const restoredCantidades = Array(9).fill(0);
 
-  useEffect(() => {
-    axios.get("http://localhost:6969/producto").then((res) => {
-      if (Array.isArray(res.data)) {
-        const filteredProducts = res.data.filter((producto) => [7].includes(producto.producto_id));
-        setListProducto(filteredProducts);
-      } else {
-        console.error("Error fetching productos: res.data is not an array");
+      for (let i = 0; i < 9; i++) {
+        restoredArticulos[i] = {
+          id: data.equipamiento3[`articulo${i + 1}Id`] || "",
+          nombre: data.equipamiento3[`articulo${i + 1}Nombre`] || "",
+        };
+        restoredMedidas[i] = {
+          id: data.equipamiento3[`medidas${i + 1}Id`] || "",
+          nombre: data.equipamiento3[`medidas${i + 1}Nombre`] || "",
+          puntos: data.equipamiento3[`medidas${i + 1}Puntos`] || 0,
+        };
+        restoredCantidades[i] = data.equipamiento3[`cantidad${i + 1}`] || 0;
       }
-    }).catch(error => {
-      console.error("Error fetching productos:", error);
-    });
+
+      setSelectedArticulos(restoredArticulos);
+      setSelectedMedidas(restoredMedidas);
+      setCantidades(restoredCantidades);
+    }
   }, []);
 
   useEffect(() => {
-    if (selectedProductoId) {
-      axios.get("http://localhost:6969/serie", { params: { productoId: selectedProductoId } }).then((res) => {
-        if (Array.isArray(res.data)) {
-          setListSerie(res.data);
-          document.getElementById("serie").disabled = false;
-        } else {
-          console.error("Error fetching series: res.data is not an array");
-        }
-      }).catch(error => {
-        console.error("Error fetching series:", error);
-      });
-      document.getElementById("articulo").disabled = true;
-      document.getElementById("material").disabled = true;
-    }
-  }, [selectedProductoId]);
+    const formattedData = selectedArticulos.reduce((acc, articulo, index) => {
+      acc[`articulo${index + 1}Nombre`] = articulo.nombre;
+      acc[`articulo${index + 1}Id`] = articulo.id;
+      acc[`medidas${index + 1}Nombre`] = selectedMedidas[index].nombre;
+      acc[`medidas${index + 1}Id`] = selectedMedidas[index].id;
+      acc[`medidas${index + 1}Puntos`] = selectedMedidas[index].puntos;
+      acc[`cantidad${index + 1}`] = cantidades[index];
+      return acc;
+    }, {});
+    saveData("equipamiento3", formattedData);
+  }, [selectedArticulos, selectedMedidas, cantidades, saveData]);
 
   useEffect(() => {
-    if (selectedSerieId) {
-      axios.get("http://localhost:6969/articulo", { params: { serieId: selectedSerieId } }).then((res) => {
+    axios
+      .get("http://localhost:6969/articulo/equipamiento")
+      .then((res) => {
         if (Array.isArray(res.data)) {
-          setListArticulo(res.data);
-          document.getElementById("articulo").disabled = false;
+          setListArticuloEquipamiento(res.data);
         } else {
           console.error("Error fetching articulos: res.data is not an array");
         }
-      }).catch(error => {
+      })
+      .catch((error) => {
         console.error("Error fetching articulos:", error);
       });
-    }
-  }, [selectedSerieId]);
 
-  useEffect(() => {
-    if (selectedArticuloId) {
-      axios.get("http://localhost:6969/material", { params: { serieId: selectedSerieId } }).then((res) => {
+    axios
+      .get("http://localhost:6969/articulo/antracita")
+      .then((res) => {
         if (Array.isArray(res.data)) {
-          setListMaterial(res.data);
-          document.getElementById("material").disabled = false;
+          setListArticuloAntracita(res.data);
         } else {
-          console.error("Error fetching materiales: res.data is not an array");
+          console.error("Error fetching articulos: res.data is not an array");
         }
-      }).catch(error => {
-        console.error("Error fetching materiales:", error);
+      })
+      .catch((error) => {
+        console.error("Error fetching articulos:", error);
       });
+  }, []);
+
+  const handleSelectArticuloChange = (index, event) => {
+    const updatedArticulos = [...selectedArticulos];
+    const updatedCantidades = [...cantidades];
+    const selectedIndex = event.target.selectedIndex;
+    const nombre = event.target.options[selectedIndex].text;
+    const id = event.target.value;
+
+    updatedArticulos[index] = { id, nombre };
+    setSelectedArticulos(updatedArticulos);
+
+    if (id) {
+      updatedCantidades[index] = 1;
+
+      axios
+        .get("http://localhost:6969/medidas", { params: { articuloId: id, materialId: 5 } })
+        .then((res) => {
+          if (Array.isArray(res.data)) {
+            const updatedListMedidas = [...listMedidas];
+            updatedListMedidas[index] = res.data;
+            setListMedidas(updatedListMedidas);
+
+            if (res.data.length > 0) {
+              const firstMedida = res.data[0];
+              const updatedSelectedMedidas = [...selectedMedidas];
+              updatedSelectedMedidas[index] = {
+                id: firstMedida.medidas_id,
+                nombre: firstMedida.medidas,
+                puntos: firstMedida.puntos,
+              };
+              setSelectedMedidas(updatedSelectedMedidas);
+            }
+          } else {
+            console.error("Error fetching medidas: res.data is not an array");
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching medidas:", error);
+        });
+    } else {
+      updatedCantidades[index] = 0;
+      const updatedListMedidas = [...listMedidas];
+      updatedListMedidas[index] = [];
+      setListMedidas(updatedListMedidas);
     }
-  }, [selectedArticuloId, selectedSerieId]);
+    setCantidades(updatedCantidades);
 
-  const handleSelectProductChange = (event) => {
-    const index = event.target.selectedIndex;
-    const nombre = event.target.options[index].text;
+    handleSelectChangeE3(`articulo${index + 1}`, id, nombre);
+  };
+
+  const handleSelectMedidasChange = (index, event) => {
+    const updatedMedidas = [...selectedMedidas];
+    const selectedIndex = event.target.selectedIndex;
+    const nombre = event.target.options[selectedIndex].text;
     const id = event.target.value;
-    setSelectedProductoId(id);
-    setSelectedProductoNombre(nombre);
-    handleSelectChangeE3("producto", id, nombre);
+    const medidasList = listMedidas[index] || [];
+    const selectedMedida = medidasList.find((medida) => medida.medidas_id === parseInt(id)) || {};
+    updatedMedidas[index] = { id, nombre, puntos: selectedMedida.puntos || 0 };
+    setSelectedMedidas(updatedMedidas);
+
+    handleSelectChangeE3(`medidas${index + 1}`, id, nombre, selectedMedida.puntos || 0);
   };
 
-  const handleSelectSerieChange = (event) => {
-    const index = event.target.selectedIndex;
-    const nombre = event.target.options[index].text;
-    const id = event.target.value;
-    setSelectedSerieId(id);
-    setSelectedSerieNombre(nombre);
-    handleSelectChangeE3("serie", id, nombre);
+  const handleCantidadChange = (index, event) => {
+    const updatedCantidades = [...cantidades];
+    updatedCantidades[index] = event.target.value;
+    setCantidades(updatedCantidades);
+
+    handleSelectChangeE3(`cantidad${index + 1}`, updatedCantidades[index]);
   };
 
-  const handleSelectArticuloChange = (event) => {
-    const index = event.target.selectedIndex;
-    const nombre = event.target.options[index].text;
-    const id = event.target.value;
-    setSelectedArticuloId(id);
-    setSelectedArticuloNombre(nombre);
-    handleSelectChangeE3("articulo", id, nombre);
-  };
-
-  const handleSelectMaterialChange = (event) => {
-    const index = event.target.selectedIndex;
-    const nombre = event.target.options[index].text;
-    const id = event.target.value;
-    setSelectedMaterialId(id);
-    setSelectedMaterialNombre(nombre);
-    handleSelectChangeE3("material", id, nombre);
-  };
-
-  const handleSaveToLocalContext = () => {
-    saveData('equipamiento3', localData);
-    console.log(localData);
-  };
-
-  useEffect(() => {
-    saveData('equipamiento3', localData);
-  }, [localData, saveData]);
+  const renderSelectArticulo = (index, list) => (
+    <div key={index}>
+      <label htmlFor={`articulo${index + 1}`}>Artículo {index + 1}:</label>
+      <select
+        id={`articulo${index + 1}`}
+        onChange={(event) => handleSelectArticuloChange(index, event)}
+        value={selectedArticulos[index].id || ""}
+      >
+        <option value="">--Selecciona una opción--</option>
+        {list.map((articulo) => (
+          <option key={articulo.articulo_id} value={articulo.articulo_id}>
+            {articulo.nombre}
+          </option>
+        ))}
+      </select>
+      <label htmlFor={`medidas${index + 1}`}>Medidas:</label>
+      <select
+        id={`medidas${index + 1}`}
+        onChange={(event) => handleSelectMedidasChange(index, event)}
+        value={selectedMedidas[index].id || ""}
+        disabled={!selectedArticulos[index].id}
+      >
+        <option value="">--Selecciona una opción--</option>
+        {(listMedidas[index] || []).map((medida) => (
+          <option key={medida.medidas_id} value={medida.medidas_id}>
+            {medida.medidas}
+          </option>
+        ))}
+      </select>
+      <label htmlFor={`cantidad${index + 1}`}>Cantidad:</label>
+      <input
+        type="number"
+        id={`cantidad${index + 1}`}
+        value={cantidades[index]}
+        onChange={(event) => handleCantidadChange(index, event)}
+        min="1"
+        disabled={!selectedArticulos[index].id}
+      />
+    </div>
+  );
 
   const handleGeneratePDF = () => {
     generatePDF(data);
@@ -162,48 +209,19 @@ function Equipamiento3() {
   return (
     <div className="container">
       <div className="container2">
-        <h1>Equipamiento 3</h1>
-        <label htmlFor="producto">Producto:</label>
-        <select id="producto" onChange={handleSelectProductChange} value={selectedProductoId || ""}>
-          <option disabled={selectedProductoId !== ""}>--Selecciona una opción--</option>
-          {listProducto.map((producto) => (
-            <option key={producto.producto_id} value={producto.producto_id}>
-              {producto.nombre}
-            </option>
-          ))}
-        </select>
-
-        <label htmlFor="serie">Serie:</label>
-        <select id="serie" disabled={true} onChange={handleSelectSerieChange} value={selectedSerieId || ""}>
-          <option value="" disabled={selectedProductoId === ""}>--Selecciona una opción--</option>
-          {listSerie.map((serie) => (
-            <option key={serie.serie_id} value={serie.serie_id}>
-              {serie.nombre}
-            </option>
-          ))}
-        </select>
-
-        <label htmlFor="articulo">Artículo:</label>
-        <select id="articulo" disabled={true} onChange={handleSelectArticuloChange} value={selectedArticuloId || ""}>
-          <option value="" disabled={selectedProductoId === ""}>--Selecciona una opción--</option>
-          {listArticulo.map((articulo) => (
-            <option key={articulo.articulo_id} value={articulo.articulo_id}>
-              {articulo.nombre}
-            </option>
-          ))}
-        </select>
+        <h1>Equipamiento y Antracita</h1>
+        <h2>Equipamiento</h2>
+        {Array.from({ length: 3 }).map((_, i) => renderSelectArticulo(i, listArticuloEquipamiento))}
       </div>
       <div className="container3">
-        <label htmlFor="material">Material:</label>
-        <select id="material" disabled={true} onChange={handleSelectMaterialChange} value={selectedMaterialId || ""}>
-          <option value="" disabled={selectedArticuloId === ""}>--Selecciona una opción--</option>
-          {listMaterial.map((material) => (
-            <option key={material.material_id} value={material.material_id}>
-              {material.nombre}
-            </option>
-          ))}
-        </select>
-        <button id="generatePDF" onClick={handleGeneratePDF}> Generar PDF</button>
+        
+        {Array.from({ length: 1 }).map((_, i) => renderSelectArticulo(i + 3, listArticuloEquipamiento))}
+        <h2>Antracita</h2>
+        {Array.from({ length: 2 }).map((_, i) => renderSelectArticulo(i + 4, listArticuloAntracita))}
+      </div>
+      <div className="container4">
+        {Array.from({ length: 3 }).map((_, i) => renderSelectArticulo(i + 6, listArticuloAntracita))}
+        <button onClick={handleGeneratePDF} style={{ marginTop: "20px" }}>Generar PDF</button>
       </div>
     </div>
   );

@@ -38,8 +38,6 @@ export const generatePDF = (data) => {
     frentes3: "Frentes 3",
     tiradores: "Tiradores",
     interiores: "Interiores",
-    equipamiento: "Equipamiento",
-    equipamiento2: "Equipamiento 2",
     equipamiento3: "Equipamiento 3",
     cerraduras: "Cerraduras",
     baldas: "Baldas e iluminación"

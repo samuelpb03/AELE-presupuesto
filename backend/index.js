@@ -132,7 +132,53 @@ app.get("/articulo/iluminacion", (req, res) => {
     return res.json(data);
   });
 });
+app.get("/articulo/equipamiento", (req, res) => {
+  const query = `
+    SELECT * FROM articulo
+    WHERE serie_id IN (
+      SELECT serie_id FROM serie
+      WHERE nombre = 'Equipamientos'
+    )
+  `;
+  dbConnection.query(query, (err, data) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json(err);
+    }
+    return res.json(data);
+  });
+});
 
+// Funcion Express GET para articulos de antracita.
+app.get("/articulo/antracita", (req, res) => {
+  const query = `
+    SELECT * FROM articulo
+    WHERE serie_id IN (
+      SELECT serie_id FROM serie
+      WHERE nombre = 'Antracita'
+    )
+  `;
+  dbConnection.query(query, (err, data) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json(err);
+    }
+    return res.json(data);
+  });
+});
+app.get("/articulo/interiores", (req, res) => {
+  const query = `
+  SELECT * FROM articulo
+  WHERE serie_id = 26
+  `;
+  dbConnection.query(query, (err, data) => {
+    if (err) {
+      console.error("Error fetching articulos:", err);
+      return res.status(500).json(err);
+    }
+    return res.json(data);
+  });
+});
 //Funcion Express GET para color franja.
 app.get("/colorFranja", (req, res) => {
   const materialFranjaId = req.query.materialFranjaId;

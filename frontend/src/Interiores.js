@@ -4,257 +4,178 @@ import { useTabs } from "./TabsContext";
 import { useData } from './context/DataContext';
 
 function Interiores() {
-  const { selectedOptionsG, handleSelectChangeG } = useTabs();
+  const { handleSelectChangeG } = useTabs();
   const { data, saveData } = useData();
-  const [listProducto, setListProducto] = useState([]);
-  const [listSerie, setListSerie] = useState([]);
-  const [listMaterial, setListMaterial] = useState([]);
   const [listArticulo, setListArticulo] = useState([]);
   const [listMedidas, setListMedidas] = useState([]);
 
-  const [selectedProductoId, setSelectedProductoId] = useState(selectedOptionsG.producto?.optionId || "");
-  const [selectedProductoNombre, setSelectedProductoNombre] = useState(selectedOptionsG.producto?.optionName || "");
-  const [selectedSerieId, setSelectedSerieId] = useState(selectedOptionsG.serie?.optionId || "");
-  const [selectedSerieNombre, setSelectedSerieNombre] = useState(selectedOptionsG.serie?.optionName || "");
-  const [selectedArticuloId, setSelectedArticuloId] = useState(selectedOptionsG.articulo?.optionId || "");
-  const [selectedArticuloNombre, setSelectedArticuloNombre] = useState(selectedOptionsG.articulo?.optionName || "");
-  const [selectedMaterialId, setSelectedMaterialId] = useState(selectedOptionsG.material?.optionId || "");
-  const [selectedMaterialNombre, setSelectedMaterialNombre] = useState(selectedOptionsG.material?.optionName || "");
-  const [selectedMedidasId, setSelectedMedidasId] = useState(selectedOptionsG.medidas?.optionId || "");
-  const [selectedMedidasNombre, setSelectedMedidasNombre] = useState(selectedOptionsG.medidas?.optionName || "");
-
-  const [localData, setLocalData] = useState({
-    selectedProductoId,
-    selectedProductoNombre,
-    selectedSerieId,
-    selectedSerieNombre,
-    selectedArticuloId,
-    selectedArticuloNombre,
-    selectedMaterialId,
-    selectedMaterialNombre,
-    selectedMedidasId,
-    selectedMedidasNombre,
-  });
+  const [selectedArticulos, setSelectedArticulos] = useState(Array(3).fill({ id: "", nombre: "" }));
+  const [selectedMedidas, setSelectedMedidas] = useState(Array(3).fill({ id: "", nombre: "", puntos: 0 }));
+  const [cantidades, setCantidades] = useState(Array(3).fill(1));
+  const [puntos, setPuntos] = useState(Array(3).fill(0));
 
   useEffect(() => {
-    setLocalData(prevLocalData => ({
-      ...prevLocalData,
-      selectedProductoId,
-      selectedProductoNombre,
-      selectedSerieId,
-      selectedSerieNombre,
-      selectedArticuloId,
-      selectedArticuloNombre,
-      selectedMaterialId,
-      selectedMaterialNombre,
-      selectedMedidasId,
-      selectedMedidasNombre,
-    }));
-  }, [
-    selectedProductoId, selectedProductoNombre, selectedSerieId, selectedSerieNombre,
-    selectedArticuloId, selectedArticuloNombre, selectedMaterialId, selectedMaterialNombre,
-    selectedMedidasId, selectedMedidasNombre
-  ]);
+    // Restore data from context when component mounts
+    if (data.interiores) {
+      const restoredArticulos = Array(3).fill({ id: "", nombre: "" });
+      const restoredMedidas = Array(3).fill({ id: "", nombre: "", puntos: 0 });
+      const restoredCantidades = Array(3).fill(1);
+      const restoredPuntos = Array(3).fill(0);
 
-  useEffect(() => {
-    axios.get("http://localhost:6969/producto").then((res) => {
-      if (Array.isArray(res.data)) {
-        const filteredProducts = res.data.filter((producto) => [6].includes(producto.producto_id));
-        setListProducto(filteredProducts);
-      } else {
-        console.error("Error fetching productos: res.data is not an array");
+      for (let i = 0; i < 3; i++) {
+        restoredArticulos[i] = {
+          id: data.interiores[`articulo${i + 1}Id`] || "",
+          nombre: data.interiores[`articulo${i + 1}Nombre`] || "",
+        };
+        restoredMedidas[i] = {
+          id: data.interiores[`medidas${i + 1}Id`] || "",
+          nombre: data.interiores[`medidas${i + 1}Nombre`] || "",
+          puntos: data.interiores[`medidas${i + 1}Puntos`] || 0,
+        };
+        restoredCantidades[i] = data.interiores[`cantidad${i + 1}`] || 1;
+        restoredPuntos[i] = data.interiores[`puntos${i + 1}`] || 0;
       }
-    }).catch(error => {
-      console.error("Error fetching productos:", error);
-    });
+
+      setSelectedArticulos(restoredArticulos);
+      setSelectedMedidas(restoredMedidas);
+      setCantidades(restoredCantidades);
+      setPuntos(restoredPuntos);
+    }
   }, []);
 
   useEffect(() => {
-    if (selectedProductoId) {
-      axios.get("http://localhost:6969/serie", { params: { productoId: selectedProductoId } }).then((res) => {
-        if (Array.isArray(res.data)) {
-          setListSerie(res.data);
-          document.getElementById("serie").disabled = false;
-        } else {
-          console.error("Error fetching series: res.data is not an array");
-        }
-      }).catch(error => {
-        console.error("Error fetching series:", error);
-      });
-      document.getElementById("articulo").disabled = true;
-      document.getElementById("material").disabled = true;
-      document.getElementById("medidas").disabled = true;
-    }
-  }, [selectedProductoId]);
+    const formattedData = selectedArticulos.reduce((acc, articulo, index) => {
+      acc[`articulo${index + 1}Nombre`] = articulo.nombre;
+      acc[`articulo${index + 1}Id`] = articulo.id;
+      acc[`medidas${index + 1}Nombre`] = selectedMedidas[index].nombre;
+      acc[`medidas${index + 1}Id`] = selectedMedidas[index].id;
+      acc[`medidas${index + 1}Puntos`] = selectedMedidas[index].puntos;
+      acc[`cantidad${index + 1}`] = cantidades[index];
+      acc[`puntos${index + 1}`] = puntos[index];
+      return acc;
+    }, {});
+    saveData("interiores", formattedData);
+  }, [selectedArticulos, selectedMedidas, cantidades, puntos, saveData]);
 
   useEffect(() => {
-    if (selectedSerieId) {
-      axios.get("http://localhost:6969/articulo", { params: { serieId: selectedSerieId } }).then((res) => {
+    axios
+      .get("http://localhost:6969/articulo/interiores")
+      .then((res) => {
         if (Array.isArray(res.data)) {
           setListArticulo(res.data);
-          document.getElementById("articulo").disabled = false;
-          document.getElementById("material").disabled = false;
-          document.getElementById("medidas").disabled = true;
         } else {
           console.error("Error fetching articulos: res.data is not an array");
         }
-      }).catch(error => {
+      })
+      .catch((error) => {
         console.error("Error fetching articulos:", error);
       });
+  }, []);
+
+  const handleSelectArticuloChange = (index, event) => {
+    const updatedArticulos = [...selectedArticulos];
+    const selectedIndex = event.target.selectedIndex;
+    const nombre = event.target.options[selectedIndex].text;
+    const id = event.target.value;
+
+    updatedArticulos[index] = { id, nombre };
+    setSelectedArticulos(updatedArticulos);
+
+    if (id) {
+      axios
+        .get("http://localhost:6969/medidas", { params: { articuloId: id, materialId: 3 } })
+        .then((res) => {
+          if (Array.isArray(res.data)) {
+            const updatedMedidasList = [...listMedidas];
+            updatedMedidasList[index] = res.data;
+            setListMedidas(updatedMedidasList);
+          } else {
+            console.error("Error fetching medidas: res.data is not an array");
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching medidas:", error);
+        });
     }
-  }, [selectedSerieId]);
 
-  useEffect(() => {
-    if (selectedArticuloId) {
-      axios.get("http://localhost:6969/material", { params: { serieId: selectedSerieId } }).then((res) => {
-        if (Array.isArray(res.data)) {
-          setListMaterial(res.data);
-          document.getElementById("material").disabled = false;
-        } else {
-          console.error("Error fetching materiales: res.data is not an array");
-        }
-      }).catch(error => {
-        console.error("Error fetching materiales:", error);
-      });
-    }
-  }, [selectedArticuloId, selectedSerieId]);
+    handleSelectChangeG(`articulo${index + 1}`, id, nombre);
+  };
 
-  useEffect(() => {
-    if (selectedArticuloId && selectedMaterialId) {
-      axios.get("http://localhost:6969/medidas", {
-        params: {
-          articuloId: selectedArticuloId,
-          materialId: selectedMaterialId,
-        },
-      }).then((res) => {
-        if (Array.isArray(res.data)) {
-          setListMedidas(res.data);
-          document.getElementById("medidas").disabled = false;
-        } else {
-          console.error("Error fetching medidas: res.data is not an array");
-        }
-      }).catch(error => {
-        console.error("Error fetching medidas:", error);
-      });
-    }
-  }, [selectedArticuloId, selectedMaterialId]);
-
-  const handleSelectProductChange = (event) => {
-    const index = event.target.selectedIndex;
-    const nombre = event.target.options[index].text;
+  const handleSelectMedidasChange = (index, event) => {
+    const updatedMedidas = [...selectedMedidas];
+    const selectedIndex = event.target.selectedIndex;
+    const nombre = event.target.options[selectedIndex].text;
     const id = event.target.value;
-    setSelectedProductoId(id);
-    setSelectedProductoNombre(nombre);
-    handleSelectChangeG("producto", id, nombre);
+    const medidasList = listMedidas[index] || [];
+    const selectedMedida = medidasList.find((medida) => medida.medidas_id === parseInt(id)) || {};
+    updatedMedidas[index] = { id, nombre, puntos: selectedMedida.puntos || 0 };
+    setSelectedMedidas(updatedMedidas);
+    setPuntos((prevPuntos) => {
+      const newPuntos = [...prevPuntos];
+      newPuntos[index] = selectedMedida.puntos || 0;
+      return newPuntos;
+    });
   };
 
-  const handleSelectSerieChange = (event) => {
-    const index = event.target.selectedIndex;
-    const nombre = event.target.options[index].text;
-    const id = event.target.value;
-    setSelectedSerieId(id);
-    setSelectedSerieNombre(nombre);
-    handleSelectChangeG("serie", id, nombre);
+  const handleCantidadChange = (index, event) => {
+    const updatedCantidades = [...cantidades];
+    const value = parseInt(event.target.value, 10);
+    updatedCantidades[index] = isNaN(value) ? 1 : value;
+    setCantidades(updatedCantidades);
+    setPuntos((prevPuntos) => {
+      const newPuntos = [...prevPuntos];
+      newPuntos[index] = selectedMedidas[index].puntos * updatedCantidades[index];
+      return newPuntos;
+    });
   };
 
-  const handleSelectArticuloChange = (event) => {
-    const index = event.target.selectedIndex;
-    const nombre = event.target.options[index].text;
-    const id = event.target.value;
-    setSelectedArticuloId(id);
-    setSelectedArticuloNombre(nombre);
-    handleSelectChangeG("articulo", id, nombre);
-  };
-
-  const handleSelectMaterialChange = (event) => {
-    const index = event.target.selectedIndex;
-    const nombre = event.target.options[index].text;
-    const id = event.target.value;
-    setSelectedMaterialId(id);
-    setSelectedMaterialNombre(nombre);
-    handleSelectChangeG("material", id, nombre);
-  };
-
-  const handleSelectMedidasChange = (event) => {
-    const index = event.target.selectedIndex;
-    const nombre = event.target.options[index].text;
-    const id = event.target.value;
-    setSelectedMedidasId(id);
-    setSelectedMedidasNombre(nombre);
-    handleSelectChangeG("medidas", id, nombre);
-  };
-
-  const handleSaveToLocalContext = () => {
-    saveData('interiores', localData);
-    console.log(localData);
-  };
-
-  useEffect(() => {
-    saveData('interiores', localData);
-  }, [localData, saveData]);
+  const renderSelectArticulo = (index) => (
+    <div key={index}>
+      <label htmlFor={`articulo${index + 1}`}>Artículo {index + 1}:</label>
+      <select
+        id={`articulo${index + 1}`}
+        onChange={(event) => handleSelectArticuloChange(index, event)}
+        value={selectedArticulos[index].id || ""}
+      >
+        <option value="">--Selecciona una opción--</option>
+        {listArticulo.map((articulo) => (
+          <option key={articulo.articulo_id} value={articulo.articulo_id}>
+            {articulo.nombre}
+          </option>
+        ))}
+      </select>
+      <label htmlFor={`medidas${index + 1}`}>Medidas:</label>
+      <select
+        id={`medidas${index + 1}`}
+        onChange={(event) => handleSelectMedidasChange(index, event)}
+        value={selectedMedidas[index].id || ""}
+        disabled={!selectedArticulos[index].id}
+      >
+        <option value="">--Selecciona una opción--</option>
+        {(listMedidas[index] || []).map((medida) => (
+          <option key={medida.medidas_id} value={medida.medidas_id}>
+            {medida.medidas}
+          </option>
+        ))}
+      </select>
+      <label htmlFor={`puntos${index + 1}`}>Puntos: {puntos[index]}</label>
+    </div>
+  );
 
   return (
     <div className="container">
       <div className="container2">
         <h1>Interiores</h1>
-        {/* Producto */}
-        <label htmlFor="producto">Producto:</label>
-        <select id="producto" onChange={handleSelectProductChange} value={selectedProductoId || ""}>
-          <option disabled={selectedProductoId !== ""}>--Selecciona una opción--</option>
-          {listProducto.map((producto) => (
-            <option key={producto.producto_id} value={producto.producto_id}>
-              {producto.nombre}
-            </option>
-          ))}
-        </select>
-
-        {/* Serie */}
-        <label htmlFor="serie">Serie:</label>
-        <select id="serie" disabled={true} onChange={handleSelectSerieChange} value={selectedSerieId || ""}>
-          <option value="" disabled={selectedProductoId === ""}>--Selecciona una opción--</option>
-          {listSerie.map((serie) => (
-            <option key={serie.serie_id} value={serie.serie_id}>
-              {serie.nombre}
-            </option>
-          ))}
-        </select>
-
-        {/* Articulo */}
-        <label htmlFor="articulo">Artículo:</label>
-        <select id="articulo" disabled={true} onChange={handleSelectArticuloChange} value={selectedArticuloId || ""}>
-          <option value="" disabled={selectedProductoId === ""}>--Selecciona una opción--</option>
-          {listArticulo.map((articulo) => (
-            <option key={articulo.articulo_id} value={articulo.articulo_id}>
-              {articulo.nombre}
-            </option>
-          ))}
-        </select>
-
-        {/* Material */}
-        <label htmlFor="material">Material:</label>
-        <select id="material" disabled={true} onChange={handleSelectMaterialChange} value={selectedMaterialId || ""}>
-          <option value="" disabled={selectedArticuloId === ""}>--Selecciona una opción--</option>
-          {listMaterial.map((material) => (
-            <option key={material.material_id} value={material.material_id}>
-              {material.nombre}
-            </option>
-          ))}
-        </select>
+        {renderSelectArticulo(0)}
+        {renderSelectArticulo(1)}
       </div>
       <div className="container3">
-        {/* Medidas */}
-        <label htmlFor="medidas">Medidas:</label>
-        <select id="medidas" disabled={true} onChange={handleSelectMedidasChange} value={selectedMedidasId || ""}>
-          <option value="" disabled={selectedArticuloId === ""}>--Selecciona una opción--</option>
-          {listMedidas.map((medidas) => (
-            <option key={medidas.medidas_id} value={medidas.medidas_id}>
-              {medidas.medidas}
-            </option>
-          ))}
-        </select>
+        {renderSelectArticulo(2)}
       </div>
     </div>
   );
 }
 
 export default Interiores;
+
+
