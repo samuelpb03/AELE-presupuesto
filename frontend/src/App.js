@@ -7,7 +7,6 @@ import Interiores from './Interiores';
 import Equipamiento3 from './Equipamiento3';
 import Frentes2 from './Frentes2';
 import Frentes3 from './Frentes3';  // Importa el nuevo componente
-import Cerraduras from './Cerraduras';
 import Baldas from './Baldas';
 import { DataProvider } from './context/DataContext';
 import NavigationController from './ControlNavegacion';
@@ -29,7 +28,6 @@ function App() {
             <Route path='/Frentes' element={<TabsProvider><Frentes/></TabsProvider>} />
             <Route path='/Frentes3' element={<TabsProvider><Frentes3/></TabsProvider>} />  {/* Nueva ruta */}
             <Route path='/Equipamiento3' element={<TabsProvider><Equipamiento3></Equipamiento3></TabsProvider>} />
-            <Route path='/Cerraduras' element={<TabsProvider><Cerraduras></Cerraduras></TabsProvider>} />
           </Routes>
         </BrowserRouter>
       </div>

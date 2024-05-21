@@ -7,11 +7,11 @@ function Interiores() {
   const { handleSelectChangeG } = useTabs();
   const { data, saveData } = useData();
   const [listArticulo, setListArticulo] = useState([]);
-  const [listMedidas, setListMedidas] = useState([]);
+  const [listMedidas, setListMedidas] = useState(Array(3).fill([]));
 
   const [selectedArticulos, setSelectedArticulos] = useState(Array(3).fill({ id: "", nombre: "" }));
   const [selectedMedidas, setSelectedMedidas] = useState(Array(3).fill({ id: "", nombre: "", puntos: 0 }));
-  const [cantidades, setCantidades] = useState(Array(3).fill(1));
+  const [cantidades, setCantidades] = useState(Array(3).fill(0)); // Inicializa cantidades en 0
   const [puntos, setPuntos] = useState(Array(3).fill(0));
 
   useEffect(() => {
@@ -19,7 +19,7 @@ function Interiores() {
     if (data.interiores) {
       const restoredArticulos = Array(3).fill({ id: "", nombre: "" });
       const restoredMedidas = Array(3).fill({ id: "", nombre: "", puntos: 0 });
-      const restoredCantidades = Array(3).fill(1);
+      const restoredCantidades = Array(3).fill(0);
       const restoredPuntos = Array(3).fill(0);
 
       for (let i = 0; i < 3; i++) {
@@ -32,7 +32,7 @@ function Interiores() {
           nombre: data.interiores[`medidas${i + 1}Nombre`] || "",
           puntos: data.interiores[`medidas${i + 1}Puntos`] || 0,
         };
-        restoredCantidades[i] = data.interiores[`cantidad${i + 1}`] || 1;
+        restoredCantidades[i] = data.interiores[`cantidad${i + 1}`] || 0;
         restoredPuntos[i] = data.interiores[`puntos${i + 1}`] || 0;
       }
 
@@ -40,6 +40,26 @@ function Interiores() {
       setSelectedMedidas(restoredMedidas);
       setCantidades(restoredCantidades);
       setPuntos(restoredPuntos);
+
+      // Fetch medidas for the restored data
+      restoredArticulos.forEach((articulo, index) => {
+        if (articulo.id) {
+          axios
+            .get("http://localhost:6969/medidas", { params: { articuloId: articulo.id, materialId: 3 } }) // Assuming materialId: 5 as mentioned
+            .then((res) => {
+              if (Array.isArray(res.data)) {
+                const updatedMedidasList = [...listMedidas];
+                updatedMedidasList[index] = res.data;
+                setListMedidas(updatedMedidasList);
+              } else {
+                console.error("Error fetching medidas: res.data is not an array");
+              }
+            })
+            .catch((error) => {
+              console.error("Error fetching medidas:", error);
+            });
+        }
+      });
     }
   }, []);
 
@@ -83,7 +103,7 @@ function Interiores() {
 
     if (id) {
       axios
-        .get("http://localhost:6969/medidas", { params: { articuloId: id, materialId: 3 } })
+        .get("http://localhost:6969/medidas", { params: { articuloId: id, materialId: 3 } }) // Assuming materialId: 5 as mentioned
         .then((res) => {
           if (Array.isArray(res.data)) {
             const updatedMedidasList = [...listMedidas];
@@ -96,6 +116,10 @@ function Interiores() {
         .catch((error) => {
           console.error("Error fetching medidas:", error);
         });
+
+      const updatedCantidades = [...cantidades];
+      updatedCantidades[index] = 1; // Cambia la cantidad a 1 al seleccionar un artículo
+      setCantidades(updatedCantidades);
     }
 
     handleSelectChangeG(`articulo${index + 1}`, id, nombre);
@@ -137,7 +161,7 @@ function Interiores() {
         onChange={(event) => handleSelectArticuloChange(index, event)}
         value={selectedArticulos[index].id || ""}
       >
-        <option value="">--Selecciona una opción--</option>
+        <option value="" disabled={selectedArticulos[index].id !== ""}>--Selecciona una opción--</option>
         {listArticulo.map((articulo) => (
           <option key={articulo.articulo_id} value={articulo.articulo_id}>
             {articulo.nombre}
@@ -158,6 +182,14 @@ function Interiores() {
           </option>
         ))}
       </select>
+      <label htmlFor={`cantidad${index + 1}`}>Cantidad:</label>
+      <input
+        type="number"
+        id={`cantidad${index + 1}`}
+        value={cantidades[index]}
+        onChange={(event) => handleCantidadChange(index, event)}
+        min="0"
+      />
       <label htmlFor={`puntos${index + 1}`}>Puntos: {puntos[index]}</label>
     </div>
   );

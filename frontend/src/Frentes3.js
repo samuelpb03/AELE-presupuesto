@@ -1,11 +1,13 @@
+
 import React, { useState, useEffect } from "react";
+import { useLocation } from 'react-router-dom';
 import axios from "axios";
 import { useTabs } from "./TabsContext";
 import { useData } from './context/DataContext';
 import { generatePDF } from "./GeneratePDF";
 
 function Frentes3() {
-  const { handleSelectChange } = useTabs();
+  const { selectedOptionsH, handleSelectChangeH } = useTabs();
   const { data, saveData } = useData();
   const [listProducto, setListProducto] = useState([]);
   const [listSerie, setListSerie] = useState([]);
@@ -15,6 +17,7 @@ function Frentes3() {
   const [listMedidas, setListMedidas] = useState([]);
   const [listMaterialFranja, setListMaterialFranja] = useState([]);
   const [listColorFranja, setListColorFranja] = useState([]);
+  const [listEspeciales, setListEspeciales] = useState([]);
 
   const [selectedProducto, setSelectedProducto] = useState({ id: "", nombre: "" });
   const [selectedSerie, setSelectedSerie] = useState({ id: "", nombre: "" });
@@ -26,6 +29,12 @@ function Frentes3() {
   const [selectedColorFranja, setSelectedColorFranja] = useState({ id: "", nombre: "" });
   const [cantidad, setCantidad] = useState(1); // Estado para cantidad
   const [puntos, setPuntos] = useState(0); // Estado para puntos
+
+  const [selectedEspecial1, setSelectedEspecial1] = useState({ id: "", nombre: "", puntos: 0 });
+  const [selectedEspecial2, setSelectedEspecial2] = useState({ id: "", nombre: "", puntos: 0 });
+  const [puntosEspecial1, setPuntosEspecial1] = useState(0);
+  const [puntosEspecial2, setPuntosEspecial2] = useState(0);
+  const [franjaActiva, setFranjaActiva] = useState(false);
 
   useEffect(() => {
     // Restore data from context when component mounts
@@ -63,8 +72,20 @@ function Frentes3() {
         id: data.frentes3.selectedColorFranjaId || "",
         nombre: data.frentes3.selectedColorFranjaNombre || "",
       });
+      setSelectedEspecial1({
+        id: data.frentes3.selectedEspecial1Id || "",
+        nombre: data.frentes3.selectedEspecial1Nombre || "",
+        puntos: data.frentes3.selectedEspecial1Puntos || 0,
+      });
+      setSelectedEspecial2({
+        id: data.frentes3.selectedEspecial2Id || "",
+        nombre: data.frentes3.selectedEspecial2Nombre || "",
+        puntos: data.frentes3.selectedEspecial2Puntos || 0,
+      });
       setCantidad(data.frentes3.cantidad || 1);
       setPuntos(data.frentes3.selectedMedidasPuntos || 0);
+      setPuntosEspecial1(data.frentes3.selectedEspecial1Puntos || 0);
+      setPuntosEspecial2(data.frentes3.selectedEspecial2Puntos || 0);
     }
   }, []);
 
@@ -87,6 +108,12 @@ function Frentes3() {
       selectedMaterialFranjaNombre: selectedMaterialFranja.nombre,
       selectedColorFranjaId: selectedColorFranja.id,
       selectedColorFranjaNombre: selectedColorFranja.nombre,
+      selectedEspecial1Id: selectedEspecial1.id,
+      selectedEspecial1Nombre: selectedEspecial1.nombre,
+      selectedEspecial1Puntos: selectedEspecial1.puntos,
+      selectedEspecial2Id: selectedEspecial2.id,
+      selectedEspecial2Nombre: selectedEspecial2.nombre,
+      selectedEspecial2Puntos: selectedEspecial2.puntos,
       cantidad,
       puntos: selectedMedidas.puntos * cantidad, // Actualiza los puntos multiplicados por la cantidad
     };
@@ -100,6 +127,8 @@ function Frentes3() {
     selectedMedidas,
     selectedMaterialFranja,
     selectedColorFranja,
+    selectedEspecial1,
+    selectedEspecial2,
     cantidad,
     saveData,
   ]);
@@ -114,6 +143,16 @@ function Frentes3() {
       }
     }).catch(error => {
       console.error("Error fetching productos:", error);
+    });
+
+    axios.get("http://localhost:6969/articuloEspeciales").then((res) => {
+      if (Array.isArray(res.data)) {
+        setListEspeciales(res.data);
+      } else {
+        console.error("Error fetching articulos especiales: res.data is not an array");
+      }
+    }).catch(error => {
+      console.error("Error fetching articulos especiales:", error);
     });
   }, []);
 
@@ -144,12 +183,17 @@ function Frentes3() {
         if (Array.isArray(res.data)) {
           setListArticulo(res.data);
           const franjaActiva = res.data.some((articulo) => articulo.franja === 1);
+          setFranjaActiva(franjaActiva);
           document.getElementById("articulo").disabled = false;
           document.getElementById("material").disabled = false;
           document.getElementById("color").disabled = false;
           document.getElementById("medidas").disabled = true;
-          document.getElementById("materialFranja").disabled = !franjaActiva;
-          document.getElementById("colorFranja").disabled = !franjaActiva;
+
+          // Restablecer el material y color de franja si la serie no tiene franja
+          if (!franjaActiva) {
+            setSelectedMaterialFranja({ id: "", nombre: "" });
+            setSelectedColorFranja({ id: "", nombre: "" });
+          }
         } else {
           console.error("Error fetching articulos: res.data is not an array");
         }
@@ -191,7 +235,7 @@ function Frentes3() {
 
   useEffect(() => {
     if (selectedArticulo.id && selectedMaterial.id) {
-      axios.get("http://localhost:6969/medidas", {
+      axios.get("http://localhost:6969/medidasConPuntos", {
         params: {
           articuloId: selectedArticulo.id,
           materialId: selectedMaterial.id,
@@ -210,7 +254,7 @@ function Frentes3() {
   }, [selectedArticulo.id, selectedMaterial.id]);
 
   useEffect(() => {
-    if (selectedMaterial.id) {
+    if (franjaActiva) {
       axios.get("http://localhost:6969/materialFranja", { params: { materialId: selectedMaterial.id } }).then((res) => {
         if (Array.isArray(res.data)) {
           setListMaterialFranja(res.data);
@@ -222,7 +266,7 @@ function Frentes3() {
         console.error("Error fetching materialFranja:", error);
       });
     }
-  }, [selectedMaterial.id]);
+  }, [franjaActiva, selectedMaterial.id]);
 
   useEffect(() => {
     if (selectedMaterialFranja.id) {
@@ -244,7 +288,7 @@ function Frentes3() {
     const nombre = event.target.options[index].text;
     const id = event.target.value;
     setSelectedProducto({ id, nombre });
-    handleSelectChange("producto3", id, nombre);
+    handleSelectChangeH("producto", id, nombre);
   };
 
   const handleSelectSerieChange = (event) => {
@@ -252,7 +296,7 @@ function Frentes3() {
     const nombre = event.target.options[index].text;
     const id = event.target.value;
     setSelectedSerie({ id, nombre });
-    handleSelectChange("serie3", id, nombre);
+    handleSelectChangeH("serie", id, nombre);
   };
 
   const handleSelectArticuloChange = (event) => {
@@ -260,7 +304,7 @@ function Frentes3() {
     const nombre = event.target.options[index].text;
     const id = event.target.value;
     setSelectedArticulo({ id, nombre });
-    handleSelectChange("articulo3", id, nombre);
+    handleSelectChangeH("articulo", id, nombre);
   };
 
   const handleSelectMaterialChange = (event) => {
@@ -268,7 +312,7 @@ function Frentes3() {
     const nombre = event.target.options[index].text;
     const id = event.target.value;
     setSelectedMaterial({ id, nombre });
-    handleSelectChange("material3", id, nombre);
+    handleSelectChangeH("material", id, nombre);
   };
 
   const handleSelectColorChange = (event) => {
@@ -276,7 +320,7 @@ function Frentes3() {
     const nombre = event.target.options[index].text;
     const id = event.target.value;
     setSelectedColor({ id, nombre });
-    handleSelectChange("color3", id, nombre);
+    handleSelectChangeH("color", id, nombre);
   };
 
   const handleSelectMedidasChange = (event) => {
@@ -286,7 +330,7 @@ function Frentes3() {
     const selectedMedida = listMedidas.find(medida => medida.medidas_id === parseInt(id));
     setSelectedMedidas({ id, nombre, puntos: selectedMedida.puntos });
     setPuntos(selectedMedida.puntos); // Actualiza los puntos
-    handleSelectChange("medidas3", id, nombre);
+    handleSelectChangeH("medidas", id, nombre);
   };
 
   const handleSelectMaterialFranjaChange = (event) => {
@@ -294,7 +338,7 @@ function Frentes3() {
     const nombre = event.target.options[index].text;
     const id = event.target.value;
     setSelectedMaterialFranja({ id, nombre });
-    handleSelectChange("materialFranja3", id, nombre);
+    handleSelectChangeH("materialFranja", id, nombre);
   };
 
   const handleSelectColorFranjaChange = (event) => {
@@ -302,16 +346,27 @@ function Frentes3() {
     const nombre = event.target.options[index].text;
     const id = event.target.value;
     setSelectedColorFranja({ id, nombre });
-    handleSelectChange("colorFranja3", id, nombre);
+    handleSelectChangeH("colorFranja", id, nombre);
+  };
+
+  const handleSelectEspecialChange = (especialIndex, event) => {
+    const index = event.target.selectedIndex;
+    const nombre = event.target.options[index].text;
+    const id = event.target.value;
+    const selectedEspecial = listEspeciales.find(especial => especial.articulo_id === parseInt(id));
+
+    if (especialIndex === 1) {
+      setSelectedEspecial1({ id, nombre, puntos: selectedEspecial.puntos });
+      setPuntosEspecial1(selectedEspecial.puntos);
+    } else if (especialIndex === 2) {
+      setSelectedEspecial2({ id, nombre, puntos: selectedEspecial.puntos });
+      setPuntosEspecial2(selectedEspecial.puntos);
+    }
   };
 
   const handleCantidadChange = (event) => {
     const newCantidad = parseInt(event.target.value, 10);
     setCantidad(newCantidad);
-  };
-
-  const handleGeneratePDF = () => {
-    generatePDF(data);
   };
 
   return (
@@ -387,8 +442,8 @@ function Frentes3() {
 
         {/* Material Franja */}
         <label htmlFor="materialFranja">Material Franja:</label>
-        <select id="materialFranja" disabled={true} onChange={handleSelectMaterialFranjaChange} value={selectedMaterialFranja.id || ""}>
-          <option value="" disabled={selectedArticulo.id === ""}>--Selecciona una opción--</option>
+        <select id="materialFranja" disabled={!franjaActiva} onChange={handleSelectMaterialFranjaChange} value={selectedMaterialFranja.id || ""}>
+          <option value="" >--Selecciona una opción--</option>
           {listMaterialFranja.map((material) => (
             <option key={material.material_id} value={material.material_id}>
               {material.nombre}
@@ -398,7 +453,7 @@ function Frentes3() {
 
         {/* Color Franja */}
         <label htmlFor="colorFranja">Color Franja:</label>
-        <select id="colorFranja" disabled={true} onChange={handleSelectColorFranjaChange} value={selectedColorFranja.id || ""}>
+        <select id="colorFranja" disabled={!franjaActiva} onChange={handleSelectColorFranjaChange} value={selectedColorFranja.id || ""}>
           <option value="" disabled={selectedArticulo.id === ""}>--Selecciona una opción--</option>
           {listColorFranja.map((color) => (
             <option key={color.color_id} value={color.color_id}>
@@ -414,10 +469,45 @@ function Frentes3() {
         {/* Puntos */}
         <label htmlFor="puntos">Puntos: {puntos * cantidad}</label>
       </div>
+      <div className="container4">
+        <h2>Especiales a Medida</h2>
+        {/* Articulo Especial 1 */}
+        <label htmlFor="especial1">Artículo Especial 1:</label>
+<select
+  id="especial1"
+  onChange={(event) => handleSelectEspecialChange(1, event)}
+  value={selectedEspecial1.id || ""}
+>
+  <option value="" disabled={selectedEspecial1.id !== ""}>
+    --Selecciona una opción--
+  </option>
+  {listEspeciales.map((especial) => (
+    <option key={especial.articulo_id} value={especial.articulo_id}>
+      {especial.nombre}
+    </option>
+  ))}
+</select>
+<label htmlFor="puntosEspecial1">Puntos: {puntosEspecial1}</label>
+
+<label htmlFor="especial2">Artículo Especial 2:</label>
+<select
+  id="especial2"
+  onChange={(event) => handleSelectEspecialChange(2, event)}
+  value={selectedEspecial2.id || ""}
+>
+  <option value="" disabled={selectedEspecial2.id !== ""}>
+    --Selecciona una opción--
+  </option>
+  {listEspeciales.map((especial) => (
+    <option key={especial.articulo_id} value={especial.articulo_id}>
+      {especial.nombre}
+    </option>
+  ))}
+</select>
+        <label htmlFor="puntosEspecial2">Puntos: {puntosEspecial2}</label>
+      </div>
     </div>
   );
 }
 
 export default Frentes3;
-
-

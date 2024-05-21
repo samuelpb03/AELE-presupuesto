@@ -76,12 +76,17 @@ app.get("/color", (req, res) => {
     return res.json(data);
   });
 });
+
 //Funcion Express GET para medidas.
 app.get("/medidas", (req, res) => {
-  const articuloId = req.query.articuloId; 
+  const articuloId = req.query.articuloId;
   const materialId = req.query.materialId;
 
-  const query = "SELECT * FROM medidas WHERE articulos_id = " + articuloId + " AND material = " + materialId;
+  const query = `
+    SELECT m.medidas_id, m.medidas, m.puntos
+    FROM medidas m
+    WHERE m.articulos_id = ? AND m.material = ?
+  `;
 
   dbConnection.query(query, [articuloId, materialId], (err, data) => {
     if (err) {
@@ -100,6 +105,7 @@ app.get("/materialFranja", (req, res) => {
     return res.json(data);
   });
 });
+
 app.get("/articulo/baldas", (req, res) => {
   const query = `
     SELECT * FROM articulo
@@ -116,6 +122,7 @@ app.get("/articulo/baldas", (req, res) => {
     return res.json(data);
   });
 });
+
 app.get("/articulo/iluminacion", (req, res) => {
   const query = `
     SELECT * FROM articulo
@@ -132,6 +139,7 @@ app.get("/articulo/iluminacion", (req, res) => {
     return res.json(data);
   });
 });
+
 app.get("/articulo/equipamiento", (req, res) => {
   const query = `
     SELECT * FROM articulo
@@ -166,10 +174,11 @@ app.get("/articulo/antracita", (req, res) => {
     return res.json(data);
   });
 });
+
 app.get("/articulo/interiores", (req, res) => {
   const query = `
-  SELECT * FROM articulo
-  WHERE serie_id = 26
+    SELECT * FROM articulo
+    WHERE serie_id = 26
   `;
   dbConnection.query(query, (err, data) => {
     if (err) {
@@ -179,6 +188,22 @@ app.get("/articulo/interiores", (req, res) => {
     return res.json(data);
   });
 });
+
+// Nueva ruta para obtener artículos de las series 8 y 9
+app.get("/articulo/cerraduras", (req, res) => {
+  const query = `
+    SELECT * FROM articulo
+    WHERE serie_id IN (9)
+  `;
+  dbConnection.query(query, (err, data) => {
+    if (err) {
+      console.error("Error fetching articulos:", err);
+      return res.status(500).json(err);
+    }
+    return res.json(data);
+  });
+});
+
 //Funcion Express GET para color franja.
 app.get("/colorFranja", (req, res) => {
   const materialFranjaId = req.query.materialFranjaId;
@@ -190,7 +215,7 @@ app.get("/colorFranja", (req, res) => {
     return res.json(data);
   });
 });
-//Funcion Express GET para medidas con puntos.
+
 app.get("/medidasConPuntos", (req, res) => {
   const articuloId = req.query.articuloId;
   const materialId = req.query.materialId;
@@ -209,7 +234,27 @@ app.get("/medidasConPuntos", (req, res) => {
     return res.json(data);
   });
 });
-
+app.get("/articulo/tiradores", (req, res) => {
+  const query = `
+    SELECT * FROM articulo
+    WHERE serie_id IN (8)
+  `;
+  dbConnection.query(query, (err, data) => {
+    if (err) {
+      console.error("Error fetching articulos:", err);
+      return res.status(500).json(err);
+    }
+    return res.json(data);
+  });
+});
+// Ruta GET para artículos especiales
+app.get("/articuloEspeciales", (req, res) => {
+  const query = "SELECT * FROM articulo WHERE serie_id = 35";
+  dbConnection.query(query, (err, data) => {
+    if (err) return res.status(500).json(err);
+    return res.json(data);
+  });
+});
 //Monta Express en el puerto.
 app.listen(port, () => {
   console.log(">>> SERVIDOR CORRIENDO EN: " + host + ":" + port);

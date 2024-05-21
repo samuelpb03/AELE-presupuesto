@@ -36,10 +36,9 @@ export const generatePDF = (data) => {
     frentes: "Frentes",
     frentes2: "Frentes 2",
     frentes3: "Frentes 3",
-    tiradores: "Tiradores",
+    tiradores: "Tiradores y cerraduras",
     interiores: "Interiores",
     equipamiento3: "Equipamiento 3",
-    cerraduras: "Cerraduras",
     baldas: "Baldas e iluminación"
   };
 
