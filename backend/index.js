@@ -139,6 +139,42 @@ app.get("/articulo/iluminacion", (req, res) => {
     return res.json(data);
   });
 });
+app.get('/especialesConPuntos', (req, res) => {
+  const query = `
+  SELECT a.articulo_id, a.nombre AS articulo_nombre, m.puntos
+  FROM articulo a
+  LEFT JOIN medidas m ON a.articulo_id = m.articulos_id
+  JOIN serie s ON a.serie_id = s.serie_id
+  JOIN producto p ON s.producto_id = p.producto_id
+  WHERE p.producto_id = 8 AND s.serie_id = 34;
+  `;
+
+  dbConnection.query(query, (err, data) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json(err);
+    }
+    return res.json(data);
+  });
+});
+app.get('/especialesConPuntosFrentes', (req, res) => {
+  const query = `
+  SELECT a.articulo_id, a.nombre AS articulo_nombre, m.puntos
+  FROM articulo a
+  LEFT JOIN medidas m ON a.articulo_id = m.articulos_id
+  JOIN serie s ON a.serie_id = s.serie_id
+  JOIN producto p ON s.producto_id = p.producto_id
+  WHERE p.producto_id = 9 AND s.serie_id = 35;
+  `;
+
+  dbConnection.query(query, (err, data) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json(err);
+    }
+    return res.json(data);
+  });
+});
 
 app.get("/articulo/equipamiento", (req, res) => {
   const query = `
@@ -250,6 +286,13 @@ app.get("/articulo/tiradores", (req, res) => {
 // Ruta GET para artículos especiales
 app.get("/articuloEspeciales", (req, res) => {
   const query = "SELECT * FROM articulo WHERE serie_id = 35";
+  dbConnection.query(query, (err, data) => {
+    if (err) return res.status(500).json(err);
+    return res.json(data);
+  });
+});
+app.get("/articuloEspecialesInteriores", (req, res) => {
+  const query = "SELECT * FROM articulo WHERE serie_id = 34";
   dbConnection.query(query, (err, data) => {
     if (err) return res.status(500).json(err);
     return res.json(data);
