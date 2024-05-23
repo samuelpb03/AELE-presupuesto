@@ -36,7 +36,6 @@ function Frentes() {
   const [franjaActiva, setFranjaActiva] = useState(false);
 
   useEffect(() => {
-    // Restore data from context when component mounts
     if (data.frentes) {
       setSelectedProducto({
         id: data.frentes.selectedProductoId || "",
@@ -83,8 +82,8 @@ function Frentes() {
       });
       setCantidad(data.frentes.cantidad || 1);
       setPuntos(data.frentes.selectedMedidasPuntos || 0);
-      setPuntosEspecial1(data.frentes.selectedEspecial1Puntos || 0);
-      setPuntosEspecial2(data.frentes.selectedEspecial2Puntos || 0);
+      setPuntosEspecial1((data.frentes.selectedEspecial1Puntos || 0) * (data.frentes.cantidadEspecial1 || 0));
+      setPuntosEspecial2((data.frentes.selectedEspecial2Puntos || 0) * (data.frentes.cantidadEspecial2 || 0));
       setCantidadEspecial1(data.frentes.cantidadEspecial1 || 0);
       setCantidadEspecial2(data.frentes.cantidadEspecial2 || 0);
     }
@@ -117,11 +116,13 @@ function Frentes() {
       selectedEspecial2Puntos: selectedEspecial2.puntos,
       cantidad,
       puntos: selectedMedidas.puntos * cantidad,
+      cantidadFrente: cantidad, // Añadir cantidadFrente
       cantidadEspecial1,
       cantidadEspecial2,
-      puntosEspecial1,
-      puntosEspecial2,
+      puntosEspecial1: selectedEspecial1.puntos * cantidadEspecial1,
+      puntosEspecial2: selectedEspecial2.puntos * cantidadEspecial2,
     };
+    console.log('formattedData:', formattedData); // Añadir log para verificar datos
     saveData("frentes", formattedData);
   }, [
     selectedProducto,
@@ -141,6 +142,7 @@ function Frentes() {
     puntosEspecial2,
     saveData,
   ]);
+  
 
   useEffect(() => {
     axios.get("http://localhost:6969/producto").then((res) => {

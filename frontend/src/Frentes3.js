@@ -1,13 +1,11 @@
 
 import React, { useState, useEffect } from "react";
-import { useLocation } from 'react-router-dom';
 import axios from "axios";
 import { useTabs } from "./TabsContext";
 import { useData } from './context/DataContext';
-import { generatePDF } from "./GeneratePDF";
 
-function Frentes3() {
-  const { selectedOptionsH, handleSelectChangeH } = useTabs();
+function Frentes() {
+  const { handleSelectChange } = useTabs();
   const { data, saveData } = useData();
   const [listProducto, setListProducto] = useState([]);
   const [listSerie, setListSerie] = useState([]);
@@ -34,10 +32,11 @@ function Frentes3() {
   const [selectedEspecial2, setSelectedEspecial2] = useState({ id: "", nombre: "", puntos: 0 });
   const [puntosEspecial1, setPuntosEspecial1] = useState(0);
   const [puntosEspecial2, setPuntosEspecial2] = useState(0);
+  const [cantidadEspecial1, setCantidadEspecial1] = useState(0);
+  const [cantidadEspecial2, setCantidadEspecial2] = useState(0);
   const [franjaActiva, setFranjaActiva] = useState(false);
 
   useEffect(() => {
-    // Restore data from context when component mounts
     if (data.frentes3) {
       setSelectedProducto({
         id: data.frentes3.selectedProductoId || "",
@@ -84,8 +83,10 @@ function Frentes3() {
       });
       setCantidad(data.frentes3.cantidad || 1);
       setPuntos(data.frentes3.selectedMedidasPuntos || 0);
-      setPuntosEspecial1(data.frentes3.selectedEspecial1Puntos || 0);
-      setPuntosEspecial2(data.frentes3.selectedEspecial2Puntos || 0);
+      setPuntosEspecial1((data.frentes3.selectedEspecial1Puntos || 0) * (data.frentes3.cantidadEspecial1 || 0));
+      setPuntosEspecial2((data.frentes3.selectedEspecial2Puntos || 0) * (data.frentes3.cantidadEspecial2 || 0));
+      setCantidadEspecial1(data.frentes3.cantidadEspecial1 || 0);
+      setCantidadEspecial2(data.frentes3.cantidadEspecial2 || 0);
     }
   }, []);
 
@@ -115,8 +116,14 @@ function Frentes3() {
       selectedEspecial2Nombre: selectedEspecial2.nombre,
       selectedEspecial2Puntos: selectedEspecial2.puntos,
       cantidad,
-      puntos: selectedMedidas.puntos * cantidad, // Actualiza los puntos multiplicados por la cantidad
+      puntos: selectedMedidas.puntos * cantidad,
+      cantidadFrente: cantidad, // Añadir cantidadFrente
+      cantidadEspecial1,
+      cantidadEspecial2,
+      puntosEspecial1: selectedEspecial1.puntos * cantidadEspecial1,
+      puntosEspecial2: selectedEspecial2.puntos * cantidadEspecial2,
     };
+    console.log('formattedData:', formattedData); // Añadir log para verificar datos
     saveData("frentes3", formattedData);
   }, [
     selectedProducto,
@@ -130,8 +137,13 @@ function Frentes3() {
     selectedEspecial1,
     selectedEspecial2,
     cantidad,
+    cantidadEspecial1,
+    cantidadEspecial2,
+    puntosEspecial1,
+    puntosEspecial2,
     saveData,
   ]);
+  
 
   useEffect(() => {
     axios.get("http://localhost:6969/producto").then((res) => {
@@ -145,7 +157,7 @@ function Frentes3() {
       console.error("Error fetching productos:", error);
     });
 
-    axios.get("http://localhost:6969/articuloEspeciales").then((res) => {
+    axios.get("http://localhost:6969/especialesConPuntosFrentes").then((res) => {
       if (Array.isArray(res.data)) {
         setListEspeciales(res.data);
       } else {
@@ -182,15 +194,15 @@ function Frentes3() {
       axios.get("http://localhost:6969/articulo", { params: { serieId: selectedSerie.id } }).then((res) => {
         if (Array.isArray(res.data)) {
           setListArticulo(res.data);
-          const franjaActiva = res.data.some((articulo) => articulo.franja === 1);
-          setFranjaActiva(franjaActiva);
+          const franja = res.data.some((articulo) => articulo.franja === 1);
+          setFranjaActiva(franja);
           document.getElementById("articulo").disabled = false;
           document.getElementById("material").disabled = false;
           document.getElementById("color").disabled = false;
           document.getElementById("medidas").disabled = true;
 
           // Restablecer el material y color de franja si la serie no tiene franja
-          if (!franjaActiva) {
+          if (!franja) {
             setSelectedMaterialFranja({ id: "", nombre: "" });
             setSelectedColorFranja({ id: "", nombre: "" });
           }
@@ -288,7 +300,7 @@ function Frentes3() {
     const nombre = event.target.options[index].text;
     const id = event.target.value;
     setSelectedProducto({ id, nombre });
-    handleSelectChangeH("producto", id, nombre);
+    handleSelectChange("producto", id, nombre);
   };
 
   const handleSelectSerieChange = (event) => {
@@ -296,7 +308,7 @@ function Frentes3() {
     const nombre = event.target.options[index].text;
     const id = event.target.value;
     setSelectedSerie({ id, nombre });
-    handleSelectChangeH("serie", id, nombre);
+    handleSelectChange("serie", id, nombre);
   };
 
   const handleSelectArticuloChange = (event) => {
@@ -304,7 +316,7 @@ function Frentes3() {
     const nombre = event.target.options[index].text;
     const id = event.target.value;
     setSelectedArticulo({ id, nombre });
-    handleSelectChangeH("articulo", id, nombre);
+    handleSelectChange("articulo", id, nombre);
   };
 
   const handleSelectMaterialChange = (event) => {
@@ -312,7 +324,7 @@ function Frentes3() {
     const nombre = event.target.options[index].text;
     const id = event.target.value;
     setSelectedMaterial({ id, nombre });
-    handleSelectChangeH("material", id, nombre);
+    handleSelectChange("material", id, nombre);
   };
 
   const handleSelectColorChange = (event) => {
@@ -320,7 +332,7 @@ function Frentes3() {
     const nombre = event.target.options[index].text;
     const id = event.target.value;
     setSelectedColor({ id, nombre });
-    handleSelectChangeH("color", id, nombre);
+    handleSelectChange("color", id, nombre);
   };
 
   const handleSelectMedidasChange = (event) => {
@@ -330,7 +342,7 @@ function Frentes3() {
     const selectedMedida = listMedidas.find(medida => medida.medidas_id === parseInt(id));
     setSelectedMedidas({ id, nombre, puntos: selectedMedida.puntos });
     setPuntos(selectedMedida.puntos); // Actualiza los puntos
-    handleSelectChangeH("medidas", id, nombre);
+    handleSelectChange("medidas", id, nombre);
   };
 
   const handleSelectMaterialFranjaChange = (event) => {
@@ -338,7 +350,7 @@ function Frentes3() {
     const nombre = event.target.options[index].text;
     const id = event.target.value;
     setSelectedMaterialFranja({ id, nombre });
-    handleSelectChangeH("materialFranja", id, nombre);
+    handleSelectChange("materialFranja", id, nombre);
   };
 
   const handleSelectColorFranjaChange = (event) => {
@@ -346,7 +358,7 @@ function Frentes3() {
     const nombre = event.target.options[index].text;
     const id = event.target.value;
     setSelectedColorFranja({ id, nombre });
-    handleSelectChangeH("colorFranja", id, nombre);
+    handleSelectChange("colorFranja", id, nombre);
   };
 
   const handleSelectEspecialChange = (especialIndex, event) => {
@@ -358,9 +370,23 @@ function Frentes3() {
     if (especialIndex === 1) {
       setSelectedEspecial1({ id, nombre, puntos: selectedEspecial.puntos });
       setPuntosEspecial1(selectedEspecial.puntos);
+      setCantidadEspecial1(1);
     } else if (especialIndex === 2) {
       setSelectedEspecial2({ id, nombre, puntos: selectedEspecial.puntos });
       setPuntosEspecial2(selectedEspecial.puntos);
+      setCantidadEspecial2(1);
+    }
+  };
+
+  const handleCantidadEspecialChange = (especialIndex, event) => {
+    const value = parseInt(event.target.value, 10);
+
+    if (especialIndex === 1) {
+      setCantidadEspecial1(isNaN(value) ? 1 : value);
+      setPuntosEspecial1(selectedEspecial1.puntos * (isNaN(value) ? 1 : value));
+    } else if (especialIndex === 2) {
+      setCantidadEspecial2(isNaN(value) ? 1 : value);
+      setPuntosEspecial2(selectedEspecial2.puntos * (isNaN(value) ? 1 : value));
     }
   };
 
@@ -473,41 +499,54 @@ function Frentes3() {
         <h2>Especiales a Medida</h2>
         {/* Articulo Especial 1 */}
         <label htmlFor="especial1">Artículo Especial 1:</label>
-<select
-  id="especial1"
-  onChange={(event) => handleSelectEspecialChange(1, event)}
-  value={selectedEspecial1.id || ""}
->
-  <option value="" disabled={selectedEspecial1.id !== ""}>
-    --Selecciona una opción--
-  </option>
-  {listEspeciales.map((especial) => (
-    <option key={especial.articulo_id} value={especial.articulo_id}>
-      {especial.nombre}
-    </option>
-  ))}
-</select>
-<label htmlFor="puntosEspecial1">Puntos: {puntosEspecial1}</label>
+        <select
+          id="especial1"
+          onChange={(event) => handleSelectEspecialChange(1, event)}
+          value={selectedEspecial1.id || ""}
+        >
+          <option value="" disabled={selectedEspecial1.id !== ""}>--Selecciona una opción--</option>
+          {listEspeciales.map((especial) => (
+            <option key={especial.articulo_id} value={especial.articulo_id}>
+              {especial.articulo_nombre}
+            </option>
+          ))}
+        </select>
+        <label htmlFor="puntosEspecial1">Puntos: {puntosEspecial1}</label>
+        <label htmlFor="cantidadEspecial1">Cantidad:</label>
+        <input
+          type="number"
+          id="cantidadEspecial1"
+          value={cantidadEspecial1}
+          onChange={(event) => handleCantidadEspecialChange(1, event)}
+          min="0"
+        />
 
-<label htmlFor="especial2">Artículo Especial 2:</label>
-<select
-  id="especial2"
-  onChange={(event) => handleSelectEspecialChange(2, event)}
-  value={selectedEspecial2.id || ""}
->
-  <option value="" disabled={selectedEspecial2.id !== ""}>
-    --Selecciona una opción--
-  </option>
-  {listEspeciales.map((especial) => (
-    <option key={especial.articulo_id} value={especial.articulo_id}>
-      {especial.nombre}
-    </option>
-  ))}
-</select>
+        {/* Articulo Especial 2 */}
+        <label htmlFor="especial2">Artículo Especial 2:</label>
+        <select
+          id="especial2"
+          onChange={(event) => handleSelectEspecialChange(2, event)}
+          value={selectedEspecial2.id || ""}
+        >
+          <option value="" disabled={selectedEspecial2.id !== ""}>--Selecciona una opción--</option>
+          {listEspeciales.map((especial) => (
+            <option key={especial.articulo_id} value={especial.articulo_id}>
+              {especial.articulo_nombre}
+            </option>
+          ))}
+        </select>
         <label htmlFor="puntosEspecial2">Puntos: {puntosEspecial2}</label>
+        <label htmlFor="cantidadEspecial2">Cantidad:</label>
+        <input
+          type="number"
+          id="cantidadEspecial2"
+          value={cantidadEspecial2}
+          onChange={(event) => handleCantidadEspecialChange(2, event)}
+          min="0"
+        />
       </div>
     </div>
   );
 }
 
-export default Frentes3;
+export default Frentes;
