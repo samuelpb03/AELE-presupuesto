@@ -504,7 +504,7 @@ function Frentes() {
           <option value="" disabled={selectedEspecial1.id !== ""}>--Selecciona una opción--</option>
           {listEspeciales.map((especial) => (
             <option key={especial.articulo_id} value={especial.articulo_id}>
-              {especial.nombre}
+              {especial.articulo_nombre}
             </option>
           ))}
         </select>
@@ -528,7 +528,7 @@ function Frentes() {
           <option value="" disabled={selectedEspecial2.id !== ""}>--Selecciona una opción--</option>
           {listEspeciales.map((especial) => (
             <option key={especial.articulo_id} value={especial.articulo_id}>
-              {especial.nombre}
+              {especial.articulo_nombre}
             </option>
           ))}
         </select>
@@ -547,3 +547,4 @@ function Frentes() {
 }
 
 export default Frentes;
+
