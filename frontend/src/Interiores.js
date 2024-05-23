@@ -23,7 +23,34 @@ function Interiores() {
   const [puntosEspecial2, setPuntosEspecial2] = useState(0);
 
   useEffect(() => {
-    // Restore data from context when component mounts
+    axios
+      .get("http://localhost:6969/articulo/interiores")
+      .then((res) => {
+        if (Array.isArray(res.data)) {
+          setListArticulo(res.data);
+        } else {
+          console.error("Error fetching articulos: res.data is not an array");
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching articulos:", error);
+      });
+
+    axios
+      .get("http://localhost:6969/especialesConPuntos")
+      .then((res) => {
+        if (Array.isArray(res.data)) {
+          setListEspeciales(res.data);
+        } else {
+          console.error("Error fetching especiales: res.data is not an array");
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching especiales:", error);
+      });
+  }, []);
+
+  useEffect(() => {
     if (data.interiores) {
       const restoredArticulos = Array(3).fill({ id: "", nombre: "" });
       const restoredMedidas = Array(3).fill({ id: "", nombre: "", puntos: 0 });
@@ -49,11 +76,10 @@ function Interiores() {
       setCantidades(restoredCantidades);
       setPuntos(restoredPuntos);
 
-      // Fetch medidas for the restored data
       restoredArticulos.forEach((articulo, index) => {
         if (articulo.id) {
           axios
-            .get("http://localhost:6969/medidasConPuntos", { params: { articuloId: articulo.id, materialId: 3 } }) // Assuming materialId: 3 as mentioned
+            .get("http://localhost:6969/medidasConPuntos", { params: { articuloId: articulo.id, materialId: 3 } })
             .then((res) => {
               if (Array.isArray(res.data)) {
                 const updatedMedidasList = [...listMedidas];
@@ -69,7 +95,6 @@ function Interiores() {
         }
       });
 
-      // Restore especiales
       setSelectedEspecial1({
         id: data.interiores.selectedEspecial1Id || "",
         nombre: data.interiores.selectedEspecial1Nombre || "",
@@ -110,35 +135,19 @@ function Interiores() {
     formattedData.puntosEspecial2 = puntosEspecial2;
 
     saveData("interiores", formattedData);
-  }, [selectedArticulos, selectedMedidas, cantidades, puntos, selectedEspecial1, selectedEspecial2, cantidadEspecial1, cantidadEspecial2, puntosEspecial1, puntosEspecial2, saveData]);
-
-  useEffect(() => {
-    axios
-      .get("http://localhost:6969/articulo/interiores")
-      .then((res) => {
-        if (Array.isArray(res.data)) {
-          setListArticulo(res.data);
-        } else {
-          console.error("Error fetching articulos: res.data is not an array");
-        }
-      })
-      .catch((error) => {
-        console.error("Error fetching articulos:", error);
-      });
-
-    axios
-      .get("http://localhost:6969/especialesConPuntos")
-      .then((res) => {
-        if (Array.isArray(res.data)) {
-          setListEspeciales(res.data);
-        } else {
-          console.error("Error fetching especiales: res.data is not an array");
-        }
-      })
-      .catch((error) => {
-        console.error("Error fetching especiales:", error);
-      });
-  }, []);
+  }, [
+    selectedArticulos,
+    selectedMedidas,
+    cantidades,
+    puntos,
+    selectedEspecial1,
+    selectedEspecial2,
+    cantidadEspecial1,
+    cantidadEspecial2,
+    puntosEspecial1,
+    puntosEspecial2,
+    saveData
+  ]);
 
   const handleSelectArticuloChange = (index, event) => {
     const updatedArticulos = [...selectedArticulos];
@@ -151,7 +160,7 @@ function Interiores() {
 
     if (id) {
       axios
-        .get("http://localhost:6969/medidasConPuntos", { params: { articuloId: id, materialId: 3 } }) // Assuming materialId: 3 as mentioned
+        .get("http://localhost:6969/medidasConPuntos", { params: { articuloId: id, materialId: 3 } })
         .then((res) => {
           if (Array.isArray(res.data)) {
             const updatedMedidasList = [...listMedidas];
@@ -341,5 +350,4 @@ function Interiores() {
 }
 
 export default Interiores;
-
 
