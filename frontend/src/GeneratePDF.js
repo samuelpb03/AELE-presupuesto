@@ -12,13 +12,18 @@ const labelsMap = {
   selectedColorFranjaNombre: "Color Franja",
   puntos: "Puntos",
   cantidad: "Cantidad",
-  cantidadFrente: "Cantidad del Frente",
   selectedEspecial1Nombre: "Especial a medida 1",
   selectedEspecial2Nombre: "Especial a medida 2",
   puntosEspecial1: "Puntos Especial 1",
   puntosEspecial2: "Puntos Especial 2",
   cantidadEspecial1: "Cantidad Especial 1",
   cantidadEspecial2: "Cantidad Especial 2",
+  cantidad1: "Cantidad 1",
+  puntos1: "Puntos 1",
+  cantidad2: "Cantidad 2",
+  puntos2: "Puntos 2",
+  cantidad3: "Cantidad 3",
+  puntos3: "Puntos 3",
 };
 
 export const generatePDF = (data) => {
@@ -51,25 +56,29 @@ export const generatePDF = (data) => {
   let startY = 70;
 
   Object.entries(sections).forEach(([section, title]) => {
+    console.log(`Processing section: ${title}`);
     if (data[section]) {
       let articuloCounter = 1;
       const sectionData = [];
 
-      // Procesar y agregar datos de la sección
+      // Procesar y agregar datos de la sección, excluyendo los especiales y "cantidadFrente"
       Object.entries(data[section]).forEach(([key, value]) => {
-        if (key.endsWith('Nombre') && value) {
+        if (key === 'cantidadFrente') return; // Excluir cantidadFrente
+        if (key.endsWith('Nombre') && value && !key.startsWith('selectedEspecial')) {
           if (key.startsWith('articulo')) {
             sectionData.push([`Artículo ${articuloCounter}`, value]);
             articuloCounter++;
-          } else if (!key.startsWith('selectedEspecial')) {
+          } else {
             sectionData.push([labelsMap[key] || key, value]);
           }
-        } else if ((key === 'cantidad' || key.startsWith('cantidad')) && value && value !== 0) {
+        } else if ((key === 'cantidad' || key.startsWith('cantidad')) && value && value !== 0 && !key.startsWith('cantidadEspecial')) {
           sectionData.push([labelsMap[key] || key, value]);
-        } else if ((key === 'puntos' || key.startsWith('puntos')) && value) {
+        } else if ((key === 'puntos' || key.startsWith('puntos')) && value && !key.startsWith('puntosEspecial')) {
           sectionData.push([labelsMap[key] || key, value]);
         }
       });
+
+      console.log(`Section data before adding especiales for section ${title}:`, sectionData);
 
       // Añadir los especiales y sus puntos después de los datos procesados
       if (data[section].selectedEspecial1Nombre) {
@@ -90,6 +99,8 @@ export const generatePDF = (data) => {
           sectionData.push([labelsMap.cantidadEspecial2, data[section].cantidadEspecial2]);
         }
       }
+
+      console.log(`Final section data for section ${title}:`, sectionData);
 
       if (sectionData.length > 0) {
         doc.setFontSize(14);
@@ -118,10 +129,15 @@ export const generatePDF = (data) => {
     }, 0);
   }, 0);
 
+  console.log(`Total Puntos: ${totalPuntos}`);
+  
   doc.setFontSize(12);
   doc.text(`Total Puntos: ${totalPuntos}`, 14, startY);
 
   doc.save("presupuesto2.pdf");
 };
+
+
+
 
 
