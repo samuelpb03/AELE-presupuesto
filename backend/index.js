@@ -1,4 +1,3 @@
-//Se usa Mysql, Express y Cors para el servidor del backend.
 const mysql = require("mysql");
 const express = require("express");
 const cors = require("cors");
@@ -13,7 +12,7 @@ const user = "root";
 const password = "root";
 const database = "dbs12752680";
 
-//Crea la conexion.
+// Crea la conexion.
 const dbConnection = mysql.createConnection({
   host: host,
   user: user,
@@ -21,7 +20,7 @@ const dbConnection = mysql.createConnection({
   database: database,
 });
 
-//Funcion Express GET para producto.
+// Funcion Express GET para producto.
 app.get("/producto", (req, res) => {
   const query = "SELECT producto_id, nombre FROM producto";
   dbConnection.query(query, (err, data) => {
@@ -30,29 +29,27 @@ app.get("/producto", (req, res) => {
   });
 });
 
-//Funcion Express GET para serie.
+// Funcion Express GET para serie.
 app.get("/serie", (req, res) => {
   const productoId = req.query.productoId;
-  const query =
-    "SELECT * FROM serie WHERE producto_id=" + productoId;
+  const query = "SELECT * FROM serie WHERE producto_id=" + productoId;
   dbConnection.query(query, (err, data) => {
     if (err) return res.json(err);
     return res.json(data);
   });
 });
 
-//Funcion Express GET para articulo.
+// Funcion Express GET para articulo.
 app.get("/articulo", (req, res) => {
   const serieId = req.query.serieId;
-  const query =
-    "SELECT * FROM articulo WHERE serie_id = " + serieId;
+  const query = "SELECT * FROM articulo WHERE serie_id = " + serieId;
   dbConnection.query(query, (err, data) => {
     if (err) return res.json(err);
     return res.json(data);
   });
 });
 
-//Funcion Express GET para material.
+// Funcion Express GET para material.
 app.get("/material", (req, res) => {
   const serieId = req.query.serieId;
   const query =
@@ -64,10 +61,9 @@ app.get("/material", (req, res) => {
   });
 });
 
-//Funcion Express GET para color.
+// Funcion Express GET para color.
 app.get("/color", (req, res) => {
   const materialId = req.query.materialId;
-  console.log(materialId);
   const query =
     "SELECT c.color_id, c.nombre FROM material m JOIN material_color mc ON m.material_id = mc.id_material JOIN color c ON mc.id_color = c.color_id WHERE m.material_id = " +
     materialId;
@@ -77,7 +73,7 @@ app.get("/color", (req, res) => {
   });
 });
 
-//Funcion Express GET para medidas.
+// Funcion Express GET para medidas.
 app.get("/medidas", (req, res) => {
   const articuloId = req.query.articuloId;
   const materialId = req.query.materialId;
@@ -97,7 +93,7 @@ app.get("/medidas", (req, res) => {
   });
 });
 
-//Funcion Express GET para material franja.
+// Funcion Express GET para material franja.
 app.get("/materialFranja", (req, res) => {
   const query = "SELECT material_id, nombre FROM material";
   dbConnection.query(query, (err, data) => {
@@ -139,7 +135,8 @@ app.get("/articulo/iluminacion", (req, res) => {
     return res.json(data);
   });
 });
-app.get('/especialesConPuntos', (req, res) => {
+
+app.get("/especialesConPuntos", (req, res) => {
   const query = `
   SELECT a.articulo_id, a.nombre AS articulo_nombre, m.puntos
   FROM articulo a
@@ -157,7 +154,8 @@ app.get('/especialesConPuntos', (req, res) => {
     return res.json(data);
   });
 });
-app.get('/especialesConPuntosFrentes', (req, res) => {
+
+app.get("/especialesConPuntosFrentes", (req, res) => {
   const query = `
   SELECT a.articulo_id, a.nombre AS articulo_nombre, m.puntos
   FROM articulo a
@@ -213,8 +211,10 @@ app.get("/articulo/antracita", (req, res) => {
 
 app.get("/articulo/interiores", (req, res) => {
   const query = `
-    SELECT * FROM articulo
-    WHERE serie_id = 26
+    SELECT a.articulo_id, a.nombre, m.puntos
+    FROM articulo a
+    LEFT JOIN medidas m ON a.articulo_id = m.articulos_id
+    WHERE a.serie_id = 26
   `;
   dbConnection.query(query, (err, data) => {
     if (err) {
@@ -240,7 +240,7 @@ app.get("/articulo/cerraduras", (req, res) => {
   });
 });
 
-//Funcion Express GET para color franja.
+// Funcion Express GET para color franja.
 app.get("/colorFranja", (req, res) => {
   const materialFranjaId = req.query.materialFranjaId;
   const query =
@@ -270,6 +270,56 @@ app.get("/medidasConPuntos", (req, res) => {
     return res.json(data);
   });
 });
+
+// Nuevas rutas para medidas de los artículos de interiores
+app.get("/medidasArticulo1", (req, res) => {
+  const articuloId = req.query.articuloId;
+  const query = `
+    SELECT m.medidas_id, m.medidas, m.puntos
+    FROM medidas m
+    WHERE m.articulos_id = ? AND m.material = 3
+  `;
+  dbConnection.query(query, [articuloId], (err, data) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json(err);
+    }
+    return res.json(data);
+  });
+});
+
+app.get("/medidasArticulo2", (req, res) => {
+  const articuloId = req.query.articuloId;
+  const query = `
+    SELECT m.medidas_id, m.medidas, m.puntos
+    FROM medidas m
+    WHERE m.articulos_id = ? AND m.material = 3
+  `;
+  dbConnection.query(query, [articuloId], (err, data) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json(err);
+    }
+    return res.json(data);
+  });
+});
+
+app.get("/medidasArticulo3", (req, res) => {
+  const articuloId = req.query.articuloId;
+  const query = `
+    SELECT m.medidas_id, m.medidas, m.puntos
+    FROM medidas m
+    WHERE m.articulos_id = ? AND m.material = 3
+  `;
+  dbConnection.query(query, [articuloId], (err, data) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json(err);
+    }
+    return res.json(data);
+  });
+});
+
 app.get("/articulo/tiradores", (req, res) => {
   const query = `
     SELECT * FROM articulo
@@ -283,6 +333,7 @@ app.get("/articulo/tiradores", (req, res) => {
     return res.json(data);
   });
 });
+
 // Ruta GET para artículos especiales
 app.get("/articuloEspeciales", (req, res) => {
   const query = "SELECT * FROM articulo WHERE serie_id = 35";
@@ -291,6 +342,7 @@ app.get("/articuloEspeciales", (req, res) => {
     return res.json(data);
   });
 });
+
 app.get("/articuloEspecialesInteriores", (req, res) => {
   const query = "SELECT * FROM articulo WHERE serie_id = 34";
   dbConnection.query(query, (err, data) => {
@@ -298,7 +350,9 @@ app.get("/articuloEspecialesInteriores", (req, res) => {
     return res.json(data);
   });
 });
-//Monta Express en el puerto.
+
+// Monta Express en el puerto.
 app.listen(port, () => {
   console.log(">>> SERVIDOR CORRIENDO EN: " + host + ":" + port);
 });
+

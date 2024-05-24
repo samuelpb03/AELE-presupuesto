@@ -7,12 +7,10 @@ function Interiores() {
   const { handleSelectChangeG } = useTabs();
   const { data, saveData } = useData();
   const [listArticulo, setListArticulo] = useState([]);
-  const [listMedidas, setListMedidas] = useState(Array(3).fill([]));
   const [listEspeciales, setListEspeciales] = useState([]);
 
-  const [selectedArticulos, setSelectedArticulos] = useState(Array(3).fill({ id: "", nombre: "" }));
-  const [selectedMedidas, setSelectedMedidas] = useState(Array(3).fill({ id: "", nombre: "", puntos: 0 }));
-  const [cantidades, setCantidades] = useState(Array(3).fill(0)); // Inicializa cantidades en 0
+  const [selectedArticulos, setSelectedArticulos] = useState(Array(3).fill({ id: "", nombre: "", puntos: 0 }));
+  const [cantidades, setCantidades] = useState(Array(3).fill(0));
   const [puntos, setPuntos] = useState(Array(3).fill(0));
 
   const [selectedEspecial1, setSelectedEspecial1] = useState({ id: "", nombre: "", puntos: 0 });
@@ -51,9 +49,8 @@ function Interiores() {
   }, []);
 
   useEffect(() => {
-    if (data.interiores) {
-      const restoredArticulos = Array(3).fill({ id: "", nombre: "" });
-      const restoredMedidas = Array(3).fill({ id: "", nombre: "", puntos: 0 });
+    if (data && data.interiores) {
+      const restoredArticulos = Array(3).fill({ id: "", nombre: "", puntos: 0 });
       const restoredCantidades = Array(3).fill(0);
       const restoredPuntos = Array(3).fill(0);
 
@@ -61,39 +58,15 @@ function Interiores() {
         restoredArticulos[i] = {
           id: data.interiores[`articulo${i + 1}Id`] || "",
           nombre: data.interiores[`articulo${i + 1}Nombre`] || "",
-        };
-        restoredMedidas[i] = {
-          id: data.interiores[`medidas${i + 1}Id`] || "",
-          nombre: data.interiores[`medidas${i + 1}Nombre`] || "",
-          puntos: data.interiores[`medidas${i + 1}Puntos`] || 0,
+          puntos: data.interiores[`articulo${i + 1}Puntos`] || 0,
         };
         restoredCantidades[i] = data.interiores[`cantidad${i + 1}`] || 0;
-        restoredPuntos[i] = (data.interiores[`medidas${i + 1}Puntos`] || 0) * (data.interiores[`cantidad${i + 1}`] || 0);
+        restoredPuntos[i] = (data.interiores[`articulo${i + 1}Puntos`] || 0) * (data.interiores[`cantidad${i + 1}`] || 0);
       }
 
       setSelectedArticulos(restoredArticulos);
-      setSelectedMedidas(restoredMedidas);
       setCantidades(restoredCantidades);
       setPuntos(restoredPuntos);
-
-      restoredArticulos.forEach((articulo, index) => {
-        if (articulo.id) {
-          axios
-            .get("http://localhost:6969/medidasConPuntos", { params: { articuloId: articulo.id, materialId: 3 } })
-            .then((res) => {
-              if (Array.isArray(res.data)) {
-                const updatedMedidasList = [...listMedidas];
-                updatedMedidasList[index] = res.data;
-                setListMedidas(updatedMedidasList);
-              } else {
-                console.error("Error fetching medidas: res.data is not an array");
-              }
-            })
-            .catch((error) => {
-              console.error("Error fetching medidas:", error);
-            });
-        }
-      });
 
       setSelectedEspecial1({
         id: data.interiores.selectedEspecial1Id || "",
@@ -116,9 +89,7 @@ function Interiores() {
     const formattedData = selectedArticulos.reduce((acc, articulo, index) => {
       acc[`articulo${index + 1}Nombre`] = articulo.nombre;
       acc[`articulo${index + 1}Id`] = articulo.id;
-      acc[`medidas${index + 1}Nombre`] = selectedMedidas[index].nombre;
-      acc[`medidas${index + 1}Id`] = selectedMedidas[index].id;
-      acc[`medidas${index + 1}Puntos`] = selectedMedidas[index].puntos;
+      acc[`articulo${index + 1}Puntos`] = articulo.puntos;
       acc[`cantidad${index + 1}`] = cantidades[index];
       acc[`puntos${index + 1}`] = puntos[index];
       return acc;
@@ -137,7 +108,6 @@ function Interiores() {
     saveData("interiores", formattedData);
   }, [
     selectedArticulos,
-    selectedMedidas,
     cantidades,
     puntos,
     selectedEspecial1,
@@ -154,53 +124,23 @@ function Interiores() {
     const selectedIndex = event.target.selectedIndex;
     const nombre = event.target.options[selectedIndex].text;
     const id = event.target.value;
+    const puntos = parseInt(event.target.options[selectedIndex].getAttribute('data-puntos'), 10);
 
-    updatedArticulos[index] = { id, nombre };
+    updatedArticulos[index] = { id, nombre, puntos };
     setSelectedArticulos(updatedArticulos);
 
     if (id) {
-      axios
-        .get("http://localhost:6969/medidasConPuntos", { params: { articuloId: id, materialId: 3 } })
-        .then((res) => {
-          if (Array.isArray(res.data)) {
-            const updatedMedidasList = [...listMedidas];
-            updatedMedidasList[index] = res.data;
-            setListMedidas(updatedMedidasList);
-          } else {
-            console.error("Error fetching medidas: res.data is not an array");
-          }
-        })
-        .catch((error) => {
-          console.error("Error fetching medidas:", error);
-        });
-
       const updatedCantidades = [...cantidades];
-      updatedCantidades[index] = 1; // Cambia la cantidad a 1 al seleccionar un artículo
+      updatedCantidades[index] = 1;
       setCantidades(updatedCantidades);
       setPuntos((prevPuntos) => {
         const newPuntos = [...prevPuntos];
-        newPuntos[index] = selectedMedidas[index].puntos * 1;
+        newPuntos[index] = puntos;
         return newPuntos;
       });
     }
 
     handleSelectChangeG(`articulo${index + 1}`, id, nombre);
-  };
-
-  const handleSelectMedidasChange = (index, event) => {
-    const updatedMedidas = [...selectedMedidas];
-    const selectedIndex = event.target.selectedIndex;
-    const nombre = event.target.options[selectedIndex].text;
-    const id = event.target.value;
-    const medidasList = listMedidas[index] || [];
-    const selectedMedida = medidasList.find((medida) => medida.medidas_id === parseInt(id)) || {};
-    updatedMedidas[index] = { id, nombre, puntos: selectedMedida.puntos || 0 };
-    setSelectedMedidas(updatedMedidas);
-    setPuntos((prevPuntos) => {
-      const newPuntos = [...prevPuntos];
-      newPuntos[index] = selectedMedida.puntos * cantidades[index];
-      return newPuntos;
-    });
   };
 
   const handleCantidadChange = (index, event) => {
@@ -210,7 +150,7 @@ function Interiores() {
     setCantidades(updatedCantidades);
     setPuntos((prevPuntos) => {
       const newPuntos = [...prevPuntos];
-      newPuntos[index] = selectedMedidas[index].puntos * updatedCantidades[index];
+      newPuntos[index] = selectedArticulos[index].puntos * updatedCantidades[index];
       return newPuntos;
     });
   };
@@ -254,22 +194,8 @@ function Interiores() {
       >
         <option value="" disabled={selectedArticulos[index].id !== ""}>--Selecciona una opción--</option>
         {listArticulo.map((articulo) => (
-          <option key={articulo.articulo_id} value={articulo.articulo_id}>
+          <option key={articulo.articulo_id} value={articulo.articulo_id} data-puntos={articulo.puntos}>
             {articulo.nombre}
-          </option>
-        ))}
-      </select>
-      <label htmlFor={`medidas${index + 1}`}>Medidas:</label>
-      <select
-        id={`medidas${index + 1}`}
-        onChange={(event) => handleSelectMedidasChange(index, event)}
-        value={selectedMedidas[index].id || ""}
-        disabled={!selectedArticulos[index].id}
-      >
-        <option value="">--Selecciona una opción--</option>
-        {(listMedidas[index] || []).map((medida) => (
-          <option key={medida.medidas_id} value={medida.medidas_id}>
-            {medida.medidas}
           </option>
         ))}
       </select>
@@ -350,4 +276,8 @@ function Interiores() {
 }
 
 export default Interiores;
+
+
+
+
 

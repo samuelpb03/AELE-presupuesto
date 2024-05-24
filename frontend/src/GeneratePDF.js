@@ -60,15 +60,14 @@ export const generatePDF = (data) => {
         if (key.endsWith('Nombre') && value) {
           if (key.startsWith('articulo')) {
             sectionData.push([`Artículo ${articuloCounter}`, value]);
+            articuloCounter++;
           } else if (!key.startsWith('selectedEspecial')) {
             sectionData.push([labelsMap[key] || key, value]);
           }
-        } else if (key === 'cantidad' && value && value !== 0) {
+        } else if ((key === 'cantidad' || key.startsWith('cantidad')) && value && value !== 0) {
           sectionData.push([labelsMap[key] || key, value]);
-        } else if (key === 'puntos' && value) {
-          const cantidadKey = `cantidad${articuloCounter - 1}`;
-          const cantidad = data[section][cantidadKey] || 1;
-          sectionData.push([labelsMap[key] || key, value * cantidad]);
+        } else if ((key === 'puntos' || key.startsWith('puntos')) && value) {
+          sectionData.push([labelsMap[key] || key, value]);
         }
       });
 
@@ -124,4 +123,5 @@ export const generatePDF = (data) => {
 
   doc.save("presupuesto2.pdf");
 };
+
 
