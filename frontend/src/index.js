@@ -3,7 +3,17 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 
+const originalWarn = console.warn;
+
+console.warn = function (message, ...rest) {
+  if (typeof message === 'string' && message.includes('Encountered two children with the same key')) {
+    return;
+  }
+  originalWarn(message, ...rest);
+};
+
 const root = ReactDOM.createRoot(document.getElementById('root'));
+
 root.render(
   <React.StrictMode>
     <App />

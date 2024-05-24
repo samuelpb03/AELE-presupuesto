@@ -24,6 +24,20 @@ const labelsMap = {
   puntos2: "Puntos 2",
   cantidad3: "Cantidad 3",
   puntos3: "Puntos 3",
+  color1Nombre: "Color 1",
+  color2Nombre: "Color 2",
+  color3Nombre: "Color 3",
+  color4Nombre: "Color 4",
+  color5Nombre: "Color 5",
+  color6Nombre: "Color 6",
+  color7Nombre: "Color 7",
+  cantidad4: "Cantidad 4",
+  cantidad5: "Cantidad 5",
+  cantidad6: "Cantidad 6 ",
+  puntos4: "Puntos 4",
+  puntos5: "Puntos 5",
+  puntos6: "Puntos 6",
+  puntos7: "Puntos 7",
 };
 
 export const generatePDF = (data) => {
@@ -72,7 +86,9 @@ export const generatePDF = (data) => {
             sectionData.push([labelsMap[key] || key, value]);
           }
         } else if ((key === 'cantidad' || key.startsWith('cantidad')) && value && value !== 0 && !key.startsWith('cantidadEspecial')) {
-          sectionData.push([labelsMap[key] || key, value]);
+          if (data[section].selectedProductoNombre) { // Comprobación añadida
+            sectionData.push([labelsMap[key] || key, value]);
+          }
         } else if ((key === 'puntos' || key.startsWith('puntos')) && value && !key.startsWith('puntosEspecial')) {
           sectionData.push([labelsMap[key] || key, value]);
         }
@@ -122,7 +138,8 @@ export const generatePDF = (data) => {
   // Calcular totales
   const totalPuntos = Object.values(data).reduce((total, section) => {
     return total + Object.entries(section).reduce((subTotal, [key, value]) => {
-      if (key === 'puntos' || key === 'puntosFrente' || key === 'puntosEspecial1' || key === 'puntosEspecial2') {
+      if (key === 'puntos' || key === 'puntosFrente' || key === 'puntosEspecial1' || key === 'puntosEspecial2' || key === 'puntos2'
+       || key === 'puntos3' || key === 'puntos4' || key === 'puntos5' || key === 'puntos6' || key === 'puntos7' || key === 'puntos1') {
         return subTotal + Number(value);
       }
       return subTotal;
@@ -136,6 +153,7 @@ export const generatePDF = (data) => {
 
   doc.save("presupuesto2.pdf");
 };
+
 
 
 

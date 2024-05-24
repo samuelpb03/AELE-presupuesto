@@ -316,6 +316,7 @@ function Frentes() {
     const id = event.target.value;
     setSelectedArticulo({ id, nombre });
     handleSelectChange("articulo", id, nombre);
+    setCantidad(1); // Establecer la cantidad a 1 cuando se selecciona un artículo
   };
 
   const handleSelectMaterialChange = (event) => {

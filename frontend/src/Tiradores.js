@@ -8,17 +8,17 @@ function Tiradores() {
   const { data, saveData } = useData();
   const [listTiradores, setListTiradores] = useState([]);
   const [listCerraduras, setListCerraduras] = useState([]);
-  const [listColor, setListColor] = useState([]);
+  const [listColor, setListColor] = useState(Array(6).fill([]));  // Inicializar como array de arrays
 
-  const [selectedArticulos, setSelectedArticulos] = useState(Array(6).fill({ id: "", nombre: "", puntos: 0 }));
+  const [selectedArticulos, setSelectedArticulos] = useState(Array(6).fill({ id: "", nombre: "", puntos: 0, serieId: "" }));
   const [selectedColores, setSelectedColores] = useState(Array(6).fill({ id: "", nombre: "" }));
   const [cantidades, setCantidades] = useState(Array(6).fill(1));
   const [puntos, setPuntos] = useState(Array(6).fill(0));
+  const [materialIds, setMaterialIds] = useState(Array(6).fill(''));
 
   useEffect(() => {
-    // Restore data from context when component mounts
     if (data.tiradores) {
-      const restoredArticulos = Array(6).fill({ id: "", nombre: "", puntos: 0 });
+      const restoredArticulos = Array(6).fill({ id: "", nombre: "", puntos: 0, serieId: "" });
       const restoredColores = Array(6).fill({ id: "", nombre: "" });
       const restoredCantidades = Array(6).fill(1);
       const restoredPuntos = Array(6).fill(0);
@@ -28,6 +28,7 @@ function Tiradores() {
           id: data.tiradores[`articulo${i + 1}Id`] || "",
           nombre: data.tiradores[`articulo${i + 1}Nombre`] || "",
           puntos: data.tiradores[`articulo${i + 1}Puntos`] || 0,
+          serieId: data.tiradores[`articulo${i + 1}SerieId`] || "",
         };
         restoredColores[i] = {
           id: data.tiradores[`color${i + 1}Id`] || "",
@@ -49,6 +50,7 @@ function Tiradores() {
       acc[`articulo${index + 1}Nombre`] = articulo.nombre;
       acc[`articulo${index + 1}Id`] = articulo.id;
       acc[`articulo${index + 1}Puntos`] = articulo.puntos;
+      acc[`articulo${index + 1}SerieId`] = articulo.serieId;
       acc[`color${index + 1}Nombre`] = selectedColores[index].nombre;
       acc[`color${index + 1}Id`] = selectedColores[index].id;
       acc[`cantidad${index + 1}`] = cantidades[index];
@@ -59,7 +61,6 @@ function Tiradores() {
   }, [selectedArticulos, selectedColores, cantidades, puntos, saveData]);
 
   useEffect(() => {
-    // Fetching articles for tiradores
     axios.get("http://localhost:6969/articulo/tiradores")
       .then((res) => {
         if (Array.isArray(res.data)) {
@@ -72,7 +73,6 @@ function Tiradores() {
         console.error("Error fetching tiradores:", error);
       });
 
-    // Fetching articles for cerraduras
     axios.get("http://localhost:6969/articulo/cerraduras")
       .then((res) => {
         if (Array.isArray(res.data)) {
@@ -84,42 +84,69 @@ function Tiradores() {
       .catch((error) => {
         console.error("Error fetching cerraduras:", error);
       });
-
-    axios.get("http://localhost:6969/color", { params: { materialId: 5 } })
-      .then((res) => {
-        if (Array.isArray(res.data)) {
-          setListColor(res.data);
-        } else {
-          console.error("Error fetching colores: res.data is not an array");
-        }
-      })
-      .catch((error) => {
-        console.error("Error fetching colores:", error);
-      });
   }, []);
+
+  const fetchAndLogMateriales = () => {
+    const promises = selectedArticulos.map(articulo =>
+      axios.get(`http://localhost:6969/material`, { params: { serieId: articulo.serieId } })
+        .then(res => res.data[0] ? res.data[0].material_id : 'No Material')
+        .catch(error => {
+          console.error(`Error fetching material for serieId ${articulo.serieId}:`, error);
+          return 'Error';
+        })
+    );
+
+    Promise.all(promises).then(materialIds => {
+      setMaterialIds(materialIds);
+      console.log('Material IDs de los artículos seleccionados:', materialIds);
+
+      materialIds.forEach((materialId, index) => {
+        if (materialId !== 'No Material' && materialId !== 'Error') {
+          axios.get("http://localhost:6969/color", { params: { materialId } })
+            .then((res) => {
+              if (Array.isArray(res.data)) {
+                setListColor(prevListColor => {
+                  const newListColor = [...prevListColor];
+                  newListColor[index] = res.data;  // Actualizar solo el índice correspondiente
+                  return newListColor;
+                });
+              } else {
+                console.error("Error fetching colores: res.data is not an array");
+              }
+            })
+            .catch((error) => {
+              console.error("Error fetching colores:", error);
+            });
+        }
+      });
+    });
+  };
+
+  useEffect(() => {
+    fetchAndLogMateriales();
+  }, [selectedArticulos]);
 
   const handleSelectArticuloChange = (index, event, isCerradura = false) => {
     const updatedArticulos = [...selectedArticulos];
     const selectedIndex = event.target.selectedIndex;
     const nombre = event.target.options[selectedIndex].text;
     const id = event.target.value;
+    const serieId = event.target.options[selectedIndex].getAttribute('data-serie-id');
 
-    // Fetch puntos for the selected article
     axios.get("http://localhost:6969/medidasConPuntos", {
       params: {
         articuloId: id,
-        materialId: 5 // Assuming materialId 5 is always used
+        materialId: 5 // Aquí podrías necesitar ajustar esto si no es siempre 5
       }
     }).then((res) => {
       const selectedArticulo = res.data.length > 0 ? res.data[0] : { puntos: 0 };
       const puntos = selectedArticulo.puntos;
 
-      updatedArticulos[index] = { id, nombre, puntos };
+      updatedArticulos[index] = { id, nombre, puntos, serieId };
       setSelectedArticulos(updatedArticulos);
 
       handleSelectChangeF(`articulo${index + 1}`, id, nombre);
 
-      // Update points
       setPuntos(prevPuntos => {
         const newPuntos = [...prevPuntos];
         newPuntos[index] = puntos * cantidades[index];
@@ -148,7 +175,6 @@ function Tiradores() {
     updatedCantidades[index] = isNaN(value) ? 1 : value;
     setCantidades(updatedCantidades);
 
-    // Update points
     setPuntos(prevPuntos => {
       const newPuntos = [...prevPuntos];
       newPuntos[index] = selectedArticulos[index].puntos * updatedCantidades[index];
@@ -166,7 +192,7 @@ function Tiradores() {
       >
         <option value="">--Selecciona una opción--</option>
         {(isCerradura ? listCerraduras : listTiradores).map((articulo) => (
-          <option key={articulo.articulo_id} value={articulo.articulo_id}>
+          <option key={articulo.articulo_id} value={articulo.articulo_id} data-serie-id={articulo.serie_id}>
             {articulo.nombre}
           </option>
         ))}
@@ -178,7 +204,7 @@ function Tiradores() {
         value={selectedColores[index].id || ""}
       >
         <option value="">--Selecciona una opción--</option>
-        {listColor.map((color) => (
+        {(listColor[index] || []).map((color) => (
           <option key={color.color_id} value={color.color_id}>
             {color.nombre}
           </option>
@@ -216,3 +242,5 @@ function Tiradores() {
 }
 
 export default Tiradores;
+
+
