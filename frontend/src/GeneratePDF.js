@@ -64,7 +64,8 @@ export const generatePDF = (data) => {
     tiradores: "Tiradores y cerraduras",
     interiores: "Interiores",
     equipamiento3: "Equipamiento 3",
-    baldas: "Baldas e iluminación"
+    baldas: "Baldas e iluminación",
+    remates: "Remates a medida"
   };
 
   let startY = 70;

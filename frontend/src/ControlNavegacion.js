@@ -19,6 +19,7 @@ function NavigationController() {
       <Link to="/Interiores" onClick={(event) => handleLinkClick('/Interiores', event)}>Interiores</Link>
       <Link to="/Baldas" onClick={(event) => handleLinkClick('/Baldas', event)}>Baldas</Link>
       <Link to="/Equipamiento3" onClick={(event) => handleLinkClick('/Equipamiento3', event)}>Equipamiento</Link>
+      <Link to="/Remates" onClick={(event) => handleLinkClick('/Remates', event)}>Remates</Link>
     </div>
   );
 }

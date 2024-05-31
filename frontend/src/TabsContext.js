@@ -14,7 +14,8 @@ export const TabsProvider = ({ children }) => {
   const [selectedOptionsE2, setSelectedOptionsE2] = useState({});
   const [selectedOptionsE3, setSelectedOptionsE3] = useState({});
   const [selectedOptionsC, setSelectedOptionsC] = useState({});
-  const [selectedOptionsB, setSelectedOptionsB] = useState({}); // Nueva opción para Baldas
+  const [selectedOptionsB, setSelectedOptionsB] = useState({});
+  const [selectedOptionsZ, setSelectedOptionsZ] = useState({});
 
   const handleSelectChange = (tabId, optionId, optionName) => {
     setSelectedOptions(prev => ({ ...prev, [tabId]: { optionId, optionName } }));
@@ -53,7 +54,10 @@ export const TabsProvider = ({ children }) => {
   };
 
   const handleSelectChangeB = (tabId, optionId, optionName) => {
-    setSelectedOptionsB(prev => ({ ...prev, [tabId]: { optionId, optionName } })); // Función para manejar cambios en Baldas
+    setSelectedOptionsB(prev => ({ ...prev, [tabId]: { optionId, optionName } }));
+  };
+  const handleSelectChangeZ = (tabId, optionId, optionName) => {
+    setSelectedOptionsZ(prev => ({ ...prev, [tabId]: { optionId, optionName } }));
   };
 
   return (
@@ -76,8 +80,10 @@ export const TabsProvider = ({ children }) => {
       handleSelectChangeE3,
       selectedOptionsC,
       handleSelectChangeC,
-      selectedOptionsB, // Agrega el estado de Baldas al proveedor
-      handleSelectChangeB // Agrega la función de cambio de Baldas al proveedor
+      selectedOptionsB,
+      handleSelectChangeB,
+      selectedOptionsZ,
+      handleSelectChangeZ
     }}>
       {children}
     </TabsContext.Provider>

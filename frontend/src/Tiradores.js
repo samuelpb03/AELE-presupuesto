@@ -10,6 +10,7 @@ function Tiradores() {
   const [listCerraduras, setListCerraduras] = useState([]);
   const [listColor, setListColor] = useState(Array(6).fill([]));  // Inicializar como array de arrays
 
+  
   const [selectedArticulos, setSelectedArticulos] = useState(Array(6).fill({ id: "", nombre: "", puntos: 0, serieId: "" }));
   const [selectedColores, setSelectedColores] = useState(Array(6).fill({ id: "", nombre: "" }));
   const [cantidades, setCantidades] = useState(Array(6).fill(1));
