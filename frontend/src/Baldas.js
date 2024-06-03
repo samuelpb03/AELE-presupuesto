@@ -210,7 +210,7 @@ function Baldas() {
     handleSelectChangeB(`cantidad${index + 1}`, value);
   };
 
-  const renderSelectArticulo = (index, list) => (
+  const renderSelectArticulo = (index, list, hideMedidas) => (
     <div key={index}>
       <label htmlFor={`articulo${index + 1}`}>Artículo {index + 1}:</label>
       <select
@@ -225,20 +225,24 @@ function Baldas() {
           </option>
         ))}
       </select>
-      <label htmlFor={`medidas${index + 1}`}>Medidas:</label>
-      <select
-        id={`medidas${index + 1}`}
-        onChange={(event) => handleSelectMedidasChange(index, event)}
-        value={selectedMedidas[index].id || ""}
-        disabled={!selectedArticulos[index].id}
-      >
-        <option value="">--Selecciona una opción--</option>
-        {(listMedidas[index] || []).map((medida) => (
-          <option key={medida.medidas_id} value={medida.medidas_id}>
-            {medida.medidas}
-          </option>
-        ))}
-      </select>
+      {!hideMedidas && (
+        <>
+          <label htmlFor={`medidas${index + 1}`}>Medidas:</label>
+          <select
+            id={`medidas${index + 1}`}
+            onChange={(event) => handleSelectMedidasChange(index, event)}
+            value={selectedMedidas[index].id || ""}
+            disabled={!selectedArticulos[index].id}
+          >
+            <option value="">--Selecciona una opción--</option>
+            {(listMedidas[index] || []).map((medida) => (
+              <option key={medida.medidas_id} value={medida.medidas_id}>
+                {medida.medidas}
+              </option>
+            ))}
+          </select>
+        </>
+      )}
       <label htmlFor={`puntos${index + 1}`}>Puntos: {puntosTotales[index]}</label>
       <label htmlFor={`cantidad${index + 1}`}>Cantidad:</label>
       <input
@@ -257,21 +261,23 @@ function Baldas() {
       <div className="container2">
         <h1>Baldas e Iluminación</h1>
         <h2>Baldas y Divisores</h2>
-        {Array.from({ length: 4 }).map((_, i) => renderSelectArticulo(i, listArticulo))}
+        {Array.from({ length: 3 }).map((_, i) => renderSelectArticulo(i, listArticulo, false))}
       </div>
       <div className="container3">
-        {Array.from({ length: 2 }).map((_, i) => renderSelectArticulo(i + 4, listArticulo))}
-        <h2>Iluminación</h2>
-        {Array.from({ length: 2 }).map((_, i) => renderSelectArticulo(i + 6, listArticuloIluminacion))}
+        {Array.from({ length: 3 }).map((_, i) => renderSelectArticulo(i + 3, listArticulo, false))}
+        
       </div>
       <div className="container4">
-        {Array.from({ length: 4 }).map((_, i) => renderSelectArticulo(i + 8, listArticuloIluminacion))}
+      <h1 style={{marginTop:"40px"}}>Iluminación</h1>
+      {Array.from({ length: 1 }).map((_, i) => renderSelectArticulo(i + 6, listArticuloIluminacion, true))}
+        {Array.from({ length: 4 }).map((_, i) => renderSelectArticulo(i + 8, listArticuloIluminacion, true))}
       </div>
     </div>
   );
 }
 
 export default Baldas;
+
 
 
 

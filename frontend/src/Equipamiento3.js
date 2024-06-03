@@ -261,7 +261,7 @@ function Equipamiento3() {
       </div>
       <div className="container3">
         {Array.from({ length: 1 }).map((_, i) => renderSelectArticulo(i + 3, listArticuloEquipamiento))}
-        <h2>Antracita</h2>
+        <h1 style={{marginTop: "40px"}}>Antracita</h1>
         {Array.from({ length: 2 }).map((_, i) => renderSelectArticulo(i + 4, listArticuloAntracita))}
       </div>
       <div className="container4">

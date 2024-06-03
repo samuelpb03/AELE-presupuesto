@@ -16,7 +16,12 @@ function Remates() {
       .get("http://localhost:6969/articulo/remates")
       .then((res) => {
         if (Array.isArray(res.data)) {
-          setListArticulo(res.data);
+          const formattedArticulos = res.data.map((articulo) => ({
+            id: articulo.articulo_id,
+            nombre: `${articulo.articulo_nombre} - ${articulo.material_nombre}`,
+            puntos: articulo.puntos
+          }));
+          setListArticulo(formattedArticulos);
         } else {
           console.error("Error fetching articulos: res.data is not an array");
         }
@@ -107,11 +112,12 @@ function Remates() {
       >
         <option value="" disabled={selectedArticulos[index].id !== ""}>--Selecciona una opción--</option>
         {listArticulo.map((articulo) => (
-          <option key={articulo.articulo_id} value={articulo.articulo_id} data-puntos={articulo.puntos}>
+          <option key={articulo.id} value={articulo.id} data-puntos={articulo.puntos}>
             {articulo.nombre}
           </option>
         ))}
       </select>
+
       <label htmlFor={`cantidad${index + 1}`}>Cantidad:</label>
       <input
         type="number"
@@ -139,9 +145,3 @@ function Remates() {
 }
 
 export default Remates;
-
-
-
-
-
-

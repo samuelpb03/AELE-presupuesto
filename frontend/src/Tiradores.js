@@ -226,12 +226,14 @@ function Tiradores() {
   return (
     <div className="container">
       <div className="container2">
+        <h1>Cerraduras</h1>
+        {renderSelectArticulo(0, true)}
         <h1>Tiradores</h1>
-        {renderSelectArticulo(0)}
         {renderSelectArticulo(1)}
+        
       </div>
       <div className="container3">
-        {renderSelectArticulo(2, true)}
+        {renderSelectArticulo(2)}
         {renderSelectArticulo(3)}
       </div>
       <div className="container4">

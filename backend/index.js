@@ -95,7 +95,7 @@ app.get("/medidas", (req, res) => {
 
 // Funcion Express GET para material franja.
 app.get("/materialFranja", (req, res) => {
-  const query = "SELECT material_id, nombre FROM material";
+  const query = "SELECT material_id, nombre FROM material where material_id = 1 or material_id = 2 or material_id = 3 or material_id = 4 or material_id = 6";
   dbConnection.query(query, (err, data) => {
     if (err) return res.json(err);
     return res.json(data);
@@ -226,9 +226,10 @@ app.get("/articulo/interiores", (req, res) => {
 });
 app.get("/articulo/remates", (req, res) => {
   const query = `
-    SELECT a.articulo_id, a.nombre, m.puntos
+    SELECT a.articulo_id, a.nombre AS articulo_nombre, m.puntos, ma.nombre AS material_nombre
     FROM articulo a
-    LEFT JOIN medidas m ON a.articulo_id = m.articulos_id
+    JOIN medidas m ON a.articulo_id = m.articulos_id
+    JOIN material ma ON m.material = ma.material_id
     WHERE a.serie_id = 37
   `;
   dbConnection.query(query, (err, data) => {
@@ -370,7 +371,23 @@ app.get("/articuloEspecialesInteriores", (req, res) => {
     return res.json(data);
   });
 });
-
+// Ruta para obtener materiales únicos desde medidas
+app.get("/materialesPorArticulo", (req, res) => {
+  const articuloId = req.query.articuloId;
+  const query = `
+    SELECT DISTINCT m.material, ma.nombre
+    FROM medidas m
+    JOIN material ma ON m.material = ma.material_id
+    WHERE m.articulos_id = ?
+  `;
+  dbConnection.query(query, [articuloId], (err, data) => {
+    if (err) {
+      console.error("Error fetching materials:", err);
+      return res.status(500).json(err);
+    }
+    return res.json(data);
+  });
+});
 // Monta Express en el puerto.
 app.listen(port, () => {
   console.log(">>> SERVIDOR CORRIENDO EN: " + host + ":" + port);
