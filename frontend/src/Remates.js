@@ -2,13 +2,14 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useTabs } from "./TabsContext";
 import { useData } from './context/DataContext';
+import { generatePDF } from "./GeneratePDF";
 
 function Remates() {
   const { handleSelectChangeZ } = useTabs();
   const { data, saveData } = useData();
   const [listArticulo, setListArticulo] = useState([]);
   const [selectedArticulos, setSelectedArticulos] = useState(Array(3).fill({ id: "", nombre: "", puntos: 0 }));
-  const [cantidades, setCantidades] = useState(Array(3).fill(0));
+  const [metros, setMetros] = useState(Array(3).fill(0));
   const [puntos, setPuntos] = useState(Array(3).fill(0));
 
   useEffect(() => {
@@ -34,7 +35,7 @@ function Remates() {
   useEffect(() => {
     if (data && data.remates) {
       const restoredArticulos = Array(3).fill({ id: "", nombre: "", puntos: 0 });
-      const restoredCantidades = Array(3).fill(0);
+      const restoredMetros = Array(3).fill(0);
       const restoredPuntos = Array(3).fill(0);
 
       for (let i = 0; i < 3; i++) {
@@ -43,12 +44,12 @@ function Remates() {
           nombre: data.remates[`articulo${i + 1}Nombre`] || "",
           puntos: data.remates[`articulo${i + 1}Puntos`] || 0,
         };
-        restoredCantidades[i] = data.remates[`cantidad${i + 1}`] || 0;
-        restoredPuntos[i] = (data.remates[`articulo${i + 1}Puntos`] || 0) * (data.remates[`cantidad${i + 1}`] || 0);
+        restoredMetros[i] = data.remates[`metros${i + 1}`] || 0;
+        restoredPuntos[i] = ((data.remates[`articulo${i + 1}Puntos`] || 0) * (data.remates[`metros${i + 1}`] || 0)) / 2.5;
       }
 
       setSelectedArticulos(restoredArticulos);
-      setCantidades(restoredCantidades);
+      setMetros(restoredMetros);
       setPuntos(restoredPuntos);
     }
   }, []);
@@ -58,13 +59,13 @@ function Remates() {
       acc[`articulo${index + 1}Nombre`] = articulo.nombre;
       acc[`articulo${index + 1}Id`] = articulo.id;
       acc[`articulo${index + 1}Puntos`] = articulo.puntos;
-      acc[`cantidad${index + 1}`] = cantidades[index];
+      acc[`metros${index + 1}`] = metros[index];
       acc[`puntos${index + 1}`] = puntos[index];
       return acc;
     }, {});
 
     saveData("remates", formattedData);
-  }, [selectedArticulos, cantidades, puntos, saveData]);
+  }, [selectedArticulos, metros, puntos, saveData]);
 
   const handleSelectArticuloChange = (index, event) => {
     const updatedArticulos = [...selectedArticulos];
@@ -77,12 +78,12 @@ function Remates() {
     setSelectedArticulos(updatedArticulos);
 
     if (id) {
-      const updatedCantidades = [...cantidades];
-      updatedCantidades[index] = 1;
-      setCantidades(updatedCantidades);
+      const updatedMetros = [...metros];
+      updatedMetros[index] = 0;
+      setMetros(updatedMetros);
       setPuntos((prevPuntos) => {
         const newPuntos = [...prevPuntos];
-        newPuntos[index] = puntos;
+        newPuntos[index] = 0;
         return newPuntos;
       });
     }
@@ -90,16 +91,19 @@ function Remates() {
     handleSelectChangeZ(`articulo${index + 1}`, id, nombre);
   };
 
-  const handleCantidadChange = (index, event) => {
-    const updatedCantidades = [...cantidades];
-    const value = parseInt(event.target.value, 10);
-    updatedCantidades[index] = isNaN(value) ? 1 : value;
-    setCantidades(updatedCantidades);
+  const handleMetrosChange = (index, event) => {
+    const updatedMetros = [...metros];
+    const value = parseFloat(event.target.value);
+    updatedMetros[index] = isNaN(value) ? 0 : value;
+    setMetros(updatedMetros);
     setPuntos((prevPuntos) => {
       const newPuntos = [...prevPuntos];
-      newPuntos[index] = selectedArticulos[index].puntos * updatedCantidades[index];
+      newPuntos[index] = (selectedArticulos[index].puntos * updatedMetros[index]) / 2.5;
       return newPuntos;
     });
+  };
+  const handleGeneratePDF = () => {
+    generatePDF(data);
   };
 
   const renderSelectArticulo = (index) => (
@@ -118,15 +122,16 @@ function Remates() {
         ))}
       </select>
 
-      <label htmlFor={`cantidad${index + 1}`}>Cantidad:</label>
+      <label htmlFor={`metros${index + 1}`}>Metros:</label>
       <input
         type="number"
-        id={`cantidad${index + 1}`}
-        value={cantidades[index]}
-        onChange={(event) => handleCantidadChange(index, event)}
+        step="0.01"
+        id={`metros${index + 1}`}
+        value={metros[index]}
+        onChange={(event) => handleMetrosChange(index, event)}
         min="0"
       />
-      <label htmlFor={`puntos${index + 1}`}>Puntos: {puntos[index]}</label>
+      <label htmlFor={`puntos${index + 1}`}>Puntos: {puntos[index].toFixed(2)}</label>
     </div>
   );
 
@@ -139,9 +144,11 @@ function Remates() {
       </div>
       <div className="container3">
         {renderSelectArticulo(2)}
+        <button onClick={handleGeneratePDF} style={{ marginTop: "20px" }}>Generar PDF</button>
       </div>
     </div>
   );
 }
 
 export default Remates;
+

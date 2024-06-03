@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useTabs } from "./TabsContext";
 import { useData } from "./context/DataContext";
-import { generatePDF } from "./GeneratePDF";
+
 
 function Equipamiento3() {
   const { handleSelectChangeE3 } = useTabs();
@@ -248,9 +248,6 @@ function Equipamiento3() {
     </div>
   );
 
-  const handleGeneratePDF = () => {
-    generatePDF(data);
-  };
 
   return (
     <div className="container">
@@ -266,7 +263,6 @@ function Equipamiento3() {
       </div>
       <div className="container4">
         {Array.from({ length: 3 }).map((_, i) => renderSelectArticulo(i + 6, listArticuloAntracita))}
-        <button onClick={handleGeneratePDF} style={{ marginTop: "20px" }}>Generar PDF</button>
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useTabs } from "./TabsContext";
+import { useTabs } from './TabsContext';
 import { useData } from './context/DataContext';
 
 function Tiradores() {
@@ -8,14 +8,11 @@ function Tiradores() {
   const { data, saveData } = useData();
   const [listTiradores, setListTiradores] = useState([]);
   const [listCerraduras, setListCerraduras] = useState([]);
-  const [listColor, setListColor] = useState(Array(6).fill([]));  // Inicializar como array de arrays
-
-  
+  const [listColor, setListColor] = useState(Array(6).fill([])); // Inicializar como array de arrays
   const [selectedArticulos, setSelectedArticulos] = useState(Array(6).fill({ id: "", nombre: "", puntos: 0, serieId: "" }));
   const [selectedColores, setSelectedColores] = useState(Array(6).fill({ id: "", nombre: "" }));
   const [cantidades, setCantidades] = useState(Array(6).fill(1));
   const [puntos, setPuntos] = useState(Array(6).fill(0));
-  const [materialIds, setMaterialIds] = useState(Array(6).fill(''));
 
   useEffect(() => {
     if (data.tiradores) {
@@ -87,75 +84,95 @@ function Tiradores() {
       });
   }, []);
 
-  const fetchAndLogMateriales = () => {
-    const promises = selectedArticulos.map(articulo =>
-      axios.get(`http://localhost:6969/material`, { params: { serieId: articulo.serieId } })
-        .then(res => res.data[0] ? res.data[0].material_id : 'No Material')
-        .catch(error => {
-          console.error(`Error fetching material for serieId ${articulo.serieId}:`, error);
-          return 'Error';
-        })
-    );
-
-    Promise.all(promises).then(materialIds => {
-      setMaterialIds(materialIds);
-      console.log('Material IDs de los artículos seleccionados:', materialIds);
-
-      materialIds.forEach((materialId, index) => {
-        if (materialId !== 'No Material' && materialId !== 'Error') {
-          axios.get("http://localhost:6969/color", { params: { materialId } })
-            .then((res) => {
-              if (Array.isArray(res.data)) {
-                setListColor(prevListColor => {
-                  const newListColor = [...prevListColor];
-                  newListColor[index] = res.data;  // Actualizar solo el índice correspondiente
-                  return newListColor;
-                });
-              } else {
-                console.error("Error fetching colores: res.data is not an array");
-              }
-            })
-            .catch((error) => {
-              console.error("Error fetching colores:", error);
-            });
-        }
-      });
-    });
-  };
-
   useEffect(() => {
-    fetchAndLogMateriales();
+    selectedArticulos.forEach((articulo, index) => {
+      if (articulo.id) {
+        axios.get("http://localhost:6969/materialesPorArticulo", { params: { articuloId: articulo.id } })
+          .then((materialRes) => {
+            const materialId = materialRes.data.length > 0 ? materialRes.data[0].material : null;
+            if (materialId) {
+              axios.get("http://localhost:6969/color", { params: { materialId } })
+                .then((coloresRes) => {
+                  if (Array.isArray(coloresRes.data)) {
+                    setListColor((prevListColor) => {
+                      const newListColor = [...prevListColor];
+                      newListColor[index] = coloresRes.data;
+                      return newListColor;
+                    });
+                  } else {
+                    console.error("Error fetching colores: res.data is not an array");
+                  }
+                })
+                .catch((error) => {
+                  console.error("Error fetching colores:", error);
+                });
+            }
+          })
+          .catch((error) => {
+            console.error("Error fetching material:", error);
+          });
+      }
+    });
   }, [selectedArticulos]);
 
-  const handleSelectArticuloChange = (index, event, isCerradura = false) => {
+  const handleSelectArticuloChange = async (index, event, isCerradura = false) => {
     const updatedArticulos = [...selectedArticulos];
     const selectedIndex = event.target.selectedIndex;
     const nombre = event.target.options[selectedIndex].text;
     const id = event.target.value;
     const serieId = event.target.options[selectedIndex].getAttribute('data-serie-id');
 
-    axios.get("http://localhost:6969/medidasConPuntos", {
-      params: {
-        articuloId: id,
-        materialId: 5 // Aquí podrías necesitar ajustar esto si no es siempre 5
-      }
-    }).then((res) => {
-      const selectedArticulo = res.data.length > 0 ? res.data[0] : { puntos: 0 };
-      const puntos = selectedArticulo.puntos;
+    updatedArticulos[index] = { id, nombre, puntos: 0, serieId };
+    setSelectedArticulos(updatedArticulos);
 
-      updatedArticulos[index] = { id, nombre, puntos, serieId };
-      setSelectedArticulos(updatedArticulos);
-
-      handleSelectChangeF(`articulo${index + 1}`, id, nombre);
-
-      setPuntos(prevPuntos => {
-        const newPuntos = [...prevPuntos];
-        newPuntos[index] = puntos * cantidades[index];
-        return newPuntos;
+    try {
+      const materialRes = await axios.get(`http://localhost:6969/materialesPorArticulo`, {
+        params: { articuloId: id }
       });
-    }).catch((error) => {
-      console.error("Error fetching puntos:", error);
-    });
+      const materialId = materialRes.data.length > 0 ? materialRes.data[0].material : null;
+      if (materialId) {
+        console.log(`Material ID for articuloId ${id}: ${materialId}`);
+        const medidasRes = await axios.get("http://localhost:6969/medidasConPuntos", {
+          params: { articuloId: id, materialId }
+        });
+        const selectedArticulo = medidasRes.data.length > 0 ? medidasRes.data[0] : { puntos: 0 };
+        const puntos = selectedArticulo.puntos;
+
+        updatedArticulos[index].puntos = puntos; // Actualizar los puntos en el estado de selectedArticulos
+        setSelectedArticulos(updatedArticulos);
+
+        setPuntos(prevPuntos => {
+          const newPuntos = [...prevPuntos];
+          newPuntos[index] = puntos * cantidades[index];
+          return newPuntos;
+        });
+
+        const coloresRes = await axios.get("http://localhost:6969/color", {
+          params: { materialId }
+        });
+        if (Array.isArray(coloresRes.data)) {
+          setListColor(prevListColor => {
+            const newListColor = [...prevListColor];
+            newListColor[index] = coloresRes.data; // Actualizar solo el índice correspondiente
+            return newListColor;
+          });
+
+          // Guardar los colores en el estado local para que se mantengan al cambiar de pestaña
+          const updatedColores = [...selectedColores];
+          if (updatedColores[index].id === "") {
+            updatedColores[index] = { id: coloresRes.data[0].color_id, nombre: coloresRes.data[0].nombre };
+            setSelectedColores(updatedColores);
+            handleSelectChangeF(`color${index + 1}`, coloresRes.data[0].color_id, coloresRes.data[0].nombre);
+          }
+        } else {
+          console.error("Error fetching colores: res.data is not an array");
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching puntos o colores:", error);
+    }
+
+    handleSelectChangeF(`articulo${index + 1}`, id, nombre);
   };
 
   const handleSelectColorChange = (index, event) => {
@@ -230,7 +247,6 @@ function Tiradores() {
         {renderSelectArticulo(0, true)}
         <h1>Tiradores</h1>
         {renderSelectArticulo(1)}
-        
       </div>
       <div className="container3">
         {renderSelectArticulo(2)}
@@ -245,5 +261,7 @@ function Tiradores() {
 }
 
 export default Tiradores;
+
+
 
 
