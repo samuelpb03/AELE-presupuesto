@@ -33,11 +33,29 @@ const labelsMap = {
   color7Nombre: "Color 7",
   cantidad4: "Cantidad 4",
   cantidad5: "Cantidad 5",
-  cantidad6: "Cantidad 6 ",
+  cantidad6: "Cantidad 6",
   puntos4: "Puntos 4",
   puntos5: "Puntos 5",
   puntos6: "Puntos 6",
   puntos7: "Puntos 7",
+  medidas1Nombre: "Medidas 1",
+  medidas2Nombre: "Medidas 2",
+  medidas3Nombre: "Medidas 3",
+  medidas4Nombre: "Medidas 4",
+  medidas5Nombre: "Medidas 5",
+  medidas6Nombre: "Medidas 6",
+  medidas7Nombre: "Medidas 7",
+  medidas8Nombre: "Medidas 8",
+  medidas9Nombre: "Medidas 9",
+  puntosTotales1: "Puntos 1",
+  puntosTotales2: "Puntos 2",
+  puntosTotales3: "Puntos 3",
+  puntosTotales4: "Puntos 4",
+  puntosTotales5: "Puntos 5",
+  puntosTotales6: "Puntos 6",
+  puntosTotales7: "Puntos 7",
+  puntosTotales8: "Puntos 8",
+  puntosTotales9: "Puntos 9",
 };
 
 export const generatePDF = (data) => {
@@ -137,10 +155,9 @@ export const generatePDF = (data) => {
   });
 
   // Calcular totales
-  const totalPuntos = Object.values(data).reduce((total, section) => {
-    return total + Object.entries(section).reduce((subTotal, [key, value]) => {
-      if (key === 'puntos' || key === 'puntosFrente' || key === 'puntosEspecial1' || key === 'puntosEspecial2' || key === 'puntos2'
-       || key === 'puntos3' || key === 'puntos4' || key === 'puntos5' || key === 'puntos6' || key === 'puntos7' || key === 'puntos1') {
+  const totalPuntos = Object.entries(sections).reduce((total, [section]) => {
+    return total + Object.entries(data[section] || {}).reduce((subTotal, [key, value]) => {
+      if (key.startsWith('puntos') && value) {
         return subTotal + Number(value);
       }
       return subTotal;
@@ -148,13 +165,12 @@ export const generatePDF = (data) => {
   }, 0);
 
   console.log(`Total Puntos: ${totalPuntos}`);
-  
+
   doc.setFontSize(12);
   doc.text(`Total Puntos: ${totalPuntos}`, 14, startY);
 
   doc.save("presupuesto2.pdf");
 };
-
 
 
 

@@ -24,12 +24,14 @@ function Equipamiento3() {
       puntos: 0,
     })
   );
+  const [puntos, setPuntos] = useState(Array(9).fill(0));
 
   useEffect(() => {
     if (data.equipamiento3) {
       const restoredArticulos = Array(9).fill({ id: "", nombre: "" });
       const restoredMedidas = Array(9).fill({ id: "", nombre: "", puntos: 0 });
       const restoredCantidades = Array(9).fill(0);
+      const restoredPuntos = Array(9).fill(0);
 
       for (let i = 0; i < 9; i++) {
         restoredArticulos[i] = {
@@ -42,11 +44,13 @@ function Equipamiento3() {
           puntos: data.equipamiento3[`medidas${i + 1}Puntos`] || 0,
         };
         restoredCantidades[i] = data.equipamiento3[`cantidad${i + 1}`] || 0;
+        restoredPuntos[i] = data.equipamiento3[`puntos${i + 1}`] || 0;
       }
 
       setSelectedArticulos(restoredArticulos);
       setSelectedMedidas(restoredMedidas);
       setCantidades(restoredCantidades);
+      setPuntos(restoredPuntos);
     }
   }, []);
 
@@ -58,10 +62,11 @@ function Equipamiento3() {
       acc[`medidas${index + 1}Id`] = selectedMedidas[index].id;
       acc[`medidas${index + 1}Puntos`] = selectedMedidas[index].puntos;
       acc[`cantidad${index + 1}`] = cantidades[index];
+      acc[`puntos${index + 1}`] = puntos[index];
       return acc;
     }, {});
     saveData("equipamiento3", formattedData);
-  }, [selectedArticulos, selectedMedidas, cantidades, saveData]);
+  }, [selectedArticulos, selectedMedidas, cantidades, puntos, saveData]);
 
   useEffect(() => {
     axios
@@ -91,6 +96,29 @@ function Equipamiento3() {
       });
   }, []);
 
+  useEffect(() => {
+    selectedArticulos.forEach((articulo, index) => {
+      if (articulo.id) {
+        axios
+          .get("http://localhost:6969/medidas", { params: { articuloId: articulo.id, materialId: 5 } })
+          .then((res) => {
+            if (Array.isArray(res.data)) {
+              setListMedidas((prevListMedidas) => {
+                const updatedListMedidas = [...prevListMedidas];
+                updatedListMedidas[index] = res.data;
+                return updatedListMedidas;
+              });
+            } else {
+              console.error("Error fetching medidas: res.data is not an array");
+            }
+          })
+          .catch((error) => {
+            console.error("Error fetching medidas:", error);
+          });
+      }
+    });
+  }, [selectedArticulos]);
+
   const handleSelectArticuloChange = (index, event) => {
     const updatedArticulos = [...selectedArticulos];
     const updatedCantidades = [...cantidades];
@@ -115,12 +143,17 @@ function Equipamiento3() {
             if (res.data.length > 0) {
               const firstMedida = res.data[0];
               const updatedSelectedMedidas = [...selectedMedidas];
+              const updatedPuntos = [...puntos];
+
               updatedSelectedMedidas[index] = {
                 id: firstMedida.medidas_id,
                 nombre: firstMedida.medidas,
                 puntos: firstMedida.puntos,
               };
+              updatedPuntos[index] = firstMedida.puntos * updatedCantidades[index];
+
               setSelectedMedidas(updatedSelectedMedidas);
+              setPuntos(updatedPuntos);
             }
           } else {
             console.error("Error fetching medidas: res.data is not an array");
@@ -134,6 +167,11 @@ function Equipamiento3() {
       const updatedListMedidas = [...listMedidas];
       updatedListMedidas[index] = [];
       setListMedidas(updatedListMedidas);
+      setPuntos((prevPuntos) => {
+        const newPuntos = [...prevPuntos];
+        newPuntos[index] = 0;
+        return newPuntos;
+      });
     }
     setCantidades(updatedCantidades);
 
@@ -142,21 +180,28 @@ function Equipamiento3() {
 
   const handleSelectMedidasChange = (index, event) => {
     const updatedMedidas = [...selectedMedidas];
+    const updatedPuntos = [...puntos];
     const selectedIndex = event.target.selectedIndex;
     const nombre = event.target.options[selectedIndex].text;
     const id = event.target.value;
     const medidasList = listMedidas[index] || [];
     const selectedMedida = medidasList.find((medida) => medida.medidas_id === parseInt(id)) || {};
     updatedMedidas[index] = { id, nombre, puntos: selectedMedida.puntos || 0 };
+    updatedPuntos[index] = (selectedMedida.puntos || 0) * cantidades[index];
+
     setSelectedMedidas(updatedMedidas);
+    setPuntos(updatedPuntos);
 
     handleSelectChangeE3(`medidas${index + 1}`, id, nombre, selectedMedida.puntos || 0);
   };
 
   const handleCantidadChange = (index, event) => {
     const updatedCantidades = [...cantidades];
+    const updatedPuntos = [...puntos];
     updatedCantidades[index] = event.target.value;
+    updatedPuntos[index] = selectedMedidas[index].puntos * updatedCantidades[index];
     setCantidades(updatedCantidades);
+    setPuntos(updatedPuntos);
 
     handleSelectChangeE3(`cantidad${index + 1}`, updatedCantidades[index]);
   };
@@ -199,6 +244,7 @@ function Equipamiento3() {
         min="1"
         disabled={!selectedArticulos[index].id}
       />
+      <label>Puntos: {puntos[index]}</label>
     </div>
   );
 
@@ -214,7 +260,6 @@ function Equipamiento3() {
         {Array.from({ length: 3 }).map((_, i) => renderSelectArticulo(i, listArticuloEquipamiento))}
       </div>
       <div className="container3">
-        
         {Array.from({ length: 1 }).map((_, i) => renderSelectArticulo(i + 3, listArticuloEquipamiento))}
         <h2>Antracita</h2>
         {Array.from({ length: 2 }).map((_, i) => renderSelectArticulo(i + 4, listArticuloAntracita))}
@@ -228,3 +273,4 @@ function Equipamiento3() {
 }
 
 export default Equipamiento3;
+
