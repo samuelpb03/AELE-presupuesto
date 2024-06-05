@@ -16,6 +16,7 @@ export const TabsProvider = ({ children }) => {
   const [selectedOptionsC, setSelectedOptionsC] = useState({});
   const [selectedOptionsB, setSelectedOptionsB] = useState({});
   const [selectedOptionsZ, setSelectedOptionsZ] = useState({});
+  const [selectedOptionsInstalacion, setSelectedOptionsInstalacion] = useState({});
 
   const handleSelectChange = (tabId, optionId, optionName) => {
     setSelectedOptions(prev => ({ ...prev, [tabId]: { optionId, optionName } }));
@@ -56,8 +57,13 @@ export const TabsProvider = ({ children }) => {
   const handleSelectChangeB = (tabId, optionId, optionName) => {
     setSelectedOptionsB(prev => ({ ...prev, [tabId]: { optionId, optionName } }));
   };
+  
   const handleSelectChangeZ = (tabId, optionId, optionName) => {
     setSelectedOptionsZ(prev => ({ ...prev, [tabId]: { optionId, optionName } }));
+  };
+
+  const handleSelectChangeInstalacion = (tabId, optionId, optionName) => {
+    setSelectedOptionsInstalacion(prev => ({ ...prev, [tabId]: { optionId, optionName } }));
   };
 
   return (
@@ -83,7 +89,9 @@ export const TabsProvider = ({ children }) => {
       selectedOptionsB,
       handleSelectChangeB,
       selectedOptionsZ,
-      handleSelectChangeZ
+      handleSelectChangeZ,
+      selectedOptionsInstalacion,
+      handleSelectChangeInstalacion
     }}>
       {children}
     </TabsContext.Provider>
@@ -92,3 +100,4 @@ export const TabsProvider = ({ children }) => {
 
 // Hook personalizado para usar el contexto
 export const useTabs = () => useContext(TabsContext);
+

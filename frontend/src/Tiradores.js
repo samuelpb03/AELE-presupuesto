@@ -11,7 +11,7 @@ function Tiradores() {
   const [listColor, setListColor] = useState(Array(6).fill([])); // Inicializar como array de arrays
   const [selectedArticulos, setSelectedArticulos] = useState(Array(6).fill({ id: "", nombre: "", puntos: 0, serieId: "" }));
   const [selectedColores, setSelectedColores] = useState(Array(6).fill({ id: "", nombre: "" }));
-  const [cantidades, setCantidades] = useState(Array(6).fill(1));
+  var [cantidades, setCantidades] = useState(Array(6).fill(0));
   const [puntos, setPuntos] = useState(Array(6).fill(0));
 
   useEffect(() => {
@@ -117,13 +117,19 @@ function Tiradores() {
 
   const handleSelectArticuloChange = async (index, event, isCerradura = false) => {
     const updatedArticulos = [...selectedArticulos];
+    const updatedCantidades = [...cantidades];
     const selectedIndex = event.target.selectedIndex;
     const nombre = event.target.options[selectedIndex].text;
     const id = event.target.value;
     const serieId = event.target.options[selectedIndex].getAttribute('data-serie-id');
-
     updatedArticulos[index] = { id, nombre, puntos: 0, serieId };
     setSelectedArticulos(updatedArticulos);
+
+    // Set cantidad to 1 if an article is selected
+    if (id) {
+      updatedCantidades[index] = 1;
+    }
+    setCantidades(updatedCantidades);
 
     try {
       const materialRes = await axios.get(`http://localhost:6969/materialesPorArticulo`, {
@@ -143,7 +149,7 @@ function Tiradores() {
 
         setPuntos(prevPuntos => {
           const newPuntos = [...prevPuntos];
-          newPuntos[index] = puntos * cantidades[index];
+          newPuntos[index] = puntos * updatedCantidades[index];
           return newPuntos;
         });
 
@@ -261,6 +267,7 @@ function Tiradores() {
 }
 
 export default Tiradores;
+
 
 
 

@@ -9,6 +9,7 @@ import Frentes2 from './Frentes2';
 import Frentes3 from './Frentes3';  // Importa el nuevo componente
 import Baldas from './Baldas';
 import Remates from './Remates';
+import Instalacion from './Instalacion';
 import { DataProvider } from './context/DataContext';
 import NavigationController from './ControlNavegacion';
 import './App.css';
@@ -30,6 +31,7 @@ function App() {
             <Route path='/Frentes3' element={<TabsProvider><Frentes3/></TabsProvider>} />  {/* Nueva ruta */}
             <Route path='/Equipamiento3' element={<TabsProvider><Equipamiento3></Equipamiento3></TabsProvider>} />
             <Route path='/Remates' element={<TabsProvider><Remates/></TabsProvider>} />
+            <Route path='Instalacion' element={<TabsProvider><Instalacion/></TabsProvider>} />
           </Routes>
         </BrowserRouter>
       </div>

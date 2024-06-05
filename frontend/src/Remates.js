@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useTabs } from "./TabsContext";
 import { useData } from './context/DataContext';
-import { generatePDF } from "./GeneratePDF";
+
 
 function Remates() {
   const { handleSelectChangeZ } = useTabs();
@@ -102,9 +102,6 @@ function Remates() {
       return newPuntos;
     });
   };
-  const handleGeneratePDF = () => {
-    generatePDF(data);
-  };
 
   const renderSelectArticulo = (index) => (
     <div key={index}>
@@ -144,7 +141,7 @@ function Remates() {
       </div>
       <div className="container3">
         {renderSelectArticulo(2)}
-        <button onClick={handleGeneratePDF} style={{ marginTop: "20px" }}>Generar PDF</button>
+        
       </div>
     </div>
   );

@@ -83,10 +83,13 @@ export const generatePDF = (data) => {
     interiores: "Interiores",
     equipamiento3: "Equipamiento",
     baldas: "Baldas e iluminación",
-    remates: "Remates a medida"
+    remates: "Remates a medida",
+    instalacion: "Instalacion"
   };
 
   let startY = 70;
+  let totalFrentesInteriores = 0;
+  let totalArmariosCompletos = 0;
 
   Object.entries(sections).forEach(([section, title]) => {
     console.log(`Processing section: ${title}`);
@@ -105,8 +108,9 @@ export const generatePDF = (data) => {
             sectionData.push([labelsMap[key] || key, value]);
           }
         } else if ((key === 'cantidad' || key.startsWith('cantidad')) && value && value !== 0 && !key.startsWith('cantidadEspecial')) {
-          if (data[section].selectedProductoNombre) { // Comprobación añadida
-            sectionData.push([labelsMap[key] || key, value]);
+          sectionData.push([labelsMap[key] || key, value]);
+          if (section === 'frentes' || section === 'frentes2' || section === 'frentes3' || section === 'interiores') {
+            totalFrentesInteriores += Number(value);
           }
         } else if ((key === 'puntos' || key.startsWith('puntos')) && value && !key.startsWith('puntosEspecial')) {
           sectionData.push([labelsMap[key] || key, value]);
@@ -146,7 +150,7 @@ export const generatePDF = (data) => {
           head: [['Concepto', 'Detalles']],
           body: sectionData,
           startY: startY,
-          theme: 'grid'
+          theme: 'grid',
         });
 
         startY = doc.lastAutoTable.finalY + 10;
@@ -164,15 +168,26 @@ export const generatePDF = (data) => {
     }, 0);
   }, 0);
 
+  // Calcular el total de montaje e instalación
+  const numFrentesInteriores = data.instalacion?.numFrentesInteriores || 0;
+  const numArmariosCompletos = data.instalacion?.numArmariosCompletos || 0;
+  const acarreo = data.instalacion?.acarreo || false;
+
+  let totalMontaje = ((numFrentesInteriores * 110) + (numArmariosCompletos * 146)) + 50;
+
   console.log(`Total Puntos: ${totalPuntos}`);
 
   doc.setFontSize(12);
   doc.text(`Total Puntos: ${totalPuntos}`, 14, startY);
+  startY += 10;
+  doc.text(`Total Frentes/Interiores: ${numFrentesInteriores}`, 14, startY);
+  startY += 10;
+  doc.text(`Total Armarios Completos: ${numArmariosCompletos}`, 14, startY);
+  startY += 10;
+  doc.text(`Total Montaje e Instalación: ${totalMontaje.toFixed(2)} €`, 14, startY);
 
   doc.save("presupuesto2.pdf");
 };
-
-
 
 
 
