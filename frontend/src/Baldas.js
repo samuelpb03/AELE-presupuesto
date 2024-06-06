@@ -25,6 +25,8 @@ function Baldas() {
   );
   const [puntosTotales, setPuntosTotales] = useState(Array(12).fill(0));
 
+  const backendUrl = 'https://46f4-62-87-75-58.ngrok-free.app'; // URL de ngrok para el backend
+
   useEffect(() => {
     // Restore data from context when component mounts
     const restoredArticulos = Array(12).fill({ id: "", nombre: "" });
@@ -55,14 +57,22 @@ function Baldas() {
   useEffect(() => {
     const fetchArticulos = async () => {
       try {
-        const baldasRes = await axios.get("http://localhost:6969/articulo/baldas");
+        const baldasRes = await axios.get(`${backendUrl}/articulo/baldas`, {
+          headers: {
+            'ngrok-skip-browser-warning': 'true'
+          }
+        });
         if (Array.isArray(baldasRes.data)) {
           setListArticulo(baldasRes.data);
         } else {
           console.error("Error fetching articulos: res.data is not an array");
         }
 
-        const iluminacionRes = await axios.get("http://localhost:6969/articulo/iluminacion");
+        const iluminacionRes = await axios.get(`${backendUrl}/articulo/iluminacion`, {
+          headers: {
+            'ngrok-skip-browser-warning': 'true'
+          }
+        });
         if (Array.isArray(iluminacionRes.data)) {
           setListArticuloIluminacion(iluminacionRes.data);
         } else {
@@ -74,7 +84,7 @@ function Baldas() {
     };
 
     fetchArticulos();
-  }, []);
+  }, [backendUrl]);
 
   useEffect(() => {
     // Fetch medidas for restored articulos
@@ -83,7 +93,10 @@ function Baldas() {
       const promises = selectedArticulos.map(async (articulo, index) => {
         if (articulo.id) {
           try {
-            const medidasRes = await axios.get("http://localhost:6969/medidas", {
+            const medidasRes = await axios.get(`${backendUrl}/medidas`, {
+              headers: {
+                'ngrok-skip-browser-warning': 'true'
+              },
               params: { articuloId: articulo.id, materialId: 5 },
             });
             if (Array.isArray(medidasRes.data)) {
@@ -101,7 +114,7 @@ function Baldas() {
     };
 
     fetchMedidas();
-  }, [selectedArticulos]);
+  }, [selectedArticulos, backendUrl]);
 
   useEffect(() => {
     const formattedData = selectedArticulos.reduce((acc, articulo, index) => {
@@ -131,7 +144,10 @@ function Baldas() {
       updatedCantidades[index] = 1; // Set the initial value to 1 when an article is selected
 
       try {
-        const medidasRes = await axios.get("http://localhost:6969/medidas", {
+        const medidasRes = await axios.get(`${backendUrl}/medidas`, {
+          headers: {
+            'ngrok-skip-browser-warning': 'true'
+          },
           params: { articuloId: id, materialId: 5 },
         });
         if (Array.isArray(medidasRes.data)) {
@@ -265,11 +281,10 @@ function Baldas() {
       </div>
       <div className="container3">
         {Array.from({ length: 3 }).map((_, i) => renderSelectArticulo(i + 3, listArticulo, false))}
-        
       </div>
       <div className="container4">
-      <h1 style={{marginTop:"40px"}}>Iluminación</h1>
-      {Array.from({ length: 1 }).map((_, i) => renderSelectArticulo(i + 6, listArticuloIluminacion, true))}
+        <h1 style={{marginTop:"40px"}}>Iluminación</h1>
+        {Array.from({ length: 1 }).map((_, i) => renderSelectArticulo(i + 6, listArticuloIluminacion, true))}
         {Array.from({ length: 4 }).map((_, i) => renderSelectArticulo(i + 8, listArticuloIluminacion, true))}
       </div>
     </div>
@@ -277,6 +292,7 @@ function Baldas() {
 }
 
 export default Baldas;
+
 
 
 

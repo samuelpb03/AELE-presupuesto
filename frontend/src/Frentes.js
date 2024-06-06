@@ -35,6 +35,8 @@ function Frentes() {
   const [cantidadEspecial2, setCantidadEspecial2] = useState(0);
   const [franjaActiva, setFranjaActiva] = useState(false);
 
+  const backendUrl = 'https://46f4-62-87-75-58.ngrok-free.app'; // URL de ngrok para el backend
+
   useEffect(() => {
     if (data.frentes) {
       setSelectedProducto({
@@ -142,34 +144,48 @@ function Frentes() {
     puntosEspecial2,
     saveData,
   ]);
-  
 
   useEffect(() => {
-    axios.get("http://localhost:6969/producto").then((res) => {
+    axios.get(`${backendUrl}/producto`, {
+      headers: {
+        'ngrok-skip-browser-warning': 'true'
+      }
+    }).then((res) => {
+      console.log('Full response:', res); // Registrar la respuesta completa
       if (Array.isArray(res.data)) {
         const filteredProducts = res.data.filter((producto) => [1, 4, 5].includes(producto.producto_id));
         setListProducto(filteredProducts);
       } else {
-        console.error("Error fetching productos: res.data is not an array");
+        console.error("Error fetching productos: res.data is not an array", res.data);
       }
     }).catch(error => {
       console.error("Error fetching productos:", error);
     });
 
-    axios.get("http://localhost:6969/especialesConPuntosFrentes").then((res) => {
+    axios.get(`${backendUrl}/especialesConPuntosFrentes`, {
+      headers: {
+        'ngrok-skip-browser-warning': 'true'
+      }
+    }).then((res) => {
+      console.log('Full response:', res); // Registrar la respuesta completa
       if (Array.isArray(res.data)) {
         setListEspeciales(res.data);
       } else {
-        console.error("Error fetching articulos especiales: res.data is not an array");
+        console.error("Error fetching articulos especiales: res.data is not an array", res.data);
       }
     }).catch(error => {
       console.error("Error fetching articulos especiales:", error);
     });
-  }, []);
+  }, [backendUrl]);
 
   useEffect(() => {
     if (selectedProducto.id) {
-      axios.get("http://localhost:6969/serie", { params: { productoId: selectedProducto.id } }).then((res) => {
+      axios.get(`${backendUrl}/serie`, {
+        headers: {
+          'ngrok-skip-browser-warning': 'true'
+        },
+        params: { productoId: selectedProducto.id }
+      }).then((res) => {
         if (Array.isArray(res.data)) {
           setListSerie(res.data);
           document.getElementById("serie").disabled = false;
@@ -186,11 +202,16 @@ function Frentes() {
       document.getElementById("materialFranja").disabled = true;
       document.getElementById("colorFranja").disabled = true;
     }
-  }, [selectedProducto.id]);
+  }, [selectedProducto.id, backendUrl]);
 
   useEffect(() => {
     if (selectedSerie.id) {
-      axios.get("http://localhost:6969/articulo", { params: { serieId: selectedSerie.id } }).then((res) => {
+      axios.get(`${backendUrl}/articulo`, {
+        headers: {
+          'ngrok-skip-browser-warning': 'true'
+        },
+        params: { serieId: selectedSerie.id }
+      }).then((res) => {
         if (Array.isArray(res.data)) {
           setListArticulo(res.data);
           const franja = res.data.some((articulo) => articulo.franja === 1);
@@ -212,11 +233,16 @@ function Frentes() {
         console.error("Error fetching articulos:", error);
       });
     }
-  }, [selectedSerie.id]);
+  }, [selectedSerie.id, backendUrl]);
 
   useEffect(() => {
     if (selectedArticulo.id) {
-      axios.get("http://localhost:6969/material", { params: { serieId: selectedSerie.id } }).then((res) => {
+      axios.get(`${backendUrl}/material`, {
+        headers: {
+          'ngrok-skip-browser-warning': 'true'
+        },
+        params: { serieId: selectedSerie.id }
+      }).then((res) => {
         if (Array.isArray(res.data)) {
           setListMaterial(res.data);
           document.getElementById("material").disabled = false;
@@ -227,11 +253,16 @@ function Frentes() {
         console.error("Error fetching materiales:", error);
       });
     }
-  }, [selectedArticulo.id, selectedSerie.id]);
+  }, [selectedArticulo.id, selectedSerie.id, backendUrl]);
 
   useEffect(() => {
     if (selectedMaterial.id) {
-      axios.get("http://localhost:6969/color", { params: { materialId: selectedMaterial.id } }).then((res) => {
+      axios.get(`${backendUrl}/color`, {
+        headers: {
+          'ngrok-skip-browser-warning': 'true'
+        },
+        params: { materialId: selectedMaterial.id }
+      }).then((res) => {
         if (Array.isArray(res.data)) {
           setListColor(res.data);
           document.getElementById("color").disabled = false;
@@ -242,11 +273,14 @@ function Frentes() {
         console.error("Error fetching colores:", error);
       });
     }
-  }, [selectedMaterial.id]);
+  }, [selectedMaterial.id, backendUrl]);
 
   useEffect(() => {
     if (selectedArticulo.id && selectedMaterial.id) {
-      axios.get("http://localhost:6969/medidasConPuntos", {
+      axios.get(`${backendUrl}/medidasConPuntos`, {
+        headers: {
+          'ngrok-skip-browser-warning': 'true'
+        },
         params: {
           articuloId: selectedArticulo.id,
           materialId: selectedMaterial.id,
@@ -262,11 +296,16 @@ function Frentes() {
         console.error("Error fetching medidas:", error);
       });
     }
-  }, [selectedArticulo.id, selectedMaterial.id]);
+  }, [selectedArticulo.id, selectedMaterial.id, backendUrl]);
 
   useEffect(() => {
     if (franjaActiva) {
-      axios.get("http://localhost:6969/materialFranja", { params: { materialId: selectedMaterial.id } }).then((res) => {
+      axios.get(`${backendUrl}/materialFranja`, {
+        headers: {
+          'ngrok-skip-browser-warning': 'true'
+        },
+        params: { materialId: selectedMaterial.id }
+      }).then((res) => {
         if (Array.isArray(res.data)) {
           setListMaterialFranja(res.data);
           document.getElementById("materialFranja").disabled = false;
@@ -277,11 +316,16 @@ function Frentes() {
         console.error("Error fetching materialFranja:", error);
       });
     }
-  }, [franjaActiva, selectedMaterial.id]);
+  }, [franjaActiva, selectedMaterial.id, backendUrl]);
 
   useEffect(() => {
     if (selectedMaterialFranja.id) {
-      axios.get("http://localhost:6969/colorFranja", { params: { materialFranjaId: selectedMaterialFranja.id } }).then((res) => {
+      axios.get(`${backendUrl}/colorFranja`, {
+        headers: {
+          'ngrok-skip-browser-warning': 'true'
+        },
+        params: { materialFranjaId: selectedMaterialFranja.id }
+      }).then((res) => {
         if (Array.isArray(res.data)) {
           setListColorFranja(res.data);
           document.getElementById("colorFranja").disabled = false;
@@ -292,7 +336,7 @@ function Frentes() {
         console.error("Error fetching colorFranja:", error);
       });
     }
-  }, [selectedMaterialFranja.id]);
+  }, [selectedMaterialFranja.id, backendUrl]);
 
   const handleSelectProductChange = (event) => {
     const index = event.target.selectedIndex;
@@ -549,4 +593,3 @@ function Frentes() {
 }
 
 export default Frentes;
-

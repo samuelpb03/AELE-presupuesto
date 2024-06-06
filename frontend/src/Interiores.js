@@ -20,9 +20,15 @@ function Interiores() {
   const [puntosEspecial1, setPuntosEspecial1] = useState(0);
   const [puntosEspecial2, setPuntosEspecial2] = useState(0);
 
+  const backendUrl = 'https://46f4-62-87-75-58.ngrok-free.app'; // URL de ngrok para el backend
+
   useEffect(() => {
     axios
-      .get("http://localhost:6969/articulo/interiores")
+      .get(`${backendUrl}/articulo/interiores`, {
+        headers: {
+          'ngrok-skip-browser-warning': 'true'
+        }
+      })
       .then((res) => {
         if (Array.isArray(res.data)) {
           setListArticulo(res.data);
@@ -35,7 +41,11 @@ function Interiores() {
       });
 
     axios
-      .get("http://localhost:6969/especialesConPuntos")
+      .get(`${backendUrl}/especialesConPuntos`, {
+        headers: {
+          'ngrok-skip-browser-warning': 'true'
+        }
+      })
       .then((res) => {
         if (Array.isArray(res.data)) {
           setListEspeciales(res.data);
@@ -46,7 +56,7 @@ function Interiores() {
       .catch((error) => {
         console.error("Error fetching especiales:", error);
       });
-  }, []);
+  }, [backendUrl]);
 
   useEffect(() => {
     if (data && data.interiores) {

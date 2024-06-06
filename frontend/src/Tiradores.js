@@ -14,6 +14,8 @@ function Tiradores() {
   var [cantidades, setCantidades] = useState(Array(6).fill(0));
   const [puntos, setPuntos] = useState(Array(6).fill(0));
 
+  const backendUrl = 'https://46f4-62-87-75-58.ngrok-free.app'; // URL de ngrok para el backend
+
   useEffect(() => {
     if (data.tiradores) {
       const restoredArticulos = Array(6).fill({ id: "", nombre: "", puntos: 0, serieId: "" });
@@ -59,7 +61,11 @@ function Tiradores() {
   }, [selectedArticulos, selectedColores, cantidades, puntos, saveData]);
 
   useEffect(() => {
-    axios.get("http://localhost:6969/articulo/tiradores")
+    axios.get(`${backendUrl}/articulo/tiradores`, {
+      headers: {
+        'ngrok-skip-browser-warning': 'true'
+      }
+    })
       .then((res) => {
         if (Array.isArray(res.data)) {
           setListTiradores(res.data);
@@ -71,7 +77,11 @@ function Tiradores() {
         console.error("Error fetching tiradores:", error);
       });
 
-    axios.get("http://localhost:6969/articulo/cerraduras")
+    axios.get(`${backendUrl}/articulo/cerraduras`, {
+      headers: {
+        'ngrok-skip-browser-warning': 'true'
+      }
+    })
       .then((res) => {
         if (Array.isArray(res.data)) {
           setListCerraduras(res.data);
@@ -82,16 +92,26 @@ function Tiradores() {
       .catch((error) => {
         console.error("Error fetching cerraduras:", error);
       });
-  }, []);
+  }, [backendUrl]);
 
   useEffect(() => {
     selectedArticulos.forEach((articulo, index) => {
       if (articulo.id) {
-        axios.get("http://localhost:6969/materialesPorArticulo", { params: { articuloId: articulo.id } })
+        axios.get(`${backendUrl}/materialesPorArticulo`, {
+          headers: {
+            'ngrok-skip-browser-warning': 'true'
+          },
+          params: { articuloId: articulo.id }
+        })
           .then((materialRes) => {
             const materialId = materialRes.data.length > 0 ? materialRes.data[0].material : null;
             if (materialId) {
-              axios.get("http://localhost:6969/color", { params: { materialId } })
+              axios.get(`${backendUrl}/color`, {
+                headers: {
+                  'ngrok-skip-browser-warning': 'true'
+                },
+                params: { materialId }
+              })
                 .then((coloresRes) => {
                   if (Array.isArray(coloresRes.data)) {
                     setListColor((prevListColor) => {
@@ -113,7 +133,7 @@ function Tiradores() {
           });
       }
     });
-  }, [selectedArticulos]);
+  }, [selectedArticulos, backendUrl]);
 
   const handleSelectArticuloChange = async (index, event, isCerradura = false) => {
     const updatedArticulos = [...selectedArticulos];
@@ -132,13 +152,19 @@ function Tiradores() {
     setCantidades(updatedCantidades);
 
     try {
-      const materialRes = await axios.get(`http://localhost:6969/materialesPorArticulo`, {
+      const materialRes = await axios.get(`${backendUrl}/materialesPorArticulo`, {
+        headers: {
+          'ngrok-skip-browser-warning': 'true'
+        },
         params: { articuloId: id }
       });
       const materialId = materialRes.data.length > 0 ? materialRes.data[0].material : null;
       if (materialId) {
         console.log(`Material ID for articuloId ${id}: ${materialId}`);
-        const medidasRes = await axios.get("http://localhost:6969/medidasConPuntos", {
+        const medidasRes = await axios.get(`${backendUrl}/medidasConPuntos`, {
+          headers: {
+            'ngrok-skip-browser-warning': 'true'
+          },
           params: { articuloId: id, materialId }
         });
         const selectedArticulo = medidasRes.data.length > 0 ? medidasRes.data[0] : { puntos: 0 };
@@ -153,7 +179,10 @@ function Tiradores() {
           return newPuntos;
         });
 
-        const coloresRes = await axios.get("http://localhost:6969/color", {
+        const coloresRes = await axios.get(`${backendUrl}/color`, {
+          headers: {
+            'ngrok-skip-browser-warning': 'true'
+          },
           params: { materialId }
         });
         if (Array.isArray(coloresRes.data)) {
@@ -267,8 +296,3 @@ function Tiradores() {
 }
 
 export default Tiradores;
-
-
-
-
-

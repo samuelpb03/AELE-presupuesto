@@ -4,7 +4,29 @@ const cors = require("cors");
 
 const app = express();
 app.use(express.json());
-app.use(cors());
+
+// Configurar CORS para permitir solicitudes desde tu dominio frontend
+const corsOptions = {
+  origin: 'http://localhost:3000', // Reemplaza esto con el dominio de tu frontend
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'ngrok-skip-browser-warning','Access-Control-Allow-Origin'],
+  optionsSuccessStatus: 200,
+  credentials: true
+};
+
+app.use(cors(corsOptions));
+
+// Middleware adicional para asegurarse de que las cabeceras CORS están presentes en todas las respuestas
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "http://localhost:3000");
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.header("ngrok-skip-browser-warning", true);
+  next();
+});
+
+// Manejar solicitudes OPTIONS (preflight) globalmente
+app.options('*', cors(corsOptions));
 
 const port = "6969";
 const host = "localhost";
@@ -392,4 +414,3 @@ app.get("/materialesPorArticulo", (req, res) => {
 app.listen(port, () => {
   console.log(">>> SERVIDOR CORRIENDO EN: " + host + ":" + port);
 });
-
