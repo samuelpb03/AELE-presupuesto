@@ -14,7 +14,7 @@ function Tiradores() {
   var [cantidades, setCantidades] = useState(Array(6).fill(0));
   const [puntos, setPuntos] = useState(Array(6).fill(0));
 
-  const backendUrl = 'https://46f4-62-87-75-58.ngrok-free.app'; // URL de ngrok para el backend
+  const backendUrl = 'https://nearby-partially-guinea.ngrok-free.app'; // URL de ngrok para el backend
 
   useEffect(() => {
     if (data.tiradores) {

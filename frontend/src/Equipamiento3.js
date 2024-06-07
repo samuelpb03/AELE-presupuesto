@@ -3,7 +3,6 @@ import axios from "axios";
 import { useTabs } from "./TabsContext";
 import { useData } from "./context/DataContext";
 
-
 function Equipamiento3() {
   const { handleSelectChangeE3 } = useTabs();
   const { data, saveData } = useData();
@@ -25,6 +24,7 @@ function Equipamiento3() {
     })
   );
   const [puntos, setPuntos] = useState(Array(9).fill(0));
+  const backendUrl = 'https://nearby-partially-guinea.ngrok-free.app';
 
   useEffect(() => {
     if (data.equipamiento3) {
@@ -70,7 +70,11 @@ function Equipamiento3() {
 
   useEffect(() => {
     axios
-      .get("http://localhost:6969/articulo/equipamiento")
+      .get(`${backendUrl}/articulo/equipamiento`, {
+        headers: {
+          'ngrok-skip-browser-warning': 'true'
+        }
+      })
       .then((res) => {
         if (Array.isArray(res.data)) {
           setListArticuloEquipamiento(res.data);
@@ -83,7 +87,11 @@ function Equipamiento3() {
       });
 
     axios
-      .get("http://localhost:6969/articulo/antracita")
+      .get(`${backendUrl}/articulo/antracita`, {
+        headers: {
+          'ngrok-skip-browser-warning': 'true'
+        }
+      })
       .then((res) => {
         if (Array.isArray(res.data)) {
           setListArticuloAntracita(res.data);
@@ -100,7 +108,12 @@ function Equipamiento3() {
     selectedArticulos.forEach((articulo, index) => {
       if (articulo.id) {
         axios
-          .get("http://localhost:6969/medidas", { params: { articuloId: articulo.id, materialId: 5 } })
+          .get(`${backendUrl}/medidas`, {
+            headers: {
+              'ngrok-skip-browser-warning': 'true'
+            },
+            params: { articuloId: articulo.id, materialId: 5 }
+          })
           .then((res) => {
             if (Array.isArray(res.data)) {
               setListMedidas((prevListMedidas) => {
@@ -133,7 +146,12 @@ function Equipamiento3() {
       updatedCantidades[index] = 1;
 
       axios
-        .get("http://localhost:6969/medidas", { params: { articuloId: id, materialId: 5 } })
+        .get(`${backendUrl}/medidas`, {
+          headers: {
+            'ngrok-skip-browser-warning': 'true'
+          },
+          params: { articuloId: id, materialId: 5 }
+        })
         .then((res) => {
           if (Array.isArray(res.data)) {
             const updatedListMedidas = [...listMedidas];
@@ -247,7 +265,6 @@ function Equipamiento3() {
       <label>Puntos: {puntos[index]}</label>
     </div>
   );
-
 
   return (
     <div className="container">

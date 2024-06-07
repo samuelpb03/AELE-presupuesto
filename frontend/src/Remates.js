@@ -3,7 +3,6 @@ import axios from "axios";
 import { useTabs } from "./TabsContext";
 import { useData } from './context/DataContext';
 
-
 function Remates() {
   const { handleSelectChangeZ } = useTabs();
   const { data, saveData } = useData();
@@ -11,10 +10,15 @@ function Remates() {
   const [selectedArticulos, setSelectedArticulos] = useState(Array(3).fill({ id: "", nombre: "", puntos: 0 }));
   const [metros, setMetros] = useState(Array(3).fill(0));
   const [puntos, setPuntos] = useState(Array(3).fill(0));
+  const backendUrl = 'https://nearby-partially-guinea.ngrok-free.app';
 
   useEffect(() => {
     axios
-      .get("http://localhost:6969/articulo/remates")
+      .get(`${backendUrl}/articulo/remates`, {
+        headers: {
+          'ngrok-skip-browser-warning': 'true'
+        }
+      })
       .then((res) => {
         if (Array.isArray(res.data)) {
           const formattedArticulos = res.data.map((articulo) => ({
@@ -141,7 +145,6 @@ function Remates() {
       </div>
       <div className="container3">
         {renderSelectArticulo(2)}
-        
       </div>
     </div>
   );

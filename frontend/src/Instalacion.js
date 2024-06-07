@@ -8,13 +8,13 @@ function Instalacion() {
   const { data, saveData } = useData();
   const [numFrentesInteriores, setNumFrentesInteriores] = useState(0);
   const [numArmariosCompletos, setNumArmariosCompletos] = useState(0);
-  const [montajeAcarreo, setMontajeAcarreo] = useState(false);
+  const [montajeAcarreo, setMontajeAcarreo] = useState(true); // Mantener como true por defecto
 
   useEffect(() => {
     if (data.instalacion) {
       setNumFrentesInteriores(data.instalacion.numFrentesInteriores || 0);
       setNumArmariosCompletos(data.instalacion.numArmariosCompletos || 0);
-      setMontajeAcarreo(data.instalacion.montajeAcarreo || false);
+      setMontajeAcarreo(true); // Mantener como true siempre
     }
   }, []);
 
@@ -26,9 +26,11 @@ function Instalacion() {
     };
     saveData("instalacion", formattedData);
   }, [numFrentesInteriores, numArmariosCompletos, montajeAcarreo, saveData]);
+
   const handleGeneratePDF = () => {
     generatePDF(data);
   };
+
   return (
     <div className="container">
       <div className="container2">
@@ -52,20 +54,18 @@ function Instalacion() {
             min={0}
             onChange={(e) => setNumArmariosCompletos(parseInt(e.target.value, 10) || 0)}
           />
-        </div>
-      </div>
-      <div className="container3">
-        <div className="field checkbox-field">
-          <input
-            type="checkbox"
-            id="montajeAcarreo"
-            checked={montajeAcarreo}
-            onChange={(e) => setMontajeAcarreo(e.target.checked)}
-          />
-          <label htmlFor="montajeAcarreo">Montaje + acarreo</label>
           <button onClick={handleGeneratePDF} style={{ marginTop: "20px" }}>Generar PDF</button>
         </div>
       </div>
+      {/* Ocultamos el input pero mantenemos el estado */}
+      <input
+        type="checkbox"
+        id="montajeAcarreo"
+        checked={montajeAcarreo}
+        onChange={(e) => setMontajeAcarreo(e.target.checked)}
+        style={{ display: "none" }}
+      />
+      
     </div>
   );
 }

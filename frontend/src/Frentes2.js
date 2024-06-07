@@ -24,7 +24,7 @@ function Frentes2() {
   const [selectedMedidas, setSelectedMedidas] = useState({ id: "", nombre: "", puntos: 0 });
   const [selectedMaterialFranja, setSelectedMaterialFranja] = useState({ id: "", nombre: "" });
   const [selectedColorFranja, setSelectedColorFranja] = useState({ id: "", nombre: "" });
-  const [cantidad, setCantidad] = useState(1); // Estado para cantidad
+  var [cantidad, setCantidad] = useState(0);// Estado para cantidad
   const [puntos, setPuntos] = useState(0); // Estado para puntos
 
   const [selectedEspecial1, setSelectedEspecial1] = useState({ id: "", nombre: "", puntos: 0 });
@@ -35,7 +35,7 @@ function Frentes2() {
   const [cantidadEspecial2, setCantidadEspecial2] = useState(0);
   const [franjaActiva, setFranjaActiva] = useState(false);
   
-  const backendUrl = 'https://46f4-62-87-75-58.ngrok-free.app'; // URL de ngrok para el backend
+  const backendUrl = 'https://nearby-partially-guinea.ngrok-free.app'; // URL de ngrok para el backend
 
   useEffect(() => {
     if (data.frentes2) {
@@ -82,7 +82,7 @@ function Frentes2() {
         nombre: data.frentes2.selectedEspecial2Nombre || "",
         puntos: data.frentes2.selectedEspecial2Puntos || 0,
       });
-      setCantidad(data.frentes2.cantidad || 1);
+      setCantidad(data.frentes2.cantidad || 0);
       setPuntos(data.frentes2.selectedMedidasPuntos || 0);
       setPuntosEspecial1((data.frentes2.selectedEspecial1Puntos || 0) * (data.frentes2.cantidadEspecial1 || 0));
       setPuntosEspecial2((data.frentes2.selectedEspecial2Puntos || 0) * (data.frentes2.cantidadEspecial2 || 0));
@@ -359,7 +359,6 @@ function Frentes2() {
     const id = event.target.value;
     setSelectedArticulo({ id, nombre });
     handleSelectChange("articulo", id, nombre);
-    setCantidad(1); // Establecer la cantidad a 1 cuando se selecciona un artículo
   };
 
   const handleSelectMaterialChange = (event) => {
@@ -533,7 +532,7 @@ function Frentes2() {
 
         {/* Cantidad */}
         <label htmlFor="cantidad">Cantidad:</label>
-        <input type="number" id="cantidad" value={cantidad} onChange={handleCantidadChange} min="1" />
+        <input type="number" id="cantidad" value={cantidad} onChange={handleCantidadChange} min="0" />
 
         {/* Puntos */}
         <label htmlFor="puntos">Puntos: {puntos * cantidad}</label>
