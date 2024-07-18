@@ -1,1 +1,8 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"/><link rel="icon" href="/favicon.ico"/><meta name="viewport" content="width=device-width,initial-scale=1"/><meta name="theme-color" content="#000000"/><meta name="description" content="Web site created using create-react-app"/><link rel="apple-touch-icon" href="/logo192.png"/><link rel="manifest" href="/manifest.json"/><title>React App</title><script defer="defer" src="/static/js/main.aed39b8a.js"></script><link href="/static/css/main.b4968599.css" rel="stylesheet"></head><body><div id="logo"><img src="logoAELE.png" alt="Logotipo de Empresa"></div><noscript>You need to enable JavaScript to run this app.</noscript><div id="root"></div></body></html>
+<!doctype html><html lang="en"><head><meta charset="utf-8"/><link rel="icon" href="/favicon.ico"/><meta name="viewport" content="width=device-width,initial-scale=1"/><meta name="theme-color" content="#000000"/><meta name="description" content="Web site created using create-react-app"/><link rel="apple-touch-icon" href="/logo192.png"/><link rel="manifest" href="/manifest.json"/><title>React App</title><script defer="defer" src="/static/js/main.aed39b8a.js"></script><link href="/static/css/main.b4968599.css" rel="stylesheet"></head><body><div id="logo"><img src="logoAELE.png" alt="Logotipo de Empresa"></div><noscript>You need to enable JavaScript to run this app.</noscript><script>
+    // Verificar si el usuario está autenticado
+    const user = localStorage.getItem('user');
+    if (!user) {
+        // Redirigir a login.php si no está autenticado
+        window.location.href = '/login.php';
+    }
+</script><div id="root"></div></body></html>

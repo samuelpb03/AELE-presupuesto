@@ -14,7 +14,14 @@ function Tiradores() {
   var [cantidades, setCantidades] = useState(Array(6).fill(0));
   const [puntos, setPuntos] = useState(Array(6).fill(0));
 
-  const backendUrl = 'https://nearby-partially-guinea.ngrok-free.app'; // URL de ngrok para el backend
+  const backendUrl = 'http://194.164.166.129:6969'; // URL de ngrok para el backend
+  
+  useEffect(() => {
+    const user = localStorage.getItem('user');
+    if (!user) {
+      window.location.href = '/login.php'; // Redirigir a login.php si no está autenticado
+    }
+  }, []);
 
   useEffect(() => {
     if (data.tiradores) {

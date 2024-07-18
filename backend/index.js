@@ -7,18 +7,29 @@ app.use(express.json());
 
 // Configurar CORS para permitir solicitudes desde tu dominio frontend
 const corsOptions = {
-  origin: 'http://adpta.com', // Reemplaza esto con el dominio de tu frontend
+  origin: function (origin, callback) {
+    const allowedOrigins = ['http://adpta.com', 'http://www.adpta.com']; // Añade ambos dominios
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'ngrok-skip-browser-warning','Access-Control-Allow-Origin'],
+  allowedHeaders: ['Content-Type', 'ngrok-skip-browser-warning', 'Authorization'],
   optionsSuccessStatus: 200,
   credentials: true
 };
 
 app.use(cors(corsOptions));
 
-// Middleware adicional para asegurarse de que las cabeceras CORS están presentes en todas las respuestas
+// Middleware adicional para asegurarse de que las cabeceras CORS estén presentes en todas las respuestas
 app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "http://adpta.com");
+  const allowedOrigins = ['http://adpta.com', 'http://www.adpta.com'];
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.header("Access-Control-Allow-Origin", origin);
+  }
   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
   res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
   res.header("ngrok-skip-browser-warning", true);
@@ -29,12 +40,12 @@ app.use((req, res, next) => {
 app.options('*', cors(corsOptions));
 
 const port = "6969";
-const host = "localhost";
+const host = "0.0.0.0";
 const user = "root";
 const password = "root";
 const database = "dbs12752680";
 
-// Crea la conexion.
+// Crea la conexión.
 const dbConnection = mysql.createConnection({
   host: host,
   user: user,
@@ -42,7 +53,16 @@ const dbConnection = mysql.createConnection({
   database: database,
 });
 
-// Funcion Express GET para producto.
+// Verificar conexión a la base de datos
+dbConnection.connect(err => {
+  if (err) {
+    console.error('Error connecting to the database:', err);
+    return;
+  }
+  console.log('Connected to the database');
+});
+
+// Función Express GET para producto.
 app.get("/producto", (req, res) => {
   const query = "SELECT producto_id, nombre FROM producto";
   dbConnection.query(query, (err, data) => {
@@ -51,7 +71,7 @@ app.get("/producto", (req, res) => {
   });
 });
 
-// Funcion Express GET para serie.
+// Función Express GET para serie.
 app.get("/serie", (req, res) => {
   const productoId = req.query.productoId;
   const query = "SELECT * FROM serie WHERE producto_id=" + productoId;
@@ -61,7 +81,7 @@ app.get("/serie", (req, res) => {
   });
 });
 
-// Funcion Express GET para articulo.
+// Función Express GET para articulo.
 app.get("/articulo", (req, res) => {
   const serieId = req.query.serieId;
   const query = "SELECT * FROM articulo WHERE serie_id = " + serieId;
@@ -71,7 +91,7 @@ app.get("/articulo", (req, res) => {
   });
 });
 
-// Funcion Express GET para material.
+// Función Express GET para material.
 app.get("/material", (req, res) => {
   const serieId = req.query.serieId;
   const query =
@@ -83,7 +103,7 @@ app.get("/material", (req, res) => {
   });
 });
 
-// Funcion Express GET para color.
+// Función Express GET para color.
 app.get("/color", (req, res) => {
   const materialId = req.query.materialId;
   const query =
@@ -95,7 +115,7 @@ app.get("/color", (req, res) => {
   });
 });
 
-// Funcion Express GET para medidas.
+// Función Express GET para medidas.
 app.get("/medidas", (req, res) => {
   const articuloId = req.query.articuloId;
   const materialId = req.query.materialId;
@@ -115,7 +135,7 @@ app.get("/medidas", (req, res) => {
   });
 });
 
-// Funcion Express GET para material franja.
+// Función Express GET para material franja.
 app.get("/materialFranja", (req, res) => {
   const query = "SELECT material_id, nombre FROM material where material_id = 1 or material_id = 2 or material_id = 3 or material_id = 4 or material_id = 6";
   dbConnection.query(query, (err, data) => {
@@ -213,7 +233,7 @@ app.get("/articulo/equipamiento", (req, res) => {
   });
 });
 
-// Funcion Express GET para articulos de antracita.
+// Función Express GET para articulos de antracita.
 app.get("/articulo/antracita", (req, res) => {
   const query = `
     SELECT * FROM articulo
@@ -278,7 +298,7 @@ app.get("/articulo/cerraduras", (req, res) => {
   });
 });
 
-// Funcion Express GET para color franja.
+// Función Express GET para color franja.
 app.get("/colorFranja", (req, res) => {
   const materialFranjaId = req.query.materialFranjaId;
   const query =
@@ -393,6 +413,7 @@ app.get("/articuloEspecialesInteriores", (req, res) => {
     return res.json(data);
   });
 });
+
 // Ruta para obtener materiales únicos desde medidas
 app.get("/materialesPorArticulo", (req, res) => {
   const articuloId = req.query.articuloId;
@@ -410,7 +431,9 @@ app.get("/materialesPorArticulo", (req, res) => {
     return res.json(data);
   });
 });
+
 // Monta Express en el puerto.
 app.listen(port, () => {
   console.log(">>> SERVIDOR CORRIENDO EN: " + host + ":" + port);
 });
+

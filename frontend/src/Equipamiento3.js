@@ -24,7 +24,7 @@ function Equipamiento3() {
     })
   );
   const [puntos, setPuntos] = useState(Array(9).fill(0));
-  const backendUrl = 'https://nearby-partially-guinea.ngrok-free.app';
+  const backendUrl = 'http://194.164.166.129:6969';
 
   useEffect(() => {
     if (data.equipamiento3) {

@@ -35,7 +35,7 @@ function Frentes3() {
   const [cantidadEspecial2, setCantidadEspecial2] = useState(0);
   const [franjaActiva, setFranjaActiva] = useState(false);
 
-  const backendUrl = 'https://nearby-partially-guinea.ngrok-free.app'; // URL de ngrok para el backend
+  const backendUrl = 'http://194.164.166.129:6969'; // URL de ngrok para el backend
 
   useEffect(() => {
     if (data.frentes3) {

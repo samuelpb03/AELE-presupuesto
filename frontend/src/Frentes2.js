@@ -35,7 +35,7 @@ function Frentes2() {
   const [cantidadEspecial2, setCantidadEspecial2] = useState(0);
   const [franjaActiva, setFranjaActiva] = useState(false);
   
-  const backendUrl = 'https://nearby-partially-guinea.ngrok-free.app'; // URL de ngrok para el backend
+  const backendUrl = 'http://194.164.166.129:6969'; // URL de ngrok para el backend
 
   useEffect(() => {
     if (data.frentes2) {
@@ -147,11 +147,7 @@ function Frentes2() {
   
 
   useEffect(() => {
-    axios.get(`${backendUrl}/producto`, {
-      headers: {
-        'ngrok-skip-browser-warning': 'true'
-      }
-    }).then((res) => {
+    axios.get(`${backendUrl}/producto`).then((res) => {
       if (Array.isArray(res.data)) {
         const filteredProducts = res.data.filter((producto) => [1, 4, 5].includes(producto.producto_id));
         setListProducto(filteredProducts);
@@ -162,11 +158,7 @@ function Frentes2() {
       console.error("Error fetching productos:", error);
     });
 
-    axios.get(`${backendUrl}/especialesConPuntosFrentes`, {
-      headers: {
-        'ngrok-skip-browser-warning': 'true'
-      }
-    }).then((res) => {
+    axios.get(`${backendUrl}/especialesConPuntosFrentes`).then((res) => {
       if (Array.isArray(res.data)) {
         setListEspeciales(res.data);
       } else {

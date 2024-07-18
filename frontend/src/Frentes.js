@@ -34,7 +34,13 @@ function Frentes() {
   const [cantidadEspecial2, setCantidadEspecial2] = useState(0);
   const [franjaActiva, setFranjaActiva] = useState(false);
   var [cantidad, setCantidad] = useState(0);
-  const backendUrl = 'https://nearby-partially-guinea.ngrok-free.app'; // URL de ngrok para el backend
+  const backendUrl = 'http://194.164.166.129:6969'; // URL de ngrok para el backend
+        // Verificar si el usuario está autenticado
+        const user = localStorage.getItem('user');
+        //if (!user) {
+            // Redirigir a login.php si no está autenticado
+            //window.location.href = '/login.php';
+        //}
 
   useEffect(() => {
     if (data.frentes) {
@@ -145,11 +151,7 @@ function Frentes() {
   ]);
 
   useEffect(() => {
-    axios.get(`${backendUrl}/producto`, {
-      headers: {
-        'ngrok-skip-browser-warning': 'true'
-      }
-    }).then((res) => {
+    axios.get(`${backendUrl}/producto`).then((res) => {
       console.log('Full response:', res); // Registrar la respuesta completa
       if (Array.isArray(res.data)) {
         const filteredProducts = res.data.filter((producto) => [1, 4, 5].includes(producto.producto_id));
@@ -161,11 +163,7 @@ function Frentes() {
       console.error("Error fetching productos:", error);
     });
 
-    axios.get(`${backendUrl}/especialesConPuntosFrentes`, {
-      headers: {
-        'ngrok-skip-browser-warning': 'true'
-      }
-    }).then((res) => {
+    axios.get(`${backendUrl}/especialesConPuntosFrentes`).then((res) => {
       console.log('Full response:', res); // Registrar la respuesta completa
       if (Array.isArray(res.data)) {
         setListEspeciales(res.data);
@@ -180,9 +178,6 @@ function Frentes() {
   useEffect(() => {
     if (selectedProducto.id) {
       axios.get(`${backendUrl}/serie`, {
-        headers: {
-          'ngrok-skip-browser-warning': 'true'
-        },
         params: { productoId: selectedProducto.id }
       }).then((res) => {
         if (Array.isArray(res.data)) {
@@ -439,156 +434,185 @@ function Frentes() {
 
   return (
     <div className="container">
-      <div className="container2">
-        <h1>Frentes</h1>
-        {/* Producto */}
-        <label htmlFor="producto">Producto:</label>
-        <select id="producto" onChange={handleSelectProductChange} value={selectedProducto.id || ""}>
-          <option disabled={selectedProducto.id !== ""}>--Selecciona una opción--</option>
-          {listProducto.map((producto) => (
-            <option key={producto.producto_id} value={producto.producto_id}>
-              {producto.nombre}
-            </option>
-          ))}
-        </select>
-
-        {/* Serie */}
-        <label htmlFor="serie">Serie:</label>
-        <select id="serie" disabled={true} onChange={handleSelectSerieChange} value={selectedSerie.id || ""}>
-          <option value="" disabled={selectedProducto.id === ""}>--Selecciona una opción--</option>
-          {listSerie.map((serie) => (
-            <option key={serie.serie_id} value={serie.serie_id}>
-              {serie.nombre}
-            </option>
-          ))}
-        </select>
-
-        {/* Articulo */}
-        <label htmlFor="articulo">Artículo:</label>
-        <select id="articulo" disabled={true} onChange={handleSelectArticuloChange} value={selectedArticulo.id || ""}>
-          <option value="" disabled={selectedProducto.id === ""}>--Selecciona una opción--</option>
-          {listArticulo.map((articulo) => (
-            <option key={articulo.articulo_id} value={articulo.articulo_id}>
-              {articulo.nombre}
-            </option>
-          ))}
-        </select>
-
-        {/* Material */}
-        <label htmlFor="material">Material:</label>
-        <select id="material" disabled={true} onChange={handleSelectMaterialChange} value={selectedMaterial.id || ""}>
-          <option value="" disabled={selectedArticulo.id === ""}>--Selecciona una opción--</option>
-          {listMaterial.map((material) => (
-            <option key={material.material_id} value={material.material_id}>
-              {material.nombre}
-            </option>
-          ))}
-        </select>
+      <div className="section">
+        <div className="container2">
+          <h1>Frentes</h1>
+          <div className="field">
+            <label htmlFor="producto">Tipo de Frente:</label>
+            <select id="producto" onChange={handleSelectProductChange} value={selectedProducto.id || ""}>
+              <option disabled={selectedProducto.id !== ""}>--Selecciona una opción--</option>
+              {listProducto.map((producto) => (
+                <option key={producto.producto_id} value={producto.producto_id}>
+                  {producto.nombre}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="field">
+            <label htmlFor="serie">Serie:</label>
+            <select id="serie" disabled={true} onChange={handleSelectSerieChange} value={selectedSerie.id || ""}>
+              <option value="" disabled={selectedProducto.id === ""}>--Selecciona una opción--</option>
+              {listSerie.map((serie) => (
+                <option key={serie.serie_id} value={serie.serie_id}>
+                  {serie.nombre}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="field">
+            <label htmlFor="articulo">Modelo:</label>
+            <select id="articulo" disabled={true} onChange={handleSelectArticuloChange} value={selectedArticulo.id || ""}>
+              <option value="" disabled={selectedProducto.id === ""}>--Selecciona una opción--</option>
+              {listArticulo.map((articulo) => (
+                <option key={articulo.articulo_id} value={articulo.articulo_id}>
+                  {articulo.nombre}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="field">
+            <label htmlFor="material">Material:</label>
+            <select id="material" disabled={true} onChange={handleSelectMaterialChange} value={selectedMaterial.id || ""}>
+              <option value="" disabled={selectedArticulo.id === ""}>--Selecciona una opción--</option>
+              {listMaterial.map((material) => (
+                <option key={material.material_id} value={material.material_id}>
+                  {material.nombre}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="field">
+            <label htmlFor="color">Color Principal:</label>
+            <select id="color" disabled={true} onChange={handleSelectColorChange} value={selectedColor.id || ""}>
+              <option value="" disabled={selectedProducto.id === ""}>--Selecciona una opción--</option>
+              {listColor.map((color) => (
+                <option key={color.color_id} value={color.color_id}>
+                  {color.nombre}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="field">
+            <label htmlFor="medidas">Medidas:</label>
+            <select id="medidas" disabled={true} onChange={handleSelectMedidasChange} value={selectedMedidas.id || ""}>
+              <option value="" disabled={selectedArticulo.id === ""}>--Selecciona una opción--</option>
+              {listMedidas.map((medidas) => (
+                <option key={medidas.medidas_id} value={medidas.medidas_id}>
+                  {medidas.medidas}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="field">
+            <label htmlFor="materialFranja">Material Franja:</label>
+            <select id="materialFranja" disabled={!franjaActiva} onChange={handleSelectMaterialFranjaChange} value={selectedMaterialFranja.id || ""}>
+              <option value="" >--Selecciona una opción--</option>
+              {listMaterialFranja.map((material) => (
+                <option key={material.material_id} value={material.material_id}>
+                  {material.nombre}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="field">
+            <label htmlFor="colorFranja">Color Franja:</label>
+            <select id="colorFranja" disabled={!franjaActiva} onChange={handleSelectColorFranjaChange} value={selectedColorFranja.id || ""}>
+              <option value="" disabled={selectedArticulo.id === ""}>--Selecciona una opción--</option>
+              {listColorFranja.map((color) => (
+                <option key={color.color_id} value={color.color_id}>
+                  {color.nombre}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="field-centered">
+            <label htmlFor="cantidad">Cantidad:</label>
+            <input type="number" id="cantidad" value={cantidad} onChange={handleCantidadChange} min="0" />
+          </div>
+          <div className="field-centered">
+            <label htmlFor="puntos">Puntos: {puntos * cantidad}</label>
+          </div>
+        </div>
       </div>
-      <div className="container3">
-        {/* Color */}
-        <label htmlFor="color">Color:</label>
-        <select id="color" disabled={true} onChange={handleSelectColorChange} value={selectedColor.id || ""}>
-          <option value="" disabled={selectedProducto.id === ""}>--Selecciona una opción--</option>
-          {listColor.map((color) => (
-            <option key={color.color_id} value={color.color_id}>
-              {color.nombre}
-            </option>
-          ))}
-        </select>
-
-        {/* Medidas */}
-        <label htmlFor="medidas">Medidas:</label>
-        <select id="medidas" disabled={true} onChange={handleSelectMedidasChange} value={selectedMedidas.id || ""}>
-          <option value="" disabled={selectedArticulo.id === ""}>--Selecciona una opción--</option>
-          {listMedidas.map((medidas) => (
-            <option key={medidas.medidas_id} value={medidas.medidas_id}>
-              {medidas.medidas}
-            </option>
-          ))}
-        </select>
-
-        {/* Material Franja */}
-        <label htmlFor="materialFranja">Material Franja:</label>
-        <select id="materialFranja" disabled={!franjaActiva} onChange={handleSelectMaterialFranjaChange} value={selectedMaterialFranja.id || ""}>
-          <option value="" >--Selecciona una opción--</option>
-          {listMaterialFranja.map((material) => (
-            <option key={material.material_id} value={material.material_id}>
-              {material.nombre}
-            </option>
-          ))}
-        </select>
-
-        {/* Color Franja */}
-        <label htmlFor="colorFranja">Color Franja:</label>
-        <select id="colorFranja" disabled={!franjaActiva} onChange={handleSelectColorFranjaChange} value={selectedColorFranja.id || ""}>
-          <option value="" disabled={selectedArticulo.id === ""}>--Selecciona una opción--</option>
-          {listColorFranja.map((color) => (
-            <option key={color.color_id} value={color.color_id}>
-              {color.nombre}
-            </option>
-          ))}
-        </select>
-
-        {/* Cantidad */}
-        <label htmlFor="cantidad">Cantidad:</label>
-        <input type="number" id="cantidad" value={cantidad} onChange={handleCantidadChange} min="0" />
-
-        {/* Puntos */}
-        <label htmlFor="puntos">Puntos: {puntos * cantidad}</label>
-      </div>
-      <div className="container4">
-        <h2>Especiales a Medida</h2>
-        {/* Articulo Especial 1 */}
-        <label htmlFor="especial1">Artículo Especial 1:</label>
-        <select
-          id="especial1"
-          onChange={(event) => handleSelectEspecialChange(1, event)}
-          value={selectedEspecial1.id || ""}
-        >
-          <option value="" disabled={selectedEspecial1.id !== ""}>--Selecciona una opción--</option>
-          {listEspeciales.map((especial) => (
-            <option key={especial.articulo_id} value={especial.articulo_id}>
-              {especial.articulo_nombre}
-            </option>
-          ))}
-        </select>
-        <label htmlFor="puntosEspecial1">Puntos: {puntosEspecial1}</label>
-        <label htmlFor="cantidadEspecial1">Cantidad:</label>
-        <input
-          type="number"
-          id="cantidadEspecial1"
-          value={cantidadEspecial1}
-          onChange={(event) => handleCantidadEspecialChange(1, event)}
-          min="0"
-        />
-
-        {/* Articulo Especial 2 */}
-        <label htmlFor="especial2">Artículo Especial 2:</label>
-        <select
-          id="especial2"
-          onChange={(event) => handleSelectEspecialChange(2, event)}
-          value={selectedEspecial2.id || ""}
-        >
-          <option value="" disabled={selectedEspecial2.id !== ""}>--Selecciona una opción--</option>
-          {listEspeciales.map((especial) => (
-            <option key={especial.articulo_id} value={especial.articulo_id}>
-              {especial.articulo_nombre}
-            </option>
-          ))}
-        </select>
-        <label htmlFor="puntosEspecial2">Puntos: {puntosEspecial2}</label>
-        <label htmlFor="cantidadEspecial2">Cantidad:</label>
-        <input
-          type="number"
-          id="cantidadEspecial2"
-          value={cantidadEspecial2}
-          onChange={(event) => handleCantidadEspecialChange(2, event)}
-          min="0"
-        />
+  
+      <div className="section">
+        <div className="container4">
+          <h2>Especiales a Medida</h2>
+          <div className="field-special">
+            <label htmlFor="especial1">Artículo Especial 1:</label>
+            <select
+              id="especial1"
+              onChange={(event) => handleSelectEspecialChange(1, event)}
+              value={selectedEspecial1.id || ""}
+            >
+              <option value="" disabled={selectedEspecial1.id !== ""}>--Selecciona una opción--</option>
+              {listEspeciales.map((especial) => (
+                <option key={especial.articulo_id} value={especial.articulo_id}>
+                  {especial.articulo_nombre}
+                </option>
+              ))}
+            </select>
+          </div>
+          
+          <div className="field-special">
+            <label htmlFor="cantidadEspecial1">Cantidad:</label>
+            <input
+              type="number"
+              id="cantidadEspecial1"
+              value={cantidadEspecial1}
+              onChange={(event) => handleCantidadEspecialChange(1, event)}
+              min="0"
+            />
+          </div>
+          <div className="fake-field-special">
+            <label htmlFor="especial2">Puntos:</label>
+            <select disabled>
+              <option value="" disabled>{puntosEspecial1}</option>
+            </select>
+            
+          </div>
+          <div className="field-special">
+            <label htmlFor="especial2">Artículo Especial 2:</label>
+            <select
+              id="especial2"
+              onChange={(event) => handleSelectEspecialChange(2, event)}
+              value={selectedEspecial2.id || ""}
+            >
+              <option value="" disabled={selectedEspecial2.id !== ""}>--Selecciona una opción--</option>
+              {listEspeciales.map((especial) => (
+                <option key={especial.articulo_id} value={especial.articulo_id}>
+                  {especial.articulo_nombre}
+                </option>
+              ))}
+            </select>
+          </div>
+          
+          <div className="field-special">
+            <label htmlFor="cantidadEspecial2">Cantidad:</label>
+            <input
+              type="number"
+              id="cantidadEspecial2"
+              value={cantidadEspecial2}
+              onChange={(event) => handleCantidadEspecialChange(2, event)}
+              min="0"
+            />
+          </div>
+          <div className="fake-field-special">
+            <label htmlFor="especial2">Puntos:</label>
+            <select disabled>
+              <option value="" disabled>{puntosEspecial2}</option>
+            </select>
+            
+          </div>
+        </div>
       </div>
     </div>
   );
+  
+  
+  
+  
+
 }
 
 export default Frentes;

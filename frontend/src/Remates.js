@@ -10,7 +10,7 @@ function Remates() {
   const [selectedArticulos, setSelectedArticulos] = useState(Array(3).fill({ id: "", nombre: "", puntos: 0 }));
   const [metros, setMetros] = useState(Array(3).fill(0));
   const [puntos, setPuntos] = useState(Array(3).fill(0));
-  const backendUrl = 'https://nearby-partially-guinea.ngrok-free.app';
+  const backendUrl = 'http://194.164.166.129:6969';
 
   useEffect(() => {
     axios

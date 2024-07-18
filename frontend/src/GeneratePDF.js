@@ -68,7 +68,7 @@ export const generatePDF = (data) => {
   // Detalles de la empresa
   doc.setFontSize(12);
   doc.text("AELE Beniparrell", 70, 20);
-  doc.text("Teléfono: 9696969", 70, 35);
+  doc.text("Teléfono: 655 895 411", 70, 35);
 
   // Título
   doc.setFontSize(18);

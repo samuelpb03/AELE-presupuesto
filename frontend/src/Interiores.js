@@ -20,7 +20,7 @@ function Interiores() {
   const [puntosEspecial1, setPuntosEspecial1] = useState(0);
   const [puntosEspecial2, setPuntosEspecial2] = useState(0);
 
-  const backendUrl = 'https://nearby-partially-guinea.ngrok-free.app'; // URL de ngrok para el backend
+  const backendUrl = 'http://194.164.166.129:6969'; // URL de ngrok para el backend
 
   useEffect(() => {
     axios

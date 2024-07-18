@@ -25,7 +25,7 @@ function Baldas() {
   );
   const [puntosTotales, setPuntosTotales] = useState(Array(12).fill(0));
 
-  const backendUrl = 'https://nearby-partially-guinea.ngrok-free.app'; // URL de ngrok para el backend
+  const backendUrl = 'http://194.164.166.129:6969'; // URL de ngrok para el backend
 
   useEffect(() => {
     // Restore data from context when component mounts
