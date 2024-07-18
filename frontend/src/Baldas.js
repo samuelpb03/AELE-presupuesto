@@ -227,9 +227,9 @@ function Baldas() {
   };
 
   const renderSelectArticulo = (index, list, hideMedidas) => (
-    <div key={index}>
-      <label htmlFor={`articulo${index + 1}`}>Artículo {index + 1}:</label>
-      <select
+    <div className="field" key={index}>
+      <label className="label" htmlFor={`articulo${index + 1}`}>Artículo {index + 1}:</label>
+      <select 
         id={`articulo${index + 1}`}
         onChange={(event) => handleSelectArticuloChange(index, event)}
         value={selectedArticulos[index].id || ""}
@@ -271,24 +271,29 @@ function Baldas() {
       />
     </div>
   );
-
+  
   return (
     <div className="container">
-      <div className="container2">
+      <div className="section">
         <h1>Baldas e Iluminación</h1>
         <h2>Baldas y Divisores</h2>
-        {Array.from({ length: 3 }).map((_, i) => renderSelectArticulo(i, listArticulo, false))}
-      </div>
-      <div className="container3">
-        {Array.from({ length: 3 }).map((_, i) => renderSelectArticulo(i + 3, listArticulo, false))}
-      </div>
-      <div className="container4">
-        <h1 style={{marginTop:"40px"}}>Iluminación</h1>
-        {Array.from({ length: 1 }).map((_, i) => renderSelectArticulo(i + 6, listArticuloIluminacion, true))}
-        {Array.from({ length: 4 }).map((_, i) => renderSelectArticulo(i + 8, listArticuloIluminacion, true))}
+        <div className="container2">
+          {Array.from({ length: 3 }).map((_, i) => renderSelectArticulo(i, listArticulo, false))}
+        </div>
+        <div className="container3">
+          {Array.from({ length: 3 }).map((_, i) => renderSelectArticulo(i + 3, listArticulo, false))}
+        </div>
+        <div className="container4">
+          <h1 style={{marginTop:"40px"}}>Iluminación</h1>
+          {Array.from({ length: 3 }).map((_, i) => renderSelectArticulo(i + 6, listArticuloIluminacion, true))}
+          {Array.from({ length: 2 }).map((_, i) => renderSelectArticulo(i + 9, listArticuloIluminacion, true))}
+        </div>
       </div>
     </div>
   );
+  
+  
+  
 }
 
 export default Baldas;

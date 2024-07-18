@@ -8,8 +8,10 @@ function Interiores() {
   const { data, saveData } = useData();
   const [listArticulo, setListArticulo] = useState([]);
   const [listEspeciales, setListEspeciales] = useState([]);
+  const [listColores, setListColores] = useState([]);  // Estado para los colores
 
   const [selectedArticulos, setSelectedArticulos] = useState(Array(3).fill({ id: "", nombre: "", puntos: 0 }));
+  const [selectedColores, setSelectedColores] = useState(Array(3).fill({ id: "", nombre: "" }));  // Estado para los colores seleccionados
   const [cantidades, setCantidades] = useState(Array(3).fill(0));
   const [puntos, setPuntos] = useState(Array(3).fill(0));
 
@@ -21,7 +23,11 @@ function Interiores() {
   const [puntosEspecial2, setPuntosEspecial2] = useState(0);
 
   const backendUrl = 'http://194.164.166.129:6969'; // URL de ngrok para el backend
-
+  const user = localStorage.getItem('user');
+  if (!user) {
+      //Redirigir a login.php si no está autenticado
+      window.location.href = '/login.php';
+  }
   useEffect(() => {
     axios
       .get(`${backendUrl}/articulo/interiores`, {
@@ -56,11 +62,28 @@ function Interiores() {
       .catch((error) => {
         console.error("Error fetching especiales:", error);
       });
-  }, [backendUrl]);
+
+    // Obtener la lista de colores
+      axios.get(`${backendUrl}/color`, {
+        headers: {
+          'ngrok-skip-browser-warning': 'true'
+        },
+        params: { materialId: 3 }  // Material ID fijo en 3
+      }).then((res) => {
+        if (Array.isArray(res.data)) {
+          setListColores(res.data);
+        } else {
+          console.error("Error fetching colores: res.data is not an array");
+        }
+      }).catch(error => {
+        console.error("Error fetching colores:", error);
+      });
+    }, [backendUrl]);
 
   useEffect(() => {
     if (data && data.interiores) {
       const restoredArticulos = Array(3).fill({ id: "", nombre: "", puntos: 0 });
+      const restoredColores = Array(3).fill({ id: "", nombre: "" });  // Restaurar los colores seleccionados
       const restoredCantidades = Array(3).fill(0);
       const restoredPuntos = Array(3).fill(0);
 
@@ -70,11 +93,16 @@ function Interiores() {
           nombre: data.interiores[`articulo${i + 1}Nombre`] || "",
           puntos: data.interiores[`articulo${i + 1}Puntos`] || 0,
         };
+        restoredColores[i] = {
+          id: data.interiores[`color${i + 1}Id`] || "",
+          nombre: data.interiores[`color${i + 1}Nombre`] || "",
+        };
         restoredCantidades[i] = data.interiores[`cantidad${i + 1}`] || 0;
         restoredPuntos[i] = (data.interiores[`articulo${i + 1}Puntos`] || 0) * (data.interiores[`cantidad${i + 1}`] || 0);
       }
 
       setSelectedArticulos(restoredArticulos);
+      setSelectedColores(restoredColores);  // Establecer los colores seleccionados
       setCantidades(restoredCantidades);
       setPuntos(restoredPuntos);
 
@@ -100,6 +128,8 @@ function Interiores() {
       acc[`articulo${index + 1}Nombre`] = articulo.nombre;
       acc[`articulo${index + 1}Id`] = articulo.id;
       acc[`articulo${index + 1}Puntos`] = articulo.puntos;
+      acc[`color${index + 1}Nombre`] = selectedColores[index].nombre;  // Guardar el nombre del color
+      acc[`color${index + 1}Id`] = selectedColores[index].id;  // Guardar el ID del color
       acc[`cantidad${index + 1}`] = cantidades[index];
       acc[`puntos${index + 1}`] = puntos[index];
       return acc;
@@ -118,6 +148,7 @@ function Interiores() {
     saveData("interiores", formattedData);
   }, [
     selectedArticulos,
+    selectedColores,  // Añadir selectedColores al useEffect
     cantidades,
     puntos,
     selectedEspecial1,
@@ -151,6 +182,18 @@ function Interiores() {
     }
 
     handleSelectChangeG(`articulo${index + 1}`, id, nombre);
+  };
+
+  const handleSelectColorChange = (index, event) => {
+    const updatedColores = [...selectedColores];
+    const selectedIndex = event.target.selectedIndex;
+    const nombre = event.target.options[selectedIndex].text;
+    const id = event.target.value;
+
+    updatedColores[index] = { id, nombre };
+    setSelectedColores(updatedColores);
+
+    handleSelectChangeG(`color${index + 1}`, id, nombre);
   };
 
   const handleCantidadChange = (index, event) => {
@@ -209,6 +252,19 @@ function Interiores() {
           </option>
         ))}
       </select>
+      <label htmlFor={`color${index + 1}`}>Color:</label>
+      <select
+        id={`color${index + 1}`}
+        onChange={(event) => handleSelectColorChange(index, event)}
+        value={selectedColores[index].id || ""}
+      >
+        <option value="" disabled={selectedColores[index].id !== ""}>--Selecciona un color--</option>
+        {listColores.map((color) => (
+          <option key={color.color_id} value={color.color_id}>
+            {color.nombre}
+          </option>
+        ))}
+      </select>
       <label htmlFor={`cantidad${index + 1}`}>Cantidad:</label>
       <input
         type="number"
@@ -223,17 +279,24 @@ function Interiores() {
 
   return (
     <div className="container">
-      <div className="container2">
-        <h1>Interiores</h1>
+  <div className="section">
+    <div className="container2">
+      <h1>Interiores</h1>
+      <div className="field-special">
         {renderSelectArticulo(0)}
+      </div>
+      <div className="field-special">
         {renderSelectArticulo(1)}
       </div>
-      <div className="container3">
+      <div className="field-special">
         {renderSelectArticulo(2)}
       </div>
-      <div className="container4">
-        <h2>Especiales a Medida</h2>
-        {/* Articulo Especial 1 */}
+    </div>
+  </div>
+  <div className="section">
+    <div className="container4">
+      <h2>Especiales a Medida</h2>
+      <div className="field-special">
         <label htmlFor="especial1">Artículo Especial 1:</label>
         <select
           id="especial1"
@@ -247,7 +310,8 @@ function Interiores() {
             </option>
           ))}
         </select>
-        <label htmlFor="puntosEspecial1">Puntos: {puntosEspecial1}</label>
+      </div>
+      <div className="field-special">
         <label htmlFor="cantidadEspecial1">Cantidad:</label>
         <input
           type="number"
@@ -256,8 +320,14 @@ function Interiores() {
           onChange={(event) => handleCantidadEspecialChange(1, event)}
           min="0"
         />
-
-        {/* Articulo Especial 2 */}
+      </div>
+      <div className="fake-field-special">
+        <label htmlFor="puntosEspecial1">Puntos:</label>
+        <select disabled>
+          <option value="">{puntosEspecial1}</option>
+        </select>
+      </div>
+      <div className="field-special">
         <label htmlFor="especial2">Artículo Especial 2:</label>
         <select
           id="especial2"
@@ -271,7 +341,8 @@ function Interiores() {
             </option>
           ))}
         </select>
-        <label htmlFor="puntosEspecial2">Puntos: {puntosEspecial2}</label>
+      </div>
+      <div className="field-special">
         <label htmlFor="cantidadEspecial2">Cantidad:</label>
         <input
           type="number"
@@ -281,13 +352,17 @@ function Interiores() {
           min="0"
         />
       </div>
+      <div className="fake-field-special">
+        <label htmlFor="puntosEspecial2">Puntos:</label>
+        <select disabled>
+          <option value="">{puntosEspecial2}</option>
+        </select>
+      </div>
     </div>
+  </div>
+</div>
+
   );
 }
 
 export default Interiores;
-
-
-
-
-

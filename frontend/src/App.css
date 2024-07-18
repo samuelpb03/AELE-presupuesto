@@ -22,7 +22,7 @@ body {
   justify-content: space-between;
 }
 
-.container2, .container4 {
+.container2, .container4, .container3 {
   width: 100%; /* Hacer que los contenedores internos ocupen todo el ancho */
   margin: 10px 0;
   padding: 20px;
@@ -41,7 +41,7 @@ h1, h2 {
   font-family: "Poppins", sans-serif;
 }
 
-.field {
+.field, .field-instalacion {
   width: 23%; /* Ajustar el ancho de los campos para que haya 4 por fila */
   display: flex;
   flex-direction: column;
@@ -57,40 +57,62 @@ h1, h2 {
   margin-bottom: 10px;
 }
 .fake-field-special {
-  width: 10%; /* Ajustar el ancho de los campos para que haya 3 por fila */
+  width: 30%; /* Ajustar el ancho de los campos para que haya 3 por fila */
   display: flex;
-  margin-left: 100px;
+  flex-direction: column;
+  margin-left: 10px;
+  margin-bottom: 10px;
+}
+
+.field label, .field-special label, .field-instalacion label , .field-centered label{
+  margin-bottom: 5px;
+  font-weight: bold;
+  font-family: "Poppins", sans-serif;
+}
+
+.field-instalacion {
+  width: 40%;
+  display: block;
+  margin-left: 10px;
   flex-direction: column;
   margin-bottom: 10px;
 }
-.field label {
-  margin-bottom: 5px;
-  font-weight: bold;
-  font-family: "Poppins", sans-serif;
-}
-.field-special label  {
-  margin-left: 10px;
-  margin-bottom: 5px;
-  font-family: "Poppins", sans-serif;
-  font-weight: bold;
-}
-.field-centered label {
-  margin-top: 5px;
-  font-weight: bold;
-}
+
 .field-centered {
   width: 30%; /* Ajusta el ancho según sea necesario */
   display: flex;
   justify-content: center;
   flex-direction: column;
   margin: 0 auto; /* Centramos el contenedor */
+}
+
+.field select, .field input, .field-special select, .field-special input[type="number"], .field-centered select, .field-centered input[type="number"], .field-instalacion input, .field-instalacion button, .field-instalacion select {
+  width: 100%; /* Asegurarse de que los campos ocupen todo el ancho del contenedor */
+  max-width: 300px; /* Limitar el ancho máximo */
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: white;
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
-  font-family: sans-serif;
+  font-family: "Poppins", sans-serif;
+  transition: border-color 0.3s, box-shadow 0.3s; 
 }
-
-.field select, .field input[type="number"], .field-special select, .field-special input[type="number"], .field-centered select, .field-centered input[type="number"] {
+.field input[type="number"] {
+  width: 100%; /* Asegurarse de que los campos ocupen todo el ancho del contenedor */
+  max-width: 250px; /* Limitar el ancho máximo */
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: white;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  font-family: "Poppins", sans-serif;
+  transition: border-color 0.3s, box-shadow 0.3s; 
+}
+.field-instalacion select, .field select, .field-instalacion input[type="number"], .field input[type="number"] {
   width: 100%;
   padding: 10px;
   border: 1px solid #ccc;
@@ -102,11 +124,13 @@ h1, h2 {
   font-family: "Poppins", sans-serif;
   transition: border-color 0.3s, box-shadow 0.3s;
 }
-.label-special {
-  margin-left: 20px;
-  font-family: sans-serif;
+.field-centered label {
+  text-align: center;
+  margin-top: 5px;
   font-weight: bold;
+  font-family: "Poppins", sans-serif;
 }
+
 select:focus, input:focus {
   border-color: #007BFF;
   box-shadow: 0 0 8px rgba(0, 123, 255, 0.25);

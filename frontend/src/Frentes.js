@@ -37,10 +37,10 @@ function Frentes() {
   const backendUrl = 'http://194.164.166.129:6969'; // URL de ngrok para el backend
         // Verificar si el usuario está autenticado
         const user = localStorage.getItem('user');
-        //if (!user) {
-            // Redirigir a login.php si no está autenticado
-            //window.location.href = '/login.php';
-        //}
+        if (!user) {
+            //Redirigir a login.php si no está autenticado
+            window.location.href = '/login.php';
+        }
 
   useEffect(() => {
     if (data.frentes) {
@@ -567,7 +567,7 @@ function Frentes() {
           <div className="fake-field-special">
             <label htmlFor="especial2">Puntos:</label>
             <select disabled>
-              <option value="" disabled>{puntosEspecial1}</option>
+              <option value="" >{puntosEspecial1}</option>
             </select>
             
           </div>
@@ -600,7 +600,7 @@ function Frentes() {
           <div className="fake-field-special">
             <label htmlFor="especial2">Puntos:</label>
             <select disabled>
-              <option value="" disabled>{puntosEspecial2}</option>
+              <option value="">{puntosEspecial2}</option>
             </select>
             
           </div>

@@ -11,7 +11,11 @@ function Remates() {
   const [metros, setMetros] = useState(Array(3).fill(0));
   const [puntos, setPuntos] = useState(Array(3).fill(0));
   const backendUrl = 'http://194.164.166.129:6969';
-
+  const user = localStorage.getItem('user');
+  if (!user) {
+      //Redirigir a login.php si no está autenticado
+      window.location.href = '/login.php';
+  }
   useEffect(() => {
     axios
       .get(`${backendUrl}/articulo/remates`, {
@@ -140,12 +144,16 @@ function Remates() {
     <div className="container">
       <div className="container2">
         <h1>Remates</h1>
+        <div className="field-special">
         {renderSelectArticulo(0)}
+        </div>
+        <div className="field-special">
         {renderSelectArticulo(1)}
-      </div>
-      <div className="container3">
+        </div>
+      <div className="field-special">
         {renderSelectArticulo(2)}
       </div>
+      </div >
     </div>
   );
 }

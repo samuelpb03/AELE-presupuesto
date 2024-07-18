@@ -19,7 +19,7 @@ function Tiradores() {
   useEffect(() => {
     const user = localStorage.getItem('user');
     if (!user) {
-      window.location.href = '/login.php'; // Redirigir a login.php si no está autenticado
+      //window.location.href = '/login.php'; // Redirigir a login.php si no está autenticado
     }
   }, []);
 
@@ -284,20 +284,35 @@ function Tiradores() {
 
   return (
     <div className="container">
+      <div className="section">
       <div className="container2">
-        <h1>Cerraduras</h1>
-        {renderSelectArticulo(0, true)}
         <h1>Tiradores</h1>
-        {renderSelectArticulo(1)}
-      </div>
-      <div className="container3">
+        <div className="field">
         {renderSelectArticulo(2)}
+        </div>
+        <div className="field">
         {renderSelectArticulo(3)}
-      </div>
-      <div className="container4">
+        </div>
+        <div className="field">
         {renderSelectArticulo(4)}
+        </div>
+        <div className="field">
         {renderSelectArticulo(5)}
+        </div>
+        </div>
+      <div className="container2">
+      <div className="section">
+      
+        <h1>Cerraduras</h1>
+        <div className="field-special">
+        {renderSelectArticulo(0, true)}
+        </div>
+        <div className="field-special">
+        {renderSelectArticulo(1)}
+        </div>
       </div>
+    </div>
+    </div>
     </div>
   );
 }
