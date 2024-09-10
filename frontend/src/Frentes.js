@@ -23,8 +23,9 @@ function Frentes() {
   const [selectedColor, setSelectedColor] = useState({ id: "", nombre: "" });
   const [selectedMedidas, setSelectedMedidas] = useState({ id: "", nombre: "", puntos: 0 });
   const [selectedMaterialFranja, setSelectedMaterialFranja] = useState({ id: "", nombre: "" });
-  const [selectedColorFranja, setSelectedColorFranja] = useState({ id: "", nombre: "" }); // Estado para cantidad
+  const [selectedColorFranja, setSelectedColorFranja] = useState({ id: "", nombre: "" });
   const [puntos, setPuntos] = useState(0); // Estado para puntos
+  const [puntosConIncremento, setPuntosConIncremento] = useState(0); // Puntos con incremento
 
   const [selectedEspecial1, setSelectedEspecial1] = useState({ id: "", nombre: "", puntos: 0 });
   const [selectedEspecial2, setSelectedEspecial2] = useState({ id: "", nombre: "", puntos: 0 });
@@ -332,6 +333,22 @@ function Frentes() {
     }
   }, [selectedMaterialFranja.id, backendUrl]);
 
+  // Controla la selección de color y aplica el 20% si es "Color según muestra" o "Laca según muestra"
+  const handleSelectColorChange = (event) => {
+    const index = event.target.selectedIndex;
+    const nombre = event.target.options[index].text;
+    const id = event.target.value;
+    setSelectedColor({ id, nombre });
+    handleSelectChange("color", id, nombre);
+
+    if (id === '55' || id === '56') {
+      const puntosConAumento = puntos * 1.2;
+      setPuntosConIncremento(puntosConAumento); // Actualiza el estado con el incremento
+    } else {
+      setPuntosConIncremento(puntos); // Si no es, resetea el incremento
+    }
+  };
+
   const handleSelectProductChange = (event) => {
     const index = event.target.selectedIndex;
     const nombre = event.target.options[index].text;
@@ -362,14 +379,6 @@ function Frentes() {
     const id = event.target.value;
     setSelectedMaterial({ id, nombre });
     handleSelectChange("material", id, nombre);
-  };
-
-  const handleSelectColorChange = (event) => {
-    const index = event.target.selectedIndex;
-    const nombre = event.target.options[index].text;
-    const id = event.target.value;
-    setSelectedColor({ id, nombre });
-    handleSelectChange("color", id, nombre);
   };
 
   const handleSelectMedidasChange = (event) => {
@@ -530,7 +539,7 @@ function Frentes() {
             <input type="number" id="cantidad" value={cantidad} onChange={handleCantidadChange} min="0" />
           </div>
           <div className="field-centered">
-            <label htmlFor="puntos">Puntos: {puntos * cantidad}</label>
+            <label htmlFor="puntos">Puntos: {puntosConIncremento * cantidad}</label>
           </div>
         </div>
       </div>
@@ -608,11 +617,7 @@ function Frentes() {
       </div>
     </div>
   );
-  
-  
-  
-  
-
 }
 
 export default Frentes;
+
