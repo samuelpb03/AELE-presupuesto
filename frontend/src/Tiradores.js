@@ -307,9 +307,6 @@ function Tiradores() {
         <div className="field-special">
         {renderSelectArticulo(0, true)}
         </div>
-        <div className="field-special">
-        {renderSelectArticulo(1)}
-        </div>
       </div>
     </div>
     </div>
