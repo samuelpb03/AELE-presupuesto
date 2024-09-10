@@ -58,18 +58,23 @@ const labelsMap = {
   puntosTotales9: "Puntos 9",
 };
 
-export const generatePDF = (data) => {
+export const generatePDF = (data, userInfo) => {
   const doc = new jsPDF();
 
   // Agregar logotipo
   const logo = 'logoAELE.png';
   doc.addImage(logo, 'PNG', 10, 10, 50, 20);
-
+  const user = JSON.parse(localStorage.getItem('user'));
+  const centro = user?.centro || 'Centro no especificado'; // Campo centro del user
   // Detalles de la empresa
   doc.setFontSize(12);
   doc.text("AELE Beniparrell", 70, 20);
   doc.text("Teléfono: 655 895 411", 70, 35);
-
+  doc.text(`Centro: ${centro}`, 14, 70); // Centro del user
+  doc.text(`Tienda: ${userInfo.tienda}`, 14, 80); // Información de userInfo
+  doc.text(`Cliente: ${userInfo.cliente}`, 14, 90); 
+  doc.text(`Teléfono: ${userInfo.telefono}`, 14, 100); 
+  
   // Título
   doc.setFontSize(18);
   doc.text("AELE Presupuesto", doc.internal.pageSize.getWidth() / 2, 60, null, null, 'center');
@@ -87,7 +92,7 @@ export const generatePDF = (data) => {
     instalacion: "Instalacion"
   };
 
-  let startY = 70;
+  let startY = 110;
   let totalFrentesInteriores = 0;
   let totalArmariosCompletos = 0;
 

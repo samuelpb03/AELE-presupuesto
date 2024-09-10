@@ -24,8 +24,14 @@ function Baldas() {
     })
   );
   const [puntosTotales, setPuntosTotales] = useState(Array(12).fill(0));
+  const user = localStorage.getItem('user');
 
   const backendUrl = 'http://194.164.166.129:6969'; // URL de ngrok para el backend
+  if (!user) {
+    //Redirigir a login.php si no está autenticado
+    window.location.href = '/login.php';
+}
+
 
   useEffect(() => {
     // Restore data from context when component mounts
@@ -276,8 +282,8 @@ function Baldas() {
     <div className="container">
       <div className="section">
         <h1>Baldas e Iluminación</h1>
-        <h2>Baldas y Divisores</h2>
         <div className="container2">
+          <h2>Baldas y Divisores</h2>
           {Array.from({ length: 3 }).map((_, i) => renderSelectArticulo(i, listArticulo, false))}
         </div>
         <div className="container3">

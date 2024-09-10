@@ -447,7 +447,7 @@ function Frentes3() {
     <div className="container">
       <div className="section">
         <div className="container2">
-          <h1>Frentes 2</h1>
+          <h1>Frentes 3</h1>
           <div className="field">
             <label htmlFor="producto">Tipo de Frente:</label>
             <select id="producto" onChange={handleSelectProductChange} value={selectedProducto.id || ""}>

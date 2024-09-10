@@ -1,40 +1,45 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { TabsProvider } from './TabsContext';
 import Frentes from './Frentes';
 import Tiradores from './Tiradores';
 import Interiores from './Interiores';
 import Equipamiento3 from './Equipamiento3';
 import Frentes2 from './Frentes2';
-import Frentes3 from './Frentes3';  // Importa el nuevo componente
+import Frentes3 from './Frentes3'; 
 import Baldas from './Baldas';
 import Remates from './Remates';
 import Instalacion from './Instalacion';
 import { DataProvider } from './context/DataContext';
 import NavigationController from './ControlNavegacion';
+import CamposUsuario from './CamposUsuario';  // Importamos el nuevo componente
 import './App.css';
 
 function App() {
   return (
     <DataProvider>
-      <div className='App'>
-        <BrowserRouter>
-          <NavigationController />
-          <div className="tabs">
-          </div>
-          <Routes>
-            <Route path='/Frentes2' element={<TabsProvider><Frentes2/></TabsProvider>} />
-            <Route path='/Tiradores' element={<TabsProvider><Tiradores /></TabsProvider>} />
-            <Route path='/Interiores' element={<TabsProvider><Interiores /></TabsProvider>} />
-            <Route path='/Baldas' element={<TabsProvider><Baldas></Baldas></TabsProvider>} />
-            <Route path='/Frentes' element={<TabsProvider><Frentes/></TabsProvider>} />
-            <Route path='/Frentes3' element={<TabsProvider><Frentes3/></TabsProvider>} />  {/* Nueva ruta */}
-            <Route path='/Equipamiento3' element={<TabsProvider><Equipamiento3></Equipamiento3></TabsProvider>} />
-            <Route path='/Remates' element={<TabsProvider><Remates/></TabsProvider>} />
-            <Route path='Instalacion' element={<TabsProvider><Instalacion/></TabsProvider>} />
-          </Routes>
-        </BrowserRouter>
-      </div>
+      <TabsProvider>
+        <div className='App'>
+          <BrowserRouter>
+            <NavigationController />
+            {/* Incluimos los campos de usuario */}
+            <CamposUsuario />  
+            <div className="tabs">
+            </div>
+            <Routes>
+              <Route path='/Frentes2' element={<Frentes2 />} />
+              <Route path='/Tiradores' element={<Tiradores />} />
+              <Route path='/Interiores' element={<Interiores />} />
+              <Route path='/Baldas' element={<Baldas />} />
+              <Route path='/Frentes' element={<Frentes />} />
+              <Route path='/Frentes3' element={<Frentes3 />} />
+              <Route path='/Equipamiento3' element={<Equipamiento3 />} />
+              <Route path='/Remates' element={<Remates />} />
+              <Route path='Instalacion' element={<Instalacion />} />
+            </Routes>
+          </BrowserRouter>
+        </div>
+      </TabsProvider>
     </DataProvider>
   );
 }
