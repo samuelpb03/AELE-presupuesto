@@ -17,7 +17,15 @@ export const TabsProvider = ({ children }) => {
   const [selectedOptionsB, setSelectedOptionsB] = useState({});
   const [selectedOptionsZ, setSelectedOptionsZ] = useState({});
   const [selectedOptionsInstalacion, setSelectedOptionsInstalacion] = useState({});
-
+  const [userInfo, setUserInfo] = useState({
+    tienda: '',
+    cliente: '',
+    telefono: '',
+  });
+  
+  const handleUserInfoChange = (field, value) => {
+    setUserInfo(prev => ({ ...prev, [field]: value }));
+  };
   const handleSelectChange = (tabId, optionId, optionName) => {
     setSelectedOptions(prev => ({ ...prev, [tabId]: { optionId, optionName } }));
   };
@@ -91,7 +99,9 @@ export const TabsProvider = ({ children }) => {
       selectedOptionsZ,
       handleSelectChangeZ,
       selectedOptionsInstalacion,
-      handleSelectChangeInstalacion
+      handleSelectChangeInstalacion,
+      userInfo,
+      handleUserInfoChange
     }}>
       {children}
     </TabsContext.Provider>

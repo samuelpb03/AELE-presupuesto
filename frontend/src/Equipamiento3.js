@@ -24,7 +24,12 @@ function Equipamiento3() {
     })
   );
   const [puntos, setPuntos] = useState(Array(9).fill(0));
+  const user = localStorage.getItem('user');
   const backendUrl = 'http://194.164.166.129:6969';
+  if (!user) {
+    // Redirigir a login.php si no está autenticado
+    window.location.href = '/login.php';
+  }
 
   useEffect(() => {
     if (data.equipamiento3) {
@@ -225,7 +230,7 @@ function Equipamiento3() {
   };
 
   const renderSelectArticulo = (index, list) => (
-    <div key={index}>
+    <div key={index} className="field"> {/* Aplicar la clase "field" */}
       <label htmlFor={`articulo${index + 1}`}>Artículo {index + 1}:</label>
       <select
         id={`articulo${index + 1}`}
@@ -272,13 +277,11 @@ function Equipamiento3() {
         <h1>Equipamiento y Antracita</h1>
         <h2>Equipamiento</h2>
         {Array.from({ length: 3 }).map((_, i) => renderSelectArticulo(i, listArticuloEquipamiento))}
+        {Array.from({ length: 1 }).map((_, i) => renderSelectArticulo(i + 3, listArticuloEquipamiento))}
       </div>
       <div className="container3">
-        {Array.from({ length: 1 }).map((_, i) => renderSelectArticulo(i + 3, listArticuloEquipamiento))}
-        <h1 style={{marginTop: "40px"}}>Antracita</h1>
+        <h1>Antracita</h1>
         {Array.from({ length: 2 }).map((_, i) => renderSelectArticulo(i + 4, listArticuloAntracita))}
-      </div>
-      <div className="container4">
         {Array.from({ length: 3 }).map((_, i) => renderSelectArticulo(i + 6, listArticuloAntracita))}
       </div>
     </div>
@@ -286,4 +289,5 @@ function Equipamiento3() {
 }
 
 export default Equipamiento3;
+
 

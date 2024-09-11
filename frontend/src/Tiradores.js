@@ -19,7 +19,7 @@ function Tiradores() {
   useEffect(() => {
     const user = localStorage.getItem('user');
     if (!user) {
-      //window.location.href = '/login.php'; // Redirigir a login.php si no está autenticado
+      window.location.href = '/login.php'; // Redirigir a login.php si no está autenticado
     }
   }, []);
 
@@ -315,3 +315,4 @@ function Tiradores() {
 }
 
 export default Tiradores;
+

@@ -1,24 +1,29 @@
 import React, { useState, useEffect } from "react";
-import { useTabs } from "./TabsContext";
+import { useTabs } from "./TabsContext";  // Usamos el contexto de TabsProvider
 import { useData } from './context/DataContext';
 import { generatePDF } from "./GeneratePDF";
+import { useNavigate } from 'react-router-dom'; // Para redirigir al index.js
 
 function Instalacion() {
-  const { handleSelectChangeI } = useTabs();
+  const { userInfo } = useTabs();  // Obtenemos la info del usuario del contexto
   const { data, saveData } = useData();
   const [numFrentesInteriores, setNumFrentesInteriores] = useState(0);
   const [numArmariosCompletos, setNumArmariosCompletos] = useState(0);
-  const [montajeAcarreo, setMontajeAcarreo] = useState(true); // Mantener como true por defecto
+  const [montajeAcarreo, setMontajeAcarreo] = useState(true);
+  const [showModal, setShowModal] = useState(false); // Estado para controlar el modal
+  const navigate = useNavigate(); // Para redirigir
+
   const user = localStorage.getItem('user');
   if (!user) {
-      //Redirigir a login.php si no está autenticado
+      // Redirigir a login.php si no está autenticado
       window.location.href = '/login.php';
   }
+
   useEffect(() => {
     if (data.instalacion) {
       setNumFrentesInteriores(data.instalacion.numFrentesInteriores || 0);
       setNumArmariosCompletos(data.instalacion.numArmariosCompletos || 0);
-      setMontajeAcarreo(true); // Mantener como true siempre
+      setMontajeAcarreo(true);
     }
   }, []);
 
@@ -32,7 +37,18 @@ function Instalacion() {
   }, [numFrentesInteriores, numArmariosCompletos, montajeAcarreo, saveData]);
 
   const handleGeneratePDF = () => {
-    generatePDF(data);
+    if (!userInfo.tienda.trim() || !userInfo.cliente.trim() || !userInfo.telefono.trim()) {
+      alert("Por favor, rellena los campos de Tienda, Cliente y Teléfono antes de generar el presupuesto.");
+      return;
+    }
+    
+    generatePDF(data, userInfo);
+    setShowModal(true); // Mostrar el modal después de generar el PDF
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+    navigate('/index.js'); // Redirigir al index.js (cambia la ruta según lo necesites)
   };
 
   return (
@@ -61,15 +77,16 @@ function Instalacion() {
           <button onClick={handleGeneratePDF} style={{ marginTop: "20px" }}>Crear presupuesto</button>
         </div>
       </div>
-      {/* Ocultamos el input pero mantenemos el estado */}
-      <input
-        type="checkbox"
-        id="montajeAcarreo"
-        checked={montajeAcarreo}
-        onChange={(e) => setMontajeAcarreo(e.target.checked)}
-        style={{ display: "none" }}
-      />
-      
+
+      {showModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h2>Su presupuesto ha sido realizado con éxito</h2>
+            <p>Lo encontrará en su carpeta de descargas</p>
+            <button onClick={handleCloseModal}>Nuevo presupuesto</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
