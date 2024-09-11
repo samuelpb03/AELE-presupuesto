@@ -289,5 +289,3 @@ function Equipamiento3() {
 }
 
 export default Equipamiento3;
-
-
