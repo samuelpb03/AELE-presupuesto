@@ -33,14 +33,16 @@ function Frentes() {
   const [cantidadEspecial1, setCantidadEspecial1] = useState(0);
   const [cantidadEspecial2, setCantidadEspecial2] = useState(0);
   const [franjaActiva, setFranjaActiva] = useState(false);
-  var [cantidad, setCantidad] = useState(0);
+  var [cantidad, setCantidad] = useState(1);
+  const [isColorValueAdded, setIsColorValueAdded] = useState(false);
+  const [shouldApplyColorIncrement, setShouldApplyColorIncrement] = useState(false);
   const backendUrl = 'http://194.164.166.129:6969'; // URL de ngrok para el backend
-        // Verificar si el usuario está autenticado
-        const user = localStorage.getItem('user');
-        if (!user) {
-            //Redirigir a login.php si no está autenticado
-            window.location.href = '/login.php';
-        }
+  // Verificar si el usuario está autenticado
+  const user = localStorage.getItem('user');
+  if (!user) {
+    //Redirigir a login.php si no está autenticado
+    window.location.href = '/login.php';
+  }
 
   useEffect(() => {
     if (data.frentes) {
@@ -88,7 +90,8 @@ function Frentes() {
         puntos: data.frentes.selectedEspecial2Puntos || 0,
       });
       setCantidad(data.frentes.cantidad || 1);
-      setPuntos(data.frentes.selectedMedidasPuntos || 0);
+      setPuntos(data.frentes.puntos || 0);  // Restaurar los puntos guardados
+      setIsColorValueAdded(data.frentes.isColorValueAdded || false);  // Restaurar el estado del incremento del 20%
       setPuntosEspecial1((data.frentes.selectedEspecial1Puntos || 0) * (data.frentes.cantidadEspecial1 || 0));
       setPuntosEspecial2((data.frentes.selectedEspecial2Puntos || 0) * (data.frentes.cantidadEspecial2 || 0));
       setCantidadEspecial1(data.frentes.cantidadEspecial1 || 0);
@@ -122,14 +125,13 @@ function Frentes() {
       selectedEspecial2Nombre: selectedEspecial2.nombre,
       selectedEspecial2Puntos: selectedEspecial2.puntos,
       cantidad,
-      puntos: selectedMedidas.puntos * cantidad,
-      cantidadFrente: cantidad, // Añadir cantidadFrente
+      puntos: puntos * cantidad, // Guardar puntos actualizados
+      isColorValueAdded, // Guardar el estado del incremento
       cantidadEspecial1,
       cantidadEspecial2,
       puntosEspecial1: selectedEspecial1.puntos * cantidadEspecial1,
       puntosEspecial2: selectedEspecial2.puntos * cantidadEspecial2,
     };
-    console.log('formattedData:', formattedData); // Añadir log para verificar datos
     saveData("frentes", formattedData);
   }, [
     selectedProducto,
@@ -145,10 +147,11 @@ function Frentes() {
     cantidad,
     cantidadEspecial1,
     cantidadEspecial2,
-    puntosEspecial1,
-    puntosEspecial2,
+    puntos, // Incluye puntos en la lista de dependencias
+    isColorValueAdded, // Asegura que se guarde el estado del incremento
     saveData,
   ]);
+  
 
   useEffect(() => {
     axios.get(`${backendUrl}/producto`).then((res) => {
@@ -336,16 +339,60 @@ function Frentes() {
     const index = event.target.selectedIndex;
     const nombre = event.target.options[index].text;
     const id = event.target.value;
+
+    // Actualizar el producto seleccionado
     setSelectedProducto({ id, nombre });
     handleSelectChange("producto", id, nombre);
+
+    // Limpiar los especiales seleccionados
+    setSelectedEspecial1({ id: "", nombre: "", puntos: 0 });
+    setSelectedEspecial2({ id: "", nombre: "", puntos: 0 });
+    setCantidadEspecial1(0);
+    setCantidadEspecial2(0);
+    setPuntosEspecial1(0);
+    setPuntosEspecial2(0);
+
+    // Si el producto es 4 o 5, filtrar solo "Gran Altura"
+    if (id === "4" || id === "5") {
+      const especialGranAltura = listEspeciales.find(especial => especial.articulo_id === 195);
+      setListEspeciales([especialGranAltura]); // Mostrar solo "Gran Altura"
+    } else {
+      // Si es otro producto, restaurar todos los especiales
+      axios.get(`${backendUrl}/especialesConPuntosFrentes`).then((res) => {
+        if (Array.isArray(res.data)) {
+          setListEspeciales(res.data); // Restaurar la lista de especiales
+        }
+      }).catch(error => {
+        console.error("Error fetching articulos especiales:", error);
+      });
+    }
+
+    // Resetear los demás campos relacionados con puntos
+    setSelectedArticulo({ id: "", nombre: "" });
+    setSelectedMaterial({ id: "", nombre: "" });
+    setSelectedColor({ id: "", nombre: "" });
+    setSelectedMedidas({ id: "", nombre: "", puntos: 0 });
+    setSelectedMaterialFranja({ id: "", nombre: "" });
+    setSelectedColorFranja({ id: "", nombre: "" });
+    setPuntos(0);
   };
 
   const handleSelectSerieChange = (event) => {
     const index = event.target.selectedIndex;
     const nombre = event.target.options[index].text;
     const id = event.target.value;
+
     setSelectedSerie({ id, nombre });
     handleSelectChange("serie", id, nombre);
+
+    // Restablecer los campos siguientes y los puntos al cambiar la serie
+    setSelectedArticulo({ id: "", nombre: "" }); // Restablecer artículo
+    setSelectedMaterial({ id: "", nombre: "" }); // Restablecer material
+    setSelectedColor({ id: "", nombre: "" }); // Restablecer color
+    setSelectedMedidas({ id: "", nombre: "", puntos: 0 }); // Restablecer medidas
+    setSelectedMaterialFranja({ id: "", nombre: "" }); // Restablecer material franja
+    setSelectedColorFranja({ id: "", nombre: "" }); // Restablecer color franja
+    setPuntos(0); // Restablecer puntos
   };
 
   const handleSelectArticuloChange = (event) => {
@@ -354,6 +401,12 @@ function Frentes() {
     const id = event.target.value;
     setSelectedArticulo({ id, nombre });
     handleSelectChange("articulo", id, nombre);
+    setSelectedMaterial({ id: "", nombre: "" }); // Restablecer material
+    setSelectedColor({ id: "", nombre: "" }); // Restablecer color
+    setSelectedMedidas({ id: "", nombre: "", puntos: 0 }); // Restablecer medidas
+    setSelectedMaterialFranja({ id: "", nombre: "" }); // Restablecer material franja
+    setSelectedColorFranja({ id: "", nombre: "" }); // Restablecer color franja
+    setPuntos(0); // Restablecer puntos
   };
 
   const handleSelectMaterialChange = (event) => {
@@ -362,25 +415,54 @@ function Frentes() {
     const id = event.target.value;
     setSelectedMaterial({ id, nombre });
     handleSelectChange("material", id, nombre);
+    setSelectedColor({ id: "", nombre: "" }); // Restablecer color
+    setSelectedMedidas({ id: "", nombre: "", puntos: 0 }); // Restablecer medidas
+    setSelectedMaterialFranja({ id: "", nombre: "" }); // Restablecer material franja
+    setSelectedColorFranja({ id: "", nombre: "" }); // Restablecer color franja
+    setPuntos(0); // Restablecer puntos
   };
 
   const handleSelectColorChange = (event) => {
     const index = event.target.selectedIndex;
     const nombre = event.target.options[index].text;
     const id = event.target.value;
+
     setSelectedColor({ id, nombre });
     handleSelectChange("color", id, nombre);
-  };
 
-  const handleSelectMedidasChange = (event) => {
-    const index = event.target.selectedIndex;
-    const nombre = event.target.options[index].text;
-    const id = event.target.value;
-    const selectedMedida = listMedidas.find(medida => medida.medidas_id === parseInt(id));
-    setSelectedMedidas({ id, nombre, puntos: selectedMedida.puntos });
-    setPuntos(selectedMedida.puntos); // Actualiza los puntos
-    handleSelectChange("medidas", id, nombre);
-  };
+    if (id === '55' || id === '56') {
+        setShouldApplyColorIncrement(true);  // Marcar que se debe aplicar el incremento cuando haya puntos
+        setIsColorValueAdded(true);  // Activar el mensaje del 20%
+
+        // Si las medidas ya están seleccionadas, aplicar el incremento inmediatamente
+        if (selectedMedidas.id) {
+            setPuntos(Math.ceil(selectedMedidas.puntos * 1.2));  // Aplicar incremento si ya hay medidas seleccionadas
+        }
+    } else {
+        setShouldApplyColorIncrement(false);  // No aplicar incremento
+        setIsColorValueAdded(false);  // Desactivar el mensaje
+        setPuntos(selectedMedidas.puntos);  // Restablecer los puntos originales si no aplica
+    }
+};
+const handleSelectMedidasChange = (event) => {
+  const index = event.target.selectedIndex;
+  const nombre = event.target.options[index].text;
+  const id = event.target.value;
+  const selectedMedida = listMedidas.find(medida => medida.medidas_id === parseInt(id));
+
+  setSelectedMedidas({ id, nombre, puntos: selectedMedida.puntos });
+  handleSelectChange("medidas", id, nombre);
+
+  let newPuntos = selectedMedida.puntos;
+
+  // Verificar si el color seleccionado es "Color según muestra" o "Laca según muestra"
+  if (selectedColor.id === '55' || selectedColor.id === '56') {
+      newPuntos = Math.ceil(selectedMedida.puntos * 1.2);  // Aplicar incremento del 20% y redondear hacia arriba
+  }
+
+  setPuntos(newPuntos);  // Actualizar los puntos con o sin incremento
+};
+
 
   const handleSelectMaterialFranjaChange = (event) => {
     const index = event.target.selectedIndex;
@@ -402,16 +484,22 @@ function Frentes() {
     const index = event.target.selectedIndex;
     const nombre = event.target.options[index].text;
     const id = event.target.value;
+
+    // Si el producto es 4 o 5, solo permitir seleccionar "Gran Altura"
+    if (selectedProducto.id === "4" || selectedProducto.id === "5") {
+      if (id !== "195") return; // Solo permite seleccionar "Gran Altura" y evitar cualquier otra opción
+    }
+
     const selectedEspecial = listEspeciales.find(especial => especial.articulo_id === parseInt(id));
 
     if (especialIndex === 1) {
       setSelectedEspecial1({ id, nombre, puntos: selectedEspecial.puntos });
       setPuntosEspecial1(selectedEspecial.puntos);
-      setCantidadEspecial1(1);
+      setCantidadEspecial1(1); // Restablecer cantidad a 1 al seleccionar
     } else if (especialIndex === 2) {
       setSelectedEspecial2({ id, nombre, puntos: selectedEspecial.puntos });
       setPuntosEspecial2(selectedEspecial.puntos);
-      setCantidadEspecial2(1);
+      setCantidadEspecial2(1); // Restablecer cantidad a 1 al seleccionar
     }
   };
 
@@ -530,11 +618,16 @@ function Frentes() {
             <input type="number" id="cantidad" value={cantidad} onChange={handleCantidadChange} min="0" />
           </div>
           <div className="field-centered">
+            {isColorValueAdded && (
+              <label style={{ color: 'red', fontWeight: 'bold' }}>
+                El color según muestra tiene un valor añadido del 20%
+              </label>
+            )}
             <label htmlFor="puntos">Puntos: {puntos * cantidad}</label>
           </div>
         </div>
       </div>
-  
+
       <div className="section">
         <div className="container4">
           <h2>Especiales a Medida</h2>
@@ -553,7 +646,7 @@ function Frentes() {
               ))}
             </select>
           </div>
-          
+
           <div className="field-special">
             <label htmlFor="cantidadEspecial1">Cantidad:</label>
             <input
@@ -569,7 +662,7 @@ function Frentes() {
             <select disabled>
               <option value="" >{puntosEspecial1}</option>
             </select>
-            
+
           </div>
           <div className="field-special">
             <label htmlFor="especial2">Artículo Especial 2:</label>
@@ -586,7 +679,7 @@ function Frentes() {
               ))}
             </select>
           </div>
-          
+
           <div className="field-special">
             <label htmlFor="cantidadEspecial2">Cantidad:</label>
             <input
@@ -602,16 +695,16 @@ function Frentes() {
             <select disabled>
               <option value="">{puntosEspecial2}</option>
             </select>
-            
+
           </div>
         </div>
       </div>
     </div>
   );
-  
-  
-  
-  
+
+
+
+
 
 }
 

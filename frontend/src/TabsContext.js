@@ -22,6 +22,10 @@ export const TabsProvider = ({ children }) => {
     cliente: '',
     telefono: '',
   });
+  const [colorAdjustment, setColorAdjustment] = useState({
+    isAdjusted: false,
+    adjustedPoints: 0,
+  });
   
   const handleUserInfoChange = (field, value) => {
     setUserInfo(prev => ({ ...prev, [field]: value }));
@@ -73,7 +77,9 @@ export const TabsProvider = ({ children }) => {
   const handleSelectChangeInstalacion = (tabId, optionId, optionName) => {
     setSelectedOptionsInstalacion(prev => ({ ...prev, [tabId]: { optionId, optionName } }));
   };
-
+  const handleColorAdjustment = (isAdjusted, adjustedPoints) => {
+    setColorAdjustment({ isAdjusted, adjustedPoints });
+  };
   return (
     <TabsContext.Provider value={{
       selectedOptions,
@@ -101,7 +107,9 @@ export const TabsProvider = ({ children }) => {
       selectedOptionsInstalacion,
       handleSelectChangeInstalacion,
       userInfo,
-      handleUserInfoChange
+      handleUserInfoChange,
+      colorAdjustment,
+      handleColorAdjustment,
     }}>
       {children}
     </TabsContext.Provider>

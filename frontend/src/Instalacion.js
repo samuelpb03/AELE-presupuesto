@@ -47,9 +47,9 @@ function Instalacion() {
   };
 
   const handleCloseModal = () => {
-    setShowModal(false);
-    navigate('/index.js'); // Redirigir al index.js (cambia la ruta según lo necesites)
-  };
+    window.location.href = '/'; // Cambiar a la pestaña del configurador
+     // Refrescar la página después de cambiar a "index"
+  }  // Redirigir al index.js (cambia la ruta según lo necesites
 
   return (
     <div className="container">

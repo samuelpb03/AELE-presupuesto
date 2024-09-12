@@ -57,10 +57,39 @@ const labelsMap = {
   puntosTotales8: "Puntos 8",
   puntosTotales9: "Puntos 9",
 };
-
+const presupuestoData = {
+  centro: "Nombre del centro",
+  puntos: 1200.50,
+  tienda: "Tienda XYZ",
+  cliente: "Cliente ABC"
+};
+fetch('http://194.164.166.129:6969/presupuesto', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify(presupuestoData)
+})
+.then(response => response.json())  // Convertir la respuesta a JSON
+.then(data => {
+  console.log("Respuesta del servidor:", data);
+})
+.catch(error => {
+  console.error("Error al enviar datos del presupuesto:", error);
+});
+// Opcionalmente, imprime estos datos en la consola para verificar que son correctos
+console.log("Datos del presupuesto a enviar:", presupuestoData);
 export const generatePDF = (data, userInfo) => {
   const doc = new jsPDF();
-
+  const checkPageSpace = (doc, startY) => {
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const marginBottom = 20; // Margen que dejamos en la parte inferior
+    if (startY >= pageHeight - marginBottom) {
+      doc.addPage();
+      return 20; // Reiniciamos el valor de startY para la nueva página
+    }
+    return startY;
+  };
   // Agregar logotipo
   const logo = 'logoAELE.png';
   doc.addImage(logo, 'PNG', 10, 10, 50, 20);
@@ -179,7 +208,7 @@ export const generatePDF = (data, userInfo) => {
   const acarreo = data.instalacion?.acarreo || false;
 
   let totalMontaje = ((numFrentesInteriores * 110) + (numArmariosCompletos * 146)) + 50;
-
+  startY = checkPageSpace(doc, startY);
   console.log(`Total Puntos: ${totalPuntos}`);
 
   doc.setFontSize(12);

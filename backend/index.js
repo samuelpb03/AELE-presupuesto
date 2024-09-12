@@ -431,7 +431,30 @@ app.get("/materialesPorArticulo", (req, res) => {
     return res.json(data);
   });
 });
+app.post("/presupuesto", (req, res) => {
+  const { centro, puntos, tienda, cliente } = req.body;
 
+  // Asegúrate de que todos los datos requeridos están presentes
+  if (!centro || !puntos || !tienda || !cliente) {
+    return res.status(400).json({ error: "Todos los campos son requeridos" });
+  }
+
+  // Consulta SQL para insertar el nuevo presupuesto
+  const query = `
+    INSERT INTO presupuesto (Centro, Puntos, Tienda, Cliente)
+    VALUES (?, ?, ?, ?)
+  `;
+
+  dbConnection.query(query, [centro, puntos, tienda, cliente], (err, result) => {
+    if (err) {
+      console.error("Error al insertar el presupuesto:", err);
+      return res.status(500).json({ error: "Error al crear el presupuesto" });
+    }
+
+    // Devolver el ID del presupuesto recién creado para confirmación
+    res.json({ message: "Presupuesto creado exitosamente", idPresupuesto: result.insertId });
+  });
+});
 // Monta Express en el puerto.
 app.listen(port, () => {
   console.log(">>> SERVIDOR CORRIENDO EN: " + host + ":" + port);
