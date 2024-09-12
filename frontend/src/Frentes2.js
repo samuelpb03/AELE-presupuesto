@@ -486,9 +486,27 @@ function Frentes2() {
   
     // Si el producto es 4 o 5, solo permitir seleccionar "Gran Altura"
     if (selectedProducto.id === "4" || selectedProducto.id === "5") {
-      if (id !== "195") return; // Solo permite seleccionar "Gran Altura" y evitar cualquier otra opción
+      if (id !== "195") {
+        return;
+      }
     }
   
+  
+    // Si el usuario selecciona la opción vacía
+    if (id === "") {
+      if (especialIndex === 1) {
+        setSelectedEspecial1({ id: "", nombre: "", puntos: 0 });
+        setPuntosEspecial1(0);
+        setCantidadEspecial1(0); // Restablecer la cantidad a 0
+      } else if (especialIndex === 2) {
+        setSelectedEspecial2({ id: "", nombre: "", puntos: 0 });
+        setPuntosEspecial2(0);
+        setCantidadEspecial2(0); // Restablecer la cantidad a 0
+      }
+      return; // Salir de la función si se selecciona el valor vacío
+    }
+  
+    // Buscar el especial seleccionado en la lista de especiales
     const selectedEspecial = listEspeciales.find(especial => especial.articulo_id === parseInt(id));
   
     if (especialIndex === 1) {
@@ -637,7 +655,7 @@ function Frentes2() {
               onChange={(event) => handleSelectEspecialChange(1, event)}
               value={selectedEspecial1.id || ""}
             >
-              <option value="" disabled={selectedEspecial1.id !== ""}>--Selecciona una opción--</option>
+              <option value="">--Selecciona una opción--</option>
               {listEspeciales.map((especial) => (
                 <option key={especial.articulo_id} value={especial.articulo_id}>
                   {especial.articulo_nombre}
@@ -670,7 +688,7 @@ function Frentes2() {
               onChange={(event) => handleSelectEspecialChange(2, event)}
               value={selectedEspecial2.id || ""}
             >
-              <option value="" disabled={selectedEspecial2.id !== ""}>--Selecciona una opción--</option>
+              <option value="">--Selecciona una opción--</option>
               {listEspeciales.map((especial) => (
                 <option key={especial.articulo_id} value={especial.articulo_id}>
                   {especial.articulo_nombre}

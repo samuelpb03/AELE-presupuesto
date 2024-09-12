@@ -151,7 +151,7 @@ function Frentes() {
     isColorValueAdded, // Asegura que se guarde el estado del incremento
     saveData,
   ]);
-  
+
 
   useEffect(() => {
     axios.get(`${backendUrl}/producto`).then((res) => {
@@ -431,37 +431,37 @@ function Frentes() {
     handleSelectChange("color", id, nombre);
 
     if (id === '55' || id === '56') {
-        setShouldApplyColorIncrement(true);  // Marcar que se debe aplicar el incremento cuando haya puntos
-        setIsColorValueAdded(true);  // Activar el mensaje del 20%
+      setShouldApplyColorIncrement(true);  // Marcar que se debe aplicar el incremento cuando haya puntos
+      setIsColorValueAdded(true);  // Activar el mensaje del 20%
 
-        // Si las medidas ya están seleccionadas, aplicar el incremento inmediatamente
-        if (selectedMedidas.id) {
-            setPuntos(Math.ceil(selectedMedidas.puntos * 1.2));  // Aplicar incremento si ya hay medidas seleccionadas
-        }
+      // Si las medidas ya están seleccionadas, aplicar el incremento inmediatamente
+      if (selectedMedidas.id) {
+        setPuntos(Math.ceil(selectedMedidas.puntos * 1.2));  // Aplicar incremento si ya hay medidas seleccionadas
+      }
     } else {
-        setShouldApplyColorIncrement(false);  // No aplicar incremento
-        setIsColorValueAdded(false);  // Desactivar el mensaje
-        setPuntos(selectedMedidas.puntos);  // Restablecer los puntos originales si no aplica
+      setShouldApplyColorIncrement(false);  // No aplicar incremento
+      setIsColorValueAdded(false);  // Desactivar el mensaje
+      setPuntos(selectedMedidas.puntos);  // Restablecer los puntos originales si no aplica
     }
-};
-const handleSelectMedidasChange = (event) => {
-  const index = event.target.selectedIndex;
-  const nombre = event.target.options[index].text;
-  const id = event.target.value;
-  const selectedMedida = listMedidas.find(medida => medida.medidas_id === parseInt(id));
+  };
+  const handleSelectMedidasChange = (event) => {
+    const index = event.target.selectedIndex;
+    const nombre = event.target.options[index].text;
+    const id = event.target.value;
+    const selectedMedida = listMedidas.find(medida => medida.medidas_id === parseInt(id));
 
-  setSelectedMedidas({ id, nombre, puntos: selectedMedida.puntos });
-  handleSelectChange("medidas", id, nombre);
+    setSelectedMedidas({ id, nombre, puntos: selectedMedida.puntos });
+    handleSelectChange("medidas", id, nombre);
 
-  let newPuntos = selectedMedida.puntos;
+    let newPuntos = selectedMedida.puntos;
 
-  // Verificar si el color seleccionado es "Color según muestra" o "Laca según muestra"
-  if (selectedColor.id === '55' || selectedColor.id === '56') {
+    // Verificar si el color seleccionado es "Color según muestra" o "Laca según muestra"
+    if (selectedColor.id === '55' || selectedColor.id === '56') {
       newPuntos = Math.ceil(selectedMedida.puntos * 1.2);  // Aplicar incremento del 20% y redondear hacia arriba
-  }
+    }
 
-  setPuntos(newPuntos);  // Actualizar los puntos con o sin incremento
-};
+    setPuntos(newPuntos);  // Actualizar los puntos con o sin incremento
+  };
 
 
   const handleSelectMaterialFranjaChange = (event) => {
@@ -484,14 +484,32 @@ const handleSelectMedidasChange = (event) => {
     const index = event.target.selectedIndex;
     const nombre = event.target.options[index].text;
     const id = event.target.value;
-
+  
     // Si el producto es 4 o 5, solo permitir seleccionar "Gran Altura"
     if (selectedProducto.id === "4" || selectedProducto.id === "5") {
-      if (id !== "195") return; // Solo permite seleccionar "Gran Altura" y evitar cualquier otra opción
+      if (id !== "195") {
+        return;
+      }
     }
-
+  
+  
+    // Si el usuario selecciona la opción vacía
+    if (id === "") {
+      if (especialIndex === 1) {
+        setSelectedEspecial1({ id: "", nombre: "", puntos: 0 });
+        setPuntosEspecial1(0);
+        setCantidadEspecial1(0); // Restablecer la cantidad a 0
+      } else if (especialIndex === 2) {
+        setSelectedEspecial2({ id: "", nombre: "", puntos: 0 });
+        setPuntosEspecial2(0);
+        setCantidadEspecial2(0); // Restablecer la cantidad a 0
+      }
+      return; // Salir de la función si se selecciona el valor vacío
+    }
+  
+    // Buscar el especial seleccionado en la lista de especiales
     const selectedEspecial = listEspeciales.find(especial => especial.articulo_id === parseInt(id));
-
+  
     if (especialIndex === 1) {
       setSelectedEspecial1({ id, nombre, puntos: selectedEspecial.puntos });
       setPuntosEspecial1(selectedEspecial.puntos);
@@ -638,7 +656,7 @@ const handleSelectMedidasChange = (event) => {
               onChange={(event) => handleSelectEspecialChange(1, event)}
               value={selectedEspecial1.id || ""}
             >
-              <option value="" disabled={selectedEspecial1.id !== ""}>--Selecciona una opción--</option>
+              <option value="">--Selecciona una opción--</option>
               {listEspeciales.map((especial) => (
                 <option key={especial.articulo_id} value={especial.articulo_id}>
                   {especial.articulo_nombre}
@@ -671,7 +689,7 @@ const handleSelectMedidasChange = (event) => {
               onChange={(event) => handleSelectEspecialChange(2, event)}
               value={selectedEspecial2.id || ""}
             >
-              <option value="" disabled={selectedEspecial2.id !== ""}>--Selecciona una opción--</option>
+              <option value="">--Selecciona una opción--</option>
               {listEspeciales.map((especial) => (
                 <option key={especial.articulo_id} value={especial.articulo_id}>
                   {especial.articulo_nombre}
