@@ -487,6 +487,18 @@ function Frentes2() {
     // Si el producto es 4 o 5, solo permitir seleccionar "Gran Altura"
     if (selectedProducto.id === "4" || selectedProducto.id === "5") {
       if (id !== "195") {
+        if (id === "") {
+          if (especialIndex === 1) {
+            setSelectedEspecial1({ id: "", nombre: "", puntos: 0 });
+            setPuntosEspecial1(0);
+            setCantidadEspecial1(0); // Restablecer la cantidad a 0
+          } else if (especialIndex === 2) {
+            setSelectedEspecial2({ id: "", nombre: "", puntos: 0 });
+            setPuntosEspecial2(0);
+            setCantidadEspecial2(0); // Restablecer la cantidad a 0
+          }
+          return; // Salir de la función si se selecciona el valor vacío
+        }
         return;
       }
     }
