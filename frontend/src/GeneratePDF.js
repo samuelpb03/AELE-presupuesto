@@ -77,7 +77,7 @@ export const generatePDF = (data, userInfo) => {
   const user = JSON.parse(localStorage.getItem('user'));
   const centro = user?.centro || 'Centro no especificado'; // Campo centro del user
   // Detalles de la empresa
-  doc.setFontSize(12);
+  doc.setFontSize(10);
   doc.text("AELE Beniparrell", 70, 20);
   doc.text("Teléfono: 655 895 411", 70, 35);
   doc.text(`Centro: ${centro}`, 14, 70); // Centro del user
@@ -156,19 +156,46 @@ export const generatePDF = (data, userInfo) => {
       console.log(`Final section data for section ${title}:`, sectionData);
 
       if (sectionData.length > 0) {
-        doc.setFontSize(14);
-        doc.text(title, 14, startY);
-        startY += 10;
-
+        doc.setFontSize(10); // Reducimos el tamaño de la fuente a 10 para compactar la información
+        doc.text(title, 14, startY); // Texto del título de la sección
+        startY += 12;  // Aumentamos el espacio entre el título y la tabla para evitar solapamientos
+        
+        // Dividimos la tabla en dos partes
+        const half = Math.ceil(sectionData.length / 2);
+        const firstHalf = sectionData.slice(0, half);  // Primera mitad de los datos
+        const secondHalf = sectionData.slice(half);    // Segunda mitad de los datos
+      
+        // Primera columna (izquierda) con margen lateral reducido
         autoTable(doc, {
           head: [['Concepto', 'Detalles']],
-          body: sectionData,
+          body: firstHalf,
           startY: startY,
+          margin: { left: 12 },  // Márgen lateral izquierdo reducido
+          tableWidth: doc.internal.pageSize.getWidth() / 2 - 8,  // Ancho de la columna más grande
           theme: 'grid',
+          styles: {
+            cellPadding: 1,  // Reducimos el relleno dentro de cada celda
+          },
         });
-
-        startY = doc.lastAutoTable.finalY + 10;
+      
+        // Segunda columna (derecha) con margen lateral reducido
+        autoTable(doc, {
+          head: [['Concepto', 'Detalles']],
+          body: secondHalf,
+          startY: startY,
+          margin: { left: doc.internal.pageSize.getWidth() / 2 + 5 },  // Márgen lateral derecho reducido
+          tableWidth: doc.internal.pageSize.getWidth() / 2 - 8,  // Ancho de la segunda columna más grande
+          theme: 'grid',
+          styles: {
+            cellPadding: 1,  // Reducimos el relleno dentro de cada celda
+          },
+        });
+      
+        // Actualizamos startY con el valor más alto para asegurarnos de que no se sobreponga con el contenido
+        startY = Math.max(doc.lastAutoTable.finalY, startY) + 5;  // Reducimos el espacio vertical entre tablas
       }
+      
+      
     }
   });
 
@@ -199,7 +226,7 @@ export const generatePDF = (data, userInfo) => {
   console.log(`Total Puntos: ${totalPuntos}`);
   
 
-  doc.setFontSize(12);
+  doc.setFontSize(10);
   doc.text(`Total Puntos: ${totalPuntos}`, 14, startY);
   startY += 10;
   doc.text(`Total Frentes/Interiores: ${numFrentesInteriores}`, 14, startY);
@@ -241,10 +268,3 @@ fetch('http://194.164.166.129:6969/presupuesto', {
     console.error("Error al enviar datos del presupuesto:", error);
   });  
 };
-
-
-
-
-
-
-
