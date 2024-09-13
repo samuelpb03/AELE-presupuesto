@@ -57,28 +57,9 @@ const labelsMap = {
   puntosTotales8: "Puntos 8",
   puntosTotales9: "Puntos 9",
 };
-const presupuestoData = {
-  centro: "Nombre del centro",
-  puntos: 1200.50,
-  tienda: "Tienda XYZ",
-  cliente: "Cliente ABC"
-};
-fetch('http://194.164.166.129:6969/presupuesto', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json'
-  },
-  body: JSON.stringify(presupuestoData)
-})
-.then(response => response.json())  // Convertir la respuesta a JSON
-.then(data => {
-  console.log("Respuesta del servidor:", data);
-})
-.catch(error => {
-  console.error("Error al enviar datos del presupuesto:", error);
-});
+
 // Opcionalmente, imprime estos datos en la consola para verificar que son correctos
-console.log("Datos del presupuesto a enviar:", presupuestoData);
+
 export const generatePDF = (data, userInfo) => {
   const doc = new jsPDF();
   const checkPageSpace = (doc, startY) => {
@@ -123,7 +104,6 @@ export const generatePDF = (data, userInfo) => {
 
   let startY = 110;
   let totalFrentesInteriores = 0;
-  let totalArmariosCompletos = 0;
 
   Object.entries(sections).forEach(([section, title]) => {
     console.log(`Processing section: ${title}`);
@@ -206,7 +186,29 @@ export const generatePDF = (data, userInfo) => {
   const numFrentesInteriores = data.instalacion?.numFrentesInteriores || 0;
   const numArmariosCompletos = data.instalacion?.numArmariosCompletos || 0;
   const acarreo = data.instalacion?.acarreo || false;
-
+  const presupuestoData = {
+    centro: centro,
+    puntos: totalPuntos,
+    tienda: "Tienda XYZ",
+    cliente: "Cliente ABC"
+  };
+  fetch('http://194.164.166.129:6969/presupuesto', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(presupuestoData),
+    
+    credentials: 'include' // Incluye esta línea si necesitas enviar cookies o autenticación
+  })
+  .then(response => response.json())  // Convertir la respuesta a JSON
+  .then(data => {
+    console.log("Respuesta del servidor:", data);
+  })
+  .catch(error => {
+    console.error("Error al enviar datos del presupuesto:", error);
+  });
+  console.log("Datos del presupuesto a enviar:", presupuestoData);
   let totalMontaje = ((numFrentesInteriores * 110) + (numArmariosCompletos * 146)) + 50;
   startY = checkPageSpace(doc, startY);
   console.log(`Total Puntos: ${totalPuntos}`);

@@ -432,10 +432,12 @@ app.get("/materialesPorArticulo", (req, res) => {
   });
 });
 app.post("/presupuesto", (req, res) => {
+  console.log("Datos recibidos:", req.body); // Para asegurarte de que los datos llegan al servidor
   const { centro, puntos, tienda, cliente } = req.body;
 
-  // Asegúrate de que todos los datos requeridos están presentes
+  // Asegúrate de que todos los campos estén presentes
   if (!centro || !puntos || !tienda || !cliente) {
+    console.log("Faltan datos del presupuesto:", req.body);
     return res.status(400).json({ error: "Todos los campos son requeridos" });
   }
 
@@ -447,11 +449,12 @@ app.post("/presupuesto", (req, res) => {
 
   dbConnection.query(query, [centro, puntos, tienda, cliente], (err, result) => {
     if (err) {
-      console.error("Error al insertar el presupuesto:", err);
+      console.error("Error al insertar el presupuesto en la base de datos:", err); // Muestra el error específico
       return res.status(500).json({ error: "Error al crear el presupuesto" });
     }
 
-    // Devolver el ID del presupuesto recién creado para confirmación
+    // Responder con éxito y el ID del presupuesto recién creado
+    console.log("Presupuesto creado exitosamente, ID:", result.insertId);
     res.json({ message: "Presupuesto creado exitosamente", idPresupuesto: result.insertId });
   });
 });
