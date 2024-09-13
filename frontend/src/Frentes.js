@@ -33,7 +33,7 @@ function Frentes() {
   const [cantidadEspecial1, setCantidadEspecial1] = useState(0);
   const [cantidadEspecial2, setCantidadEspecial2] = useState(0);
   const [franjaActiva, setFranjaActiva] = useState(false);
-  var [cantidad, setCantidad] = useState(1);
+  var [cantidad, setCantidad] = useState(0);
   const [isColorValueAdded, setIsColorValueAdded] = useState(false);
   const [shouldApplyColorIncrement, setShouldApplyColorIncrement] = useState(false);
   const backendUrl = 'http://194.164.166.129:6969'; // URL de ngrok para el backend
