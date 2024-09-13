@@ -189,29 +189,15 @@ export const generatePDF = (data, userInfo) => {
   const presupuestoData = {
     centro: centro,
     puntos: totalPuntos,
-    tienda: "Tienda XYZ",
-    cliente: "Cliente ABC"
+    tienda: userInfo.tienda,
+    cliente: userInfo.cliente
   };
-  fetch('http://194.164.166.129:6969/presupuesto', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(presupuestoData),
-    
-    credentials: 'include' // Incluye esta línea si necesitas enviar cookies o autenticación
-  })
-  .then(response => response.json())  // Convertir la respuesta a JSON
-  .then(data => {
-    console.log("Respuesta del servidor:", data);
-  })
-  .catch(error => {
-    console.error("Error al enviar datos del presupuesto:", error);
-  });
+  
   console.log("Datos del presupuesto a enviar:", presupuestoData);
   let totalMontaje = ((numFrentesInteriores * 110) + (numArmariosCompletos * 146)) + 50;
   startY = checkPageSpace(doc, startY);
   console.log(`Total Puntos: ${totalPuntos}`);
+  
 
   doc.setFontSize(12);
   doc.text(`Total Puntos: ${totalPuntos}`, 14, startY);
@@ -221,8 +207,39 @@ export const generatePDF = (data, userInfo) => {
   doc.text(`Total Armarios Completos: ${numArmariosCompletos}`, 14, startY);
   startY += 10;
   doc.text(`Total Montaje e Instalación: ${totalMontaje.toFixed(2)} €`, 14, startY);
+  // Aquí asumes que tienes el valor de "centro" en el frontend
+  // Obtenemos el centro desde el frontend
+const centroAbreviado = centro.substring(0, 3).toUpperCase();  // Tomamos las primeras 3 letras en mayúsculas
 
-  doc.save("presupuesto2.pdf");
+// El nombre del presupuesto será generado en el frontend concatenando el centro y el id del presupuesto
+// Una vez que recibas el idPresupuesto del backend, lo concatenas
+fetch('http://194.164.166.129:6969/presupuesto', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    centro: centro, // Incluimos el centro en el POST por si es necesario guardarlo en la BD
+    puntos: totalPuntos,
+    tienda: userInfo.tienda,
+    cliente: userInfo.cliente
+  }),
+  credentials: 'include' // Incluye esta línea si necesitas enviar cookies o autenticación
+})
+.then(response => response.json())  // Convertimos la respuesta a JSON
+.then(data => {
+  console.log("Respuesta del servidor:", data);
+
+  // Ahora concatenamos el nombre del presupuesto usando el ID devuelto por el backend
+  const nombrePresupuesto = `${centroAbreviado}-${data.idPresupuesto}`;
+  console.log("Nombre del presupuesto generado:", nombrePresupuesto);
+
+  // Usar el nombre del presupuesto para guardar el archivo PDF
+  doc.save(`${nombrePresupuesto}.pdf`);
+})
+  .catch(error => {
+    console.error("Error al enviar datos del presupuesto:", error);
+  });  
 };
 
 
