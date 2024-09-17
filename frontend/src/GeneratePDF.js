@@ -58,39 +58,43 @@ const labelsMap = {
   puntosTotales9: "Puntos 9",
 };
 
-// Opcionalmente, imprime estos datos en la consola para verificar que son correctos
-
+// Función para generar el PDF
 export const generatePDF = (data, userInfo) => {
   const doc = new jsPDF();
+
+  // Helper para verificar si hay espacio suficiente en la página
   const checkPageSpace = (doc, startY) => {
     const pageHeight = doc.internal.pageSize.getHeight();
-    const marginBottom = 20; // Margen que dejamos en la parte inferior
+    const marginBottom = 20; // Margen inferior
     if (startY >= pageHeight - marginBottom) {
       doc.addPage();
       return 20; // Reiniciamos el valor de startY para la nueva página
     }
     return startY;
   };
+
   // Agregar logotipo
-  const logo = 'logoAELE.png';
-  doc.addImage(logo, 'PNG', 10, 10, 50, 20);
   const user = JSON.parse(localStorage.getItem('user'));
   const centro = user?.centro || 'Centro no especificado'; // Campo centro del user
-  // Detalles de la empresa
+  let logo = 'logoAELE.png';
+  if (centro === "Leroy Merlin") {
+    logo = 'logoLeroy.png';
+  }
+
+  doc.addImage(logo, 'PNG', 10, 10, 50, 20);
+
+  // Detalles de la empresa en una sola línea
   doc.setFontSize(10);
-  doc.text("AELE Beniparrell", 70, 20);
-  doc.text("Teléfono: 655 895 411", 70, 35);
-  doc.text(`Centro: ${centro}`, 14, 70); // Centro del user
-  doc.text(`Tienda: ${userInfo.tienda}`, 14, 80); // Información de userInfo
-  doc.text(`Cliente: ${userInfo.cliente}`, 14, 90); 
-  doc.text(`Teléfono: ${userInfo.telefono}`, 14, 100); 
-  
+  const companyDetails = `Centro: ${centro} | Cliente: ${userInfo.cliente} | Teléfono: ${userInfo.telefono}`;
+  doc.text(companyDetails, 12, 70);
+
   // Título
   doc.setFontSize(18);
   doc.text("AELE Presupuesto", doc.internal.pageSize.getWidth() / 2, 60, null, null, 'center');
 
   // Tabla de datos
   const sections = {
+
     frentes: "Frentes",
     frentes2: "Frentes 2",
     frentes3: "Frentes 3",
@@ -102,16 +106,15 @@ export const generatePDF = (data, userInfo) => {
     instalacion: "Instalacion"
   };
 
-  let startY = 110;
+  let startY = 90;
   let totalFrentesInteriores = 0;
 
   Object.entries(sections).forEach(([section, title]) => {
-    console.log(`Processing section: ${title}`);
     if (data[section]) {
       let articuloCounter = 1;
       const sectionData = [];
 
-      // Procesar y agregar datos de la sección, excluyendo los especiales y "cantidadFrente"
+      // Procesar y agregar datos de la sección
       Object.entries(data[section]).forEach(([key, value]) => {
         if (key === 'cantidadFrente') return; // Excluir cantidadFrente
         if (key.endsWith('Nombre') && value && !key.startsWith('selectedEspecial')) {
@@ -130,8 +133,6 @@ export const generatePDF = (data, userInfo) => {
           sectionData.push([labelsMap[key] || key, value]);
         }
       });
-
-      console.log(`Section data before adding especiales for section ${title}:`, sectionData);
 
       // Añadir los especiales y sus puntos después de los datos procesados
       if (data[section].selectedEspecial1Nombre) {
@@ -153,49 +154,50 @@ export const generatePDF = (data, userInfo) => {
         }
       }
 
-      console.log(`Final section data for section ${title}:`, sectionData);
-
+      // Solo continuar si hay datos relevantes
       if (sectionData.length > 0) {
-        doc.setFontSize(10); // Reducimos el tamaño de la fuente a 10 para compactar la información
-        doc.text(title, 14, startY); // Texto del título de la sección
-        startY += 12;  // Aumentamos el espacio entre el título y la tabla para evitar solapamientos
-        
+        doc.setFontSize(10);
+        doc.text(title, 12, startY);
+        startY += 12;
+
         // Dividimos la tabla en dos partes
         const half = Math.ceil(sectionData.length / 2);
-        const firstHalf = sectionData.slice(0, half);  // Primera mitad de los datos
-        const secondHalf = sectionData.slice(half);    // Segunda mitad de los datos
-      
-        // Primera columna (izquierda) con margen lateral reducido
+        const firstHalf = sectionData.slice(0, half);
+        const secondHalf = sectionData.slice(half);
+
+        // Primera columna
+        startY = checkPageSpace(doc, startY);  // Comprobar si queda espacio suficiente
         autoTable(doc, {
           head: [['Concepto', 'Detalles']],
           body: firstHalf,
           startY: startY,
-          margin: { left: 12 },  // Márgen lateral izquierdo reducido
-          tableWidth: doc.internal.pageSize.getWidth() / 2 - 8,  // Ancho de la columna más grande
+          margin: { left: 12 },
+          tableWidth: doc.internal.pageSize.getWidth() / 2 - 12,
           theme: 'grid',
           styles: {
-            cellPadding: 1,  // Reducimos el relleno dentro de cada celda
+            cellPadding: 1,
           },
         });
-      
-        // Segunda columna (derecha) con margen lateral reducido
+
+        // Actualizar startY después de la primera columna
+        const finalY1 = doc.lastAutoTable.finalY;
+
+        // Segunda columna
         autoTable(doc, {
           head: [['Concepto', 'Detalles']],
           body: secondHalf,
           startY: startY,
-          margin: { left: doc.internal.pageSize.getWidth() / 2 + 5 },  // Márgen lateral derecho reducido
-          tableWidth: doc.internal.pageSize.getWidth() / 2 - 8,  // Ancho de la segunda columna más grande
+          margin: { left: doc.internal.pageSize.getWidth() / 2 + 2 },
+          tableWidth: doc.internal.pageSize.getWidth() / 2 - 12,
           theme: 'grid',
           styles: {
-            cellPadding: 1,  // Reducimos el relleno dentro de cada celda
+            cellPadding: 1,
           },
         });
-      
+
         // Actualizamos startY con el valor más alto para asegurarnos de que no se sobreponga con el contenido
-        startY = Math.max(doc.lastAutoTable.finalY, startY) + 5;  // Reducimos el espacio vertical entre tablas
+        startY = Math.max(doc.lastAutoTable.finalY, finalY1) + 5;
       }
-      
-      
     }
   });
 
@@ -209,62 +211,53 @@ export const generatePDF = (data, userInfo) => {
     }, 0);
   }, 0);
 
-  // Calcular el total de montaje e instalación
+  // Cálculo de montaje e instalación
   const numFrentesInteriores = data.instalacion?.numFrentesInteriores || 0;
   const numArmariosCompletos = data.instalacion?.numArmariosCompletos || 0;
-  const acarreo = data.instalacion?.acarreo || false;
   const presupuestoData = {
     centro: centro,
     puntos: totalPuntos,
     tienda: userInfo.tienda,
     cliente: userInfo.cliente
   };
-  
-  console.log("Datos del presupuesto a enviar:", presupuestoData);
-  let totalMontaje = ((numFrentesInteriores * 110) + (numArmariosCompletos * 146)) + 50;
+  let totalMontaje = (numFrentesInteriores * 110) + (numArmariosCompletos * 146) + 50;
   startY = checkPageSpace(doc, startY);
-  console.log(`Total Puntos: ${totalPuntos}`);
-  
 
   doc.setFontSize(10);
-  doc.text(`Total Puntos: ${totalPuntos}`, 14, startY);
-  startY += 10;
-  doc.text(`Total Frentes/Interiores: ${numFrentesInteriores}`, 14, startY);
-  startY += 10;
-  doc.text(`Total Armarios Completos: ${numArmariosCompletos}`, 14, startY);
-  startY += 10;
-  doc.text(`Total Montaje e Instalación: ${totalMontaje.toFixed(2)} €`, 14, startY);
-  // Aquí asumes que tienes el valor de "centro" en el frontend
-  // Obtenemos el centro desde el frontend
-const centroAbreviado = centro.substring(0, 3).toUpperCase();  // Tomamos las primeras 3 letras en mayúsculas
 
-// El nombre del presupuesto será generado en el frontend concatenando el centro y el id del presupuesto
-// Una vez que recibas el idPresupuesto del backend, lo concatenas
-fetch('http://194.164.166.129:6969/presupuesto', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json'
-  },
-  body: JSON.stringify({
-    centro: centro, // Incluimos el centro en el POST por si es necesario guardarlo en la BD
-    puntos: totalPuntos,
-    tienda: userInfo.tienda,
-    cliente: userInfo.cliente
-  }),
-  credentials: 'include' // Incluye esta línea si necesitas enviar cookies o autenticación
-})
-.then(response => response.json())  // Convertimos la respuesta a JSON
-.then(data => {
-  console.log("Respuesta del servidor:", data);
+  startY += 15;
 
-  // Ahora concatenamos el nombre del presupuesto usando el ID devuelto por el backend
-  const nombrePresupuesto = `${centroAbreviado}-${data.idPresupuesto}`;
-  console.log("Nombre del presupuesto generado:", nombrePresupuesto);
+// Primera línea que agrupa los puntos y frentes/interiores
+const linea1 = `Total Puntos: ${totalPuntos} | Total Frentes/Interiores: ${numFrentesInteriores}`;
+doc.text(linea1, 12, startY);  // Ajustamos el margen izquierdo a 12
+startY += 10;
 
-  // Usar el nombre del presupuesto para guardar el archivo PDF
-  doc.save(`${nombrePresupuesto}.pdf`);
-})
-  .catch(error => {
-    console.error("Error al enviar datos del presupuesto:", error);
-  });  
+// Segunda línea que agrupa armarios completos y montaje/instalación
+const linea2 = `Total Armarios Completos: ${numArmariosCompletos} | Total Montaje e Instalación: ${totalMontaje.toFixed(2)} €`;
+doc.text(linea2, 12, startY);  // Ajustamos el margen izquierdo a 12
+
+  // Guardar el PDF con el nombre correcto
+  const centroAbreviado = centro.substring(0, 3).toUpperCase();
+  fetch('http://194.164.166.129:6969/presupuesto', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      centro: centro,
+      puntos: totalPuntos,
+      cliente: userInfo.cliente,
+      tienda: userInfo.tienda
+    }),
+    credentials: 'include' // Enviar cookies o autenticación si es necesario
+  })
+    .then(response => response.json())
+    .then(data => {
+      const nombrePresupuesto = `${centroAbreviado}-${data.idPresupuesto}`;
+      doc.save(`${nombrePresupuesto}.pdf`);
+    })
+    .catch(error => {
+      console.error("Error al enviar datos del presupuesto:", error);
+    });
 };
+
