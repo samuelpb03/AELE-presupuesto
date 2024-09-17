@@ -26,7 +26,7 @@ function Frentes3() {
   const [selectedMedidas, setSelectedMedidas] = useState({ id: "", nombre: "", puntos: 0 });
   const [selectedMaterialFranja, setSelectedMaterialFranja] = useState({ id: "", nombre: "" });
   const [selectedColorFranja, setSelectedColorFranja] = useState({ id: "", nombre: "" });
-  var [cantidad, setCantidad] = useState(1);
+  var [cantidad, setCantidad] = useState(0);
   const [puntos, setPuntos] = useState(0); // Estado para puntos
 
   const [selectedEspecial1, setSelectedEspecial1] = useState({ id: "", nombre: "", puntos: 0 });
@@ -88,7 +88,7 @@ function Frentes3() {
         nombre: data.frentes3.selectedEspecial2Nombre || "",
         puntos: data.frentes3.selectedEspecial2Puntos || 0,
       });
-      setCantidad(data.frentes3.cantidad || 1);
+      setCantidad(data.frentes3.cantidad || 0);
       setPuntos(data.frentes3.puntos || 0);
 
       setPuntosEspecial1((data.frentes3.selectedEspecial1Puntos || 0) * (data.frentes3.cantidadEspecial1 || 0));

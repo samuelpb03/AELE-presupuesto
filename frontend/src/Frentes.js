@@ -89,7 +89,7 @@ function Frentes() {
         nombre: data.frentes.selectedEspecial2Nombre || "",
         puntos: data.frentes.selectedEspecial2Puntos || 0,
       });
-      setCantidad(data.frentes.cantidad || 1);
+      setCantidad(data.frentes.cantidad || 0);
       setPuntos(data.frentes.puntos || 0);  // Restaurar los puntos guardados
       setIsColorValueAdded(data.frentes.isColorValueAdded || false);  // Restaurar el estado del incremento del 20%
       setPuntosEspecial1((data.frentes.selectedEspecial1Puntos || 0) * (data.frentes.cantidadEspecial1 || 0));

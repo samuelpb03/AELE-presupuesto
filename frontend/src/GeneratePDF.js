@@ -68,7 +68,13 @@ export const generatePDF = (data, userInfo) => {
     const marginBottom = 20; // Margen inferior
     if (startY >= pageHeight - marginBottom) {
       doc.addPage();
-      return 20; // Reiniciamos el valor de startY para la nueva página
+      
+      // Redibujar el recuadro en cada nueva página
+      const pageWidth = doc.internal.pageSize.getWidth();
+      doc.setLineWidth(0.5);
+      doc.rect(5, 5, pageWidth - 10, pageHeight - 10); // Recuadro para la nueva página
+
+      return 20; // Reiniciar la posición vertical para la nueva página
     }
     return startY;
   };
@@ -83,18 +89,29 @@ export const generatePDF = (data, userInfo) => {
 
   doc.addImage(logo, 'PNG', 10, 10, 50, 20);
 
-  // Detalles de la empresa en una sola línea
-  doc.setFontSize(10);
-  const companyDetails = `Centro: ${centro} | Cliente: ${userInfo.cliente} | Teléfono: ${userInfo.telefono}`;
-  doc.text(companyDetails, 12, 70);
+  // Recuadro para toda la página
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  doc.setLineWidth(0.5);
+  doc.rect(5, 5, pageWidth - 10, pageHeight - 10); // Recuadro con bordes finos
 
-  // Título
+  // Detalles de la empresa en varias líneas en la esquina superior derecha
+  doc.setFontSize(10);
+  const companyDetails = [
+    `Centro: ${centro}`,
+    `Cliente: ${userInfo.cliente}`,
+    `Teléfono: ${userInfo.telefono}`
+  ];
+  companyDetails.forEach((line, index) => {
+    doc.text(line, pageWidth - 90, 15 + (index * 7)); // Ajuste de líneas
+  });
+
+  // Título ajustado a "Presupuesto"
   doc.setFontSize(18);
-  doc.text("AELE Presupuesto", doc.internal.pageSize.getWidth() / 2, 60, null, null, 'center');
+  doc.text("Presupuesto", pageWidth - 90, 40); // En la esquina derecha, junto a los datos
 
   // Tabla de datos
   const sections = {
-
     frentes: "Frentes",
     frentes2: "Frentes 2",
     frentes3: "Frentes 3",
@@ -106,7 +123,7 @@ export const generatePDF = (data, userInfo) => {
     instalacion: "Instalacion"
   };
 
-  let startY = 90;
+  let startY = 50;
   let totalFrentesInteriores = 0;
 
   Object.entries(sections).forEach(([section, title]) => {
@@ -134,70 +151,80 @@ export const generatePDF = (data, userInfo) => {
         }
       });
 
+      // Filtrar productos que solo tengan "Cantidad"
+      const filteredSectionData = sectionData.filter(row => row[1] !== 'Cantidad');
+
       // Añadir los especiales y sus puntos después de los datos procesados
       if (data[section].selectedEspecial1Nombre) {
-        sectionData.push([labelsMap.selectedEspecial1Nombre, data[section].selectedEspecial1Nombre]);
+        filteredSectionData.push([labelsMap.selectedEspecial1Nombre, data[section].selectedEspecial1Nombre]);
         if (data[section].puntosEspecial1) {
-          sectionData.push([labelsMap.puntosEspecial1, data[section].puntosEspecial1]);
+          filteredSectionData.push([labelsMap.puntosEspecial1, data[section].puntosEspecial1]);
         }
         if (data[section].cantidadEspecial1) {
-          sectionData.push([labelsMap.cantidadEspecial1, data[section].cantidadEspecial1]);
+          filteredSectionData.push([labelsMap.cantidadEspecial1, data[section].cantidadEspecial1]);
         }
       }
       if (data[section].selectedEspecial2Nombre) {
-        sectionData.push([labelsMap.selectedEspecial2Nombre, data[section].selectedEspecial2Nombre]);
+        filteredSectionData.push([labelsMap.selectedEspecial2Nombre, data[section].selectedEspecial2Nombre]);
         if (data[section].puntosEspecial2) {
-          sectionData.push([labelsMap.puntosEspecial2, data[section].puntosEspecial2]);
+          filteredSectionData.push([labelsMap.puntosEspecial2, data[section].puntosEspecial2]);
         }
         if (data[section].cantidadEspecial2) {
-          sectionData.push([labelsMap.cantidadEspecial2, data[section].cantidadEspecial2]);
+          filteredSectionData.push([labelsMap.cantidadEspecial2, data[section].cantidadEspecial2]);
         }
       }
 
       // Solo continuar si hay datos relevantes
-      if (sectionData.length > 0) {
+      if (filteredSectionData.length > 0) {
         doc.setFontSize(10);
         doc.text(title, 12, startY);
-        startY += 12;
-
+        startY += 6;
+    
         // Dividimos la tabla en dos partes
-        const half = Math.ceil(sectionData.length / 2);
-        const firstHalf = sectionData.slice(0, half);
-        const secondHalf = sectionData.slice(half);
-
+        const half = Math.ceil(filteredSectionData.length / 2);
+        const firstHalf = filteredSectionData.slice(0, half);
+        const secondHalf = filteredSectionData.slice(half);
+    
         // Primera columna
-        startY = checkPageSpace(doc, startY);  // Comprobar si queda espacio suficiente
         autoTable(doc, {
-          head: [['Concepto', 'Detalles']],
-          body: firstHalf,
-          startY: startY,
-          margin: { left: 12 },
-          tableWidth: doc.internal.pageSize.getWidth() / 2 - 12,
-          theme: 'grid',
-          styles: {
-            cellPadding: 1,
-          },
+            head: [['Concepto', 'Detalles']],
+            body: firstHalf,
+            startY: startY,
+            margin: { left: 12 },
+            tableWidth: doc.internal.pageSize.getWidth() / 2 - 12, // Mitad de la página
+            theme: 'grid',
+            styles: {
+                cellPadding: 1,
+                fillColor: [255, 255, 255], // Sin color de fondo
+                textColor: 0,
+            },
+            headStyles: {
+                fillColor: [220, 220, 220], // Color gris claro para los títulos
+                textColor: 0,
+            },
         });
-
-        // Actualizar startY después de la primera columna
-        const finalY1 = doc.lastAutoTable.finalY;
-
+    
         // Segunda columna
         autoTable(doc, {
-          head: [['Concepto', 'Detalles']],
-          body: secondHalf,
-          startY: startY,
-          margin: { left: doc.internal.pageSize.getWidth() / 2 + 2 },
-          tableWidth: doc.internal.pageSize.getWidth() / 2 - 12,
-          theme: 'grid',
-          styles: {
-            cellPadding: 1,
-          },
+            head: [['Concepto', 'Detalles']],
+            body: secondHalf,
+            startY: startY,
+            margin: { left: doc.internal.pageSize.getWidth() / 2 + 2 }, // Mitad derecha de la página
+            tableWidth: doc.internal.pageSize.getWidth() / 2 - 12, // Mitad de la página
+            theme: 'grid',
+            styles: {
+                cellPadding: 1,
+                fillColor: [255, 255, 255], // Sin color de fondo
+                textColor: 0,
+            },
+            headStyles: {
+                fillColor: [220, 220, 220], // Color gris claro para los títulos
+                textColor: 0,
+            },
         });
-
-        // Actualizamos startY con el valor más alto para asegurarnos de que no se sobreponga con el contenido
-        startY = Math.max(doc.lastAutoTable.finalY, finalY1) + 5;
-      }
+    
+        startY = Math.max(doc.lastAutoTable.finalY, startY) + 10; // Ajuste del espacio después de ambas columnas
+    }
     }
   });
 
@@ -225,16 +252,16 @@ export const generatePDF = (data, userInfo) => {
 
   doc.setFontSize(10);
 
-  startY += 15;
+  startY += 10;
 
-// Primera línea que agrupa los puntos y frentes/interiores
-const linea1 = `Total Puntos: ${totalPuntos} | Total Frentes/Interiores: ${numFrentesInteriores}`;
-doc.text(linea1, 12, startY);  // Ajustamos el margen izquierdo a 12
-startY += 10;
+  // Primera línea que agrupa los puntos y frentes/interiores
+  const linea1 = `Total Puntos: ${totalPuntos} | Total Frentes/Interiores: ${numFrentesInteriores}`;
+  doc.text(linea1, 12, startY);  // Ajustamos el margen izquierdo a 12
+  startY += 10;
 
-// Segunda línea que agrupa armarios completos y montaje/instalación
-const linea2 = `Total Armarios Completos: ${numArmariosCompletos} | Total Montaje e Instalación: ${totalMontaje.toFixed(2)} €`;
-doc.text(linea2, 12, startY);  // Ajustamos el margen izquierdo a 12
+  // Segunda línea que agrupa armarios completos y montaje/instalación
+  const linea2 = `Total Armarios Completos: ${numArmariosCompletos} | Total Montaje e Instalación: ${totalMontaje.toFixed(2)} €`;
+  doc.text(linea2, 12, startY);  // Ajustamos el margen izquierdo a 12
 
   // Guardar el PDF con el nombre correcto
   const centroAbreviado = centro.substring(0, 3).toUpperCase();
@@ -260,4 +287,6 @@ doc.text(linea2, 12, startY);  // Ajustamos el margen izquierdo a 12
       console.error("Error al enviar datos del presupuesto:", error);
     });
 };
+
+
 

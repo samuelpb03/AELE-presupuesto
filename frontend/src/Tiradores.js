@@ -41,7 +41,7 @@ function Tiradores() {
           id: data.tiradores[`color${i + 1}Id`] || "",
           nombre: data.tiradores[`color${i + 1}Nombre`] || "",
         };
-        restoredCantidades[i] = data.tiradores[`cantidad${i + 1}`] || 1;
+        restoredCantidades[i] = data.tiradores[`cantidad${i + 1}`] || 0;
         restoredPuntos[i] = data.tiradores[`puntos${i + 1}`] || 0;
       }
 
@@ -288,16 +288,16 @@ function Tiradores() {
       <div className="container2">
         <h1>Tiradores</h1>
         <div className="field">
+        {renderSelectArticulo(0)}
+        </div>
+        <div className="field">
+        {renderSelectArticulo(1)}
+        </div>
+        <div className="field">
         {renderSelectArticulo(2)}
         </div>
         <div className="field">
         {renderSelectArticulo(3)}
-        </div>
-        <div className="field">
-        {renderSelectArticulo(4)}
-        </div>
-        <div className="field">
-        {renderSelectArticulo(5)}
         </div>
         </div>
       <div className="container2">
@@ -305,7 +305,7 @@ function Tiradores() {
       
         <h1>Cerraduras</h1>
         <div className="field-special">
-        {renderSelectArticulo(0, true)}
+        {renderSelectArticulo(4, true)}
         </div>
       </div>
     </div>
