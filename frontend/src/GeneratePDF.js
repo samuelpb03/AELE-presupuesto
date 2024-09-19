@@ -62,27 +62,16 @@ const labelsMap = {
 export const generatePDF = (data, userInfo) => {
   const doc = new jsPDF();
 
-  // Helper para redibujar el borde de página en cada nueva página
-  const drawPageBorder = () => {
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const pageHeight = doc.internal.pageSize.getHeight();
-    doc.setLineWidth(0.5);
-    doc.rect(5, 5, pageWidth - 10, pageHeight - 10); // Recuadro con bordes finos
-  };
-
   // Helper para verificar si hay espacio suficiente en la página
   const checkPageSpace = (doc, startY) => {
-  const pageHeight = doc.internal.pageSize.getHeight();
-  const marginBottom = 20; // Margen inferior
-
-  if (startY >= pageHeight - marginBottom) {
-    doc.addPage(); // Añade una nueva página
-    drawPageBorder(); // Redibujar el borde en la nueva página
-    return 20; // Reiniciar la posición en la nueva página
-  }
-  return startY;
-};
-
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const marginBottom = 20; // Margen inferior
+    if (startY >= pageHeight - marginBottom) {
+      doc.addPage();
+      return 20; // Reiniciamos el valor de startY para la nueva página
+    }
+    return startY;
+  };
 
   // Agregar logotipo
   const user = JSON.parse(localStorage.getItem('user'));
@@ -93,42 +82,27 @@ export const generatePDF = (data, userInfo) => {
   }
 
   doc.addImage(logo, 'PNG', 10, 10, 50, 20);
-  drawPageBorder(); // Dibujar el borde en la primera página
+
+  // Recuadro para toda la página
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  doc.setLineWidth(0.5);
+  doc.rect(5, 5, pageWidth - 10, pageHeight - 10); // Recuadro con bordes finos
 
   // Detalles de la empresa en varias líneas en la esquina superior derecha
-  doc.setFontSize(10);
+  doc.setFontSize(8);
   const companyDetails = [
     `Centro: ${centro}`,
     `Cliente: ${userInfo.cliente}`,
     `Teléfono: ${userInfo.telefono}`
   ];
   companyDetails.forEach((line, index) => {
-    doc.text(line, doc.internal.pageSize.getWidth() - 90, 15 + (index * 7)); // Ajuste de líneas
+    doc.text(line, pageWidth - 90, 15 + (index * 7)); // Ajuste de líneas
   });
 
   // Título ajustado a "Presupuesto"
-  doc.setFontSize(18);
-  doc.text("Presupuesto", doc.internal.pageSize.getWidth() - 90, 40); // En la esquina derecha, junto a los datos
-
-  // Configuración de autoTable para agregar bordes en cada nueva página
-  const autoTableOptions = {
-    theme: 'grid',
-    styles: {
-      fillColor: [255, 255, 255], // Sin color de fondo
-      textColor: 0,
-    },
-    headStyles: {
-      fillColor: [220, 220, 220], // Color gris claro para los títulos
-      textColor: 0,
-    },
-    columnStyles: {
-      0: { cellWidth: 45 }, // Ajustar el ancho de las columnas de 'Concepto'
-      1: { cellWidth: 50 }  // Ajustar el ancho de las columnas de 'Detalles'
-    },
-    didDrawPage: () => {
-      drawPageBorder(); // Redibujar el borde en cada nueva página
-    }
-  };
+  doc.setFontSize(15);
+  doc.text("Presupuesto", pageWidth - 90, 40); // En la esquina derecha, junto a los datos
 
   // Tabla de datos
   const sections = {
@@ -143,7 +117,7 @@ export const generatePDF = (data, userInfo) => {
     instalacion: "Instalacion"
   };
 
-  let startY = 50;
+  let startY = 30;
   let totalFrentesInteriores = 0;
 
   Object.entries(sections).forEach(([section, title]) => {
@@ -155,10 +129,9 @@ export const generatePDF = (data, userInfo) => {
       Object.entries(data[section]).forEach(([key, value]) => {
         if (key === 'cantidadFrente') return; // Excluir cantidadFrente
         if (key.endsWith('Nombre') && value && !key.startsWith('selectedEspecial')) {
-          if (key.includes('Color')) { // Asegurarse de que Color se maneje correctamente
-            sectionData.push([labelsMap[key] || 'Color', value]); 
-          } else if (key.includes('Medidas')) {  // Asegurar que las Medidas se manejen correctamente en baldas e iluminación
-            sectionData.push([labelsMap[key] || 'Medidas', value]); 
+          if (key.startsWith('articulo')) {
+            sectionData.push([`Artículo ${articuloCounter}`, value]);
+            articuloCounter++;
           } else {
             sectionData.push([labelsMap[key] || key, value]);
           }
@@ -175,46 +148,81 @@ export const generatePDF = (data, userInfo) => {
       // Filtrar productos que solo tengan "Cantidad"
       const filteredSectionData = sectionData.filter(row => row[1] !== 'Cantidad');
 
+      // Añadir los especiales y sus puntos después de los datos procesados
+      if (data[section].selectedEspecial1Nombre) {
+        filteredSectionData.push([labelsMap.selectedEspecial1Nombre, data[section].selectedEspecial1Nombre]);
+        if (data[section].puntosEspecial1) {
+          filteredSectionData.push([labelsMap.puntosEspecial1, data[section].puntosEspecial1]);
+        }
+        if (data[section].cantidadEspecial1) {
+          filteredSectionData.push([labelsMap.cantidadEspecial1, data[section].cantidadEspecial1]);
+        }
+      }
+      if (data[section].selectedEspecial2Nombre) {
+        filteredSectionData.push([labelsMap.selectedEspecial2Nombre, data[section].selectedEspecial2Nombre]);
+        if (data[section].puntosEspecial2) {
+          filteredSectionData.push([labelsMap.puntosEspecial2, data[section].puntosEspecial2]);
+        }
+        if (data[section].cantidadEspecial2) {
+          filteredSectionData.push([labelsMap.cantidadEspecial2, data[section].cantidadEspecial2]);
+        }
+      }
+
       // Solo continuar si hay datos relevantes
       if (filteredSectionData.length > 0) {
-        doc.setFontSize(10);
+        doc.setFontSize(8);
         doc.text(title, 12, startY);
-        startY += 6;
+        startY += 12;
 
         // Dividimos la tabla en dos partes
         const half = Math.ceil(filteredSectionData.length / 2);
         const firstHalf = filteredSectionData.slice(0, half);
         const secondHalf = filteredSectionData.slice(half);
 
-        // Ajustar más tablas por página
-        const rowHeightEstimate = 8; // Estimación del alto de una fila
-        const availableHeight = doc.internal.pageSize.getHeight() - startY - 20; // Altura disponible en la página
-        const maxRowsPerPage = Math.floor(availableHeight / rowHeightEstimate); // Cuántas filas caben en una página
-
-        const rowsToDisplayFirstHalf = firstHalf.slice(0, maxRowsPerPage); // Fila para la primera columna
-        const rowsToDisplaySecondHalf = secondHalf.slice(0, maxRowsPerPage); // Fila para la segunda columna
-
         // Primera columna
-        startY = checkPageSpace(doc, startY, rowsToDisplayFirstHalf.length * 10); // Comprobar si queda espacio suficiente
+        // Comprobar si queda espacio suficiente
         autoTable(doc, {
-          ...autoTableOptions,
-          body: rowsToDisplayFirstHalf,
+          head: [['Concepto', 'Detalles']],
+          body: firstHalf,
           startY: startY,
-          margin: { left: 12 },
-          tableWidth: doc.internal.pageSize.getWidth() / 2 - 12 // Mitad de la página
+          margin: { left: 9 },
+          tableWidth: doc.internal.pageSize.getWidth() / 2 - 12,
+          theme: 'grid',
+          styles: {
+            cellPadding: 1,
+            fillColor: [255, 255, 255], // Celdas sin color
+            textColor: 0,
+          },
+          headStyles: {
+            fillColor: [220, 220, 220], // Color gris claro para los títulos
+            textColor: 0,
+          },
         });
+
+        // Actualizar startY después de la primera columna
+        const finalY1 = doc.lastAutoTable.finalY;
 
         // Segunda columna
         autoTable(doc, {
-          ...autoTableOptions,
-          body: rowsToDisplaySecondHalf,
+          head: [['Concepto', 'Detalles']],
+          body: secondHalf,
           startY: startY,
-          margin: { left: doc.internal.pageSize.getWidth() / 2 + 2 }, // Mitad derecha de la página
-          tableWidth: doc.internal.pageSize.getWidth() / 2 - 12 // Mitad de la página
+          margin: { left: doc.internal.pageSize.getWidth() / 2 + 2 },
+          tableWidth: doc.internal.pageSize.getWidth() / 2 - 12,
+          theme: 'grid',
+          styles: {
+            cellPadding: 1,
+            fillColor: [255, 255, 255], // Celdas sin color
+            textColor: 0,
+          },
+          headStyles: {
+            fillColor: [220, 220, 220], // Color gris claro para los títulos
+            textColor: 0,
+          },
         });
 
-        startY = Math.max(doc.lastAutoTable.finalY, startY) + 10; // Ajuste del espacio después de ambas columnas
-        startY = checkPageSpace(doc, startY); // Verificar si hay que añadir una nueva página
+        // Actualizamos startY con el valor más alto para asegurarnos de que no se sobreponga con el contenido
+        startY = Math.max(doc.lastAutoTable.finalY, finalY1) + 5;
       }
     }
   });
@@ -241,7 +249,7 @@ export const generatePDF = (data, userInfo) => {
   let totalMontaje = (numFrentesInteriores * 110) + (numArmariosCompletos * 146) + 50;
   startY = checkPageSpace(doc, startY);
 
-  doc.setFontSize(10);
+  doc.setFontSize(8);
 
   startY += 10;
 
@@ -278,5 +286,3 @@ export const generatePDF = (data, userInfo) => {
       console.error("Error al enviar datos del presupuesto:", error);
     });
 };
-
-
