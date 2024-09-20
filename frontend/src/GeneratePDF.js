@@ -64,11 +64,12 @@ export const generatePDF = (data, userInfo) => {
 
   // Helper para verificar si hay espacio suficiente en la página
   const checkPageSpace = (doc, startY) => {
+    const marginBottom = 10;  // Margin at the bottom of the page
     const pageHeight = doc.internal.pageSize.getHeight();
-    const marginBottom = 20; // Margen inferior
+    console.log("El valor de startY es " + startY);
     if (startY >= pageHeight - marginBottom) {
       doc.addPage();
-      return 20; // Reiniciamos el valor de startY para la nueva página
+      return 20;  // Start at the top of the new page
     }
     return startY;
   };
@@ -117,7 +118,7 @@ export const generatePDF = (data, userInfo) => {
     instalacion: "Instalacion"
   };
 
-  let startY = 30;
+  let startY = 50;
   let totalFrentesInteriores = 0;
 
   Object.entries(sections).forEach(([section, title]) => {
@@ -173,20 +174,24 @@ export const generatePDF = (data, userInfo) => {
         doc.setFontSize(8);
         doc.text(title, 12, startY);
         startY += 12;
-
+    
         // Dividimos la tabla en dos partes
         const half = Math.ceil(filteredSectionData.length / 2);
         const firstHalf = filteredSectionData.slice(0, half);
         const secondHalf = filteredSectionData.slice(half);
-
+    
+        // Calculamos la altura disponible en la página
+        const pageHeight = doc.internal.pageSize.getHeight();
+        const availableHeight = pageHeight - startY - 20; // Ajusta 20 para márgenes inferiores
+    
         // Primera columna
-        // Comprobar si queda espacio suficiente
+        startY = checkPageSpace(doc, startY);
         autoTable(doc, {
           head: [['Concepto', 'Detalles']],
           body: firstHalf,
           startY: startY,
           margin: { left: 9 },
-          tableWidth: doc.internal.pageSize.getWidth() / 2 - 12,
+          tableWidth: doc.internal.pageSize.getWidth() / 2 - 10,
           theme: 'grid',
           styles: {
             cellPadding: 1,
@@ -197,18 +202,27 @@ export const generatePDF = (data, userInfo) => {
             fillColor: [220, 220, 220], // Color gris claro para los títulos
             textColor: 0,
           },
+          pageBreak: 'auto',
         });
-
-        // Actualizar startY después de la primera columna
+    
         const finalY1 = doc.lastAutoTable.finalY;
-
+    
+        // Determinamos si la segunda columna puede comenzar en la misma página
+        let secondStartY = startY;
+        if (finalY1 + 10 > availableHeight) { // 10 es un margen pequeño para no cortar al final
+            doc.addPage();
+            secondStartY = 12; // Reiniciar startY en la nueva página
+        } else {
+            secondStartY = startY;
+        }
+    
         // Segunda columna
         autoTable(doc, {
           head: [['Concepto', 'Detalles']],
           body: secondHalf,
-          startY: startY,
+          startY: secondStartY,
           margin: { left: doc.internal.pageSize.getWidth() / 2 + 2 },
-          tableWidth: doc.internal.pageSize.getWidth() / 2 - 12,
+          tableWidth: doc.internal.pageSize.getWidth() / 2 - 10,
           theme: 'grid',
           styles: {
             cellPadding: 1,
@@ -219,11 +233,15 @@ export const generatePDF = (data, userInfo) => {
             fillColor: [220, 220, 220], // Color gris claro para los títulos
             textColor: 0,
           },
+          pageBreak: 'auto',
         });
+    
+        // Ajustamos startY para el siguiente contenido
+        startY = Math.max(doc.lastAutoTable.finalY, finalY1);
+    }    
 
-        // Actualizamos startY con el valor más alto para asegurarnos de que no se sobreponga con el contenido
-        startY = Math.max(doc.lastAutoTable.finalY, finalY1) + 5;
-      }
+    
+    
     }
   });
 
@@ -251,7 +269,7 @@ export const generatePDF = (data, userInfo) => {
 
   doc.setFontSize(8);
 
-  startY += 10;
+  startY += 15;
 
   // Primera línea que agrupa los puntos y frentes/interiores
   const linea1 = `Total Puntos: ${totalPuntos} | Total Frentes/Interiores: ${numFrentesInteriores}`;

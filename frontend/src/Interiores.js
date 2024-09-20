@@ -213,29 +213,35 @@ function Interiores() {
     const nombre = event.target.options[index].text;
     const id = event.target.value;
     const selectedEspecial = listEspeciales.find((especial) => especial.articulo_id === parseInt(id));
-
-    if (especialIndex === 1) {
-      setSelectedEspecial1({ id, nombre, puntos: selectedEspecial.puntos });
-      setPuntosEspecial1(selectedEspecial.puntos);
-      setCantidadEspecial1(1);
-    } else if (especialIndex === 2) {
-      setSelectedEspecial2({ id, nombre, puntos: selectedEspecial.puntos });
-      setPuntosEspecial2(selectedEspecial.puntos);
-      setCantidadEspecial2(1);
+  
+    if (selectedEspecial) {
+      if (especialIndex === 1) {
+        setSelectedEspecial1({ id, nombre, puntos: selectedEspecial.puntos });
+        setCantidadEspecial1(1);
+        setPuntosEspecial1(selectedEspecial.puntos * cantidadEspecial1);
+         
+        // Asegúrate de que se multiplique por la cantidad actual
+        
+      } else if (especialIndex === 2) {
+        setSelectedEspecial2({ id, nombre, puntos: selectedEspecial.puntos });
+        setCantidadEspecial2(1);// Asegúrate de que se multiplique por
+        setPuntosEspecial2(selectedEspecial.puntos * cantidadEspecial2); // Asegúrate de que se multiplique por la cantidad actual
+      }
     }
   };
-
+  
   const handleCantidadEspecialChange = (especialIndex, event) => {
     const value = parseInt(event.target.value, 10);
-
+  
     if (especialIndex === 1) {
       setCantidadEspecial1(isNaN(value) ? 1 : value);
-      setPuntosEspecial1(selectedEspecial1.puntos * (isNaN(value) ? 1 : value));
+      setPuntosEspecial1(selectedEspecial1.puntos * (isNaN(value) ? 1 : value)); // Multiplicar por la cantidad seleccionada
     } else if (especialIndex === 2) {
       setCantidadEspecial2(isNaN(value) ? 1 : value);
-      setPuntosEspecial2(selectedEspecial2.puntos * (isNaN(value) ? 1 : value));
+      setPuntosEspecial2(selectedEspecial2.puntos * (isNaN(value) ? 1 : value)); // Multiplicar por la cantidad seleccionada
     }
   };
+  
 
   const renderSelectArticulo = (index) => (
     <div key={index}>
@@ -245,7 +251,7 @@ function Interiores() {
         onChange={(event) => handleSelectArticuloChange(index, event)}
         value={selectedArticulos[index].id || ""}
       >
-        <option value="" disabled={selectedArticulos[index].id !== ""}>--Selecciona una opción--</option>
+        <option value="">--Selecciona una opción--</option>
         {listArticulo.map((articulo) => (
           <option key={articulo.articulo_id} value={articulo.articulo_id} data-puntos={articulo.puntos}>
             {articulo.nombre}
@@ -258,7 +264,7 @@ function Interiores() {
         onChange={(event) => handleSelectColorChange(index, event)}
         value={selectedColores[index].id || ""}
       >
-        <option value="" disabled={selectedColores[index].id !== ""}>--Selecciona un color--</option>
+        <option value="">--Selecciona un color--</option>
         {listColores.map((color) => (
           <option key={color.color_id} value={color.color_id}>
             {color.nombre}
@@ -303,7 +309,7 @@ function Interiores() {
           onChange={(event) => handleSelectEspecialChange(1, event)}
           value={selectedEspecial1.id || ""}
         >
-          <option value="" disabled={selectedEspecial1.id !== ""}>--Selecciona una opción--</option>
+          <option value="">--Selecciona una opción--</option>
           {listEspeciales.map((especial) => (
             <option key={especial.articulo_id} value={especial.articulo_id}>
               {especial.articulo_nombre}
@@ -334,7 +340,7 @@ function Interiores() {
           onChange={(event) => handleSelectEspecialChange(2, event)}
           value={selectedEspecial2.id || ""}
         >
-          <option value="" disabled={selectedEspecial2.id !== ""}>--Selecciona una opción--</option>
+          <option value="">--Selecciona una opción--</option>
           {listEspeciales.map((especial) => (
             <option key={especial.articulo_id} value={especial.articulo_id}>
               {especial.articulo_nombre}

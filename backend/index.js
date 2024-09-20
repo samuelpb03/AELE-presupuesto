@@ -379,14 +379,15 @@ app.get("/medidasArticulo3", (req, res) => {
 });
 
 app.get("/articulo/tiradores", (req, res) => {
-  const query = `
-  SELECT a.*, m.nombre as material_nombre, c.color_id
-  FROM articulo a
-  JOIN serie_material sm ON a.serie_id = sm.id_serie
-  JOIN material m ON sm.id_material = m.material_id
-  JOIN material_color mc ON m.material_id = mc.id_material
-  JOIN color c ON mc.id_color = c.color_id
-  WHERE a.serie_id IN (8);
+  const query = `SELECT a.articulo_id, a.serie_id, a.nombre, m.nombre as material_nombre, 
+       GROUP_CONCAT(c.color_id) as colores
+FROM articulo a
+JOIN serie_material sm ON a.serie_id = sm.id_serie
+JOIN material m ON sm.id_material = m.material_id
+JOIN material_color mc ON m.material_id = mc.id_material
+JOIN color c ON mc.id_color = c.color_id
+WHERE a.serie_id IN (8)
+GROUP BY a.articulo_id, a.serie_id, a.nombre, m.nombre;
   `;
   dbConnection.query(query, (err, data) => {
     if (err) {
