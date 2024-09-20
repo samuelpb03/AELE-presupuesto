@@ -62,11 +62,11 @@ export const generatePDF = (data, userInfo) => {
   const doc = new jsPDF();
 
   const checkPageSpace = (doc, startY) => {
-    const marginBottom = 10;  // Margen en la parte inferior de la página
+    const marginBottom = 10;
     const pageHeight = doc.internal.pageSize.getHeight();
     if (startY >= pageHeight - marginBottom) {
       doc.addPage();
-      return 20;  // Reiniciar la posición vertical en la nueva página
+      return 20;  // Reiniciar posición vertical en la nueva página
     }
     return startY;
   };
@@ -78,7 +78,6 @@ export const generatePDF = (data, userInfo) => {
   if (centro === "Leroy Merlin") {
     logo = 'logoLeroy.png';
   }
-
   doc.addImage(logo, 'PNG', 10, 10, 50, 20);
 
   const pageWidth = doc.internal.pageSize.getWidth();
@@ -99,7 +98,7 @@ export const generatePDF = (data, userInfo) => {
   doc.setFontSize(15);
   doc.text("Presupuesto", pageWidth - 90, 40);
 
-  // Tabla de datos
+  // Configuramos las secciones
   const sections = {
     frentes: "Frentes",
     frentes2: "Frentes 2",
@@ -118,8 +117,8 @@ export const generatePDF = (data, userInfo) => {
   Object.entries(sections).forEach(([section, title]) => {
     if (data[section]) {
       let sectionData = [];
-      
-      // Procesar y agregar datos de la sección
+
+      // Procesamos y agregamos los datos de la sección
       Object.entries(data[section]).forEach(([key, value]) => {
         if (
           value &&
@@ -144,23 +143,35 @@ export const generatePDF = (data, userInfo) => {
         sectionData.push(`Cantidad: ${data[section].cantidadEspecial2}`);
       }
 
-      // Imprimir título de la sección
+      // Imprimir el título de la sección
       doc.setFontSize(10);
       doc.text(title, 12, startY);
       startY += 10;
 
-      // Imprimir los datos de la sección en líneas
+      // Imprimir los datos de la sección en filas de 4 elementos
       doc.setFontSize(8);
-      sectionData.forEach((line) => {
-        doc.text(line, 12, startY);
-        startY += 6;
+      let currentRow = 0;
 
-        // Si se llena la página, crear una nueva
+      sectionData.forEach((line, index) => {
+        const xPosition = 12 + (index % 4) * (pageWidth / 4 - 10); // Calculamos la posición X de los 4 elementos por fila
+        doc.text(line, xPosition, startY);
+
+        if ((index + 1) % 4 === 0) {
+          startY += 6;  // Avanza a la siguiente fila después de 4 elementos
+          currentRow++;
+        }
+
+        // Si la página se llena, agregamos una nueva
         if (startY > pageHeight - 20) {
           doc.addPage();
           startY = 20;
         }
       });
+
+      // Asegurarse de que una fila parcial también avance
+      if (sectionData.length % 4 !== 0) {
+        startY += 6; // Si la última fila tiene menos de 4 elementos
+      }
 
       startY += 10; // Espacio después de cada sección
     }
@@ -211,4 +222,3 @@ export const generatePDF = (data, userInfo) => {
       console.error("Error al enviar datos del presupuesto:", error);
     });
 };
-
