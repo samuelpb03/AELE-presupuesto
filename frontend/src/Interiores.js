@@ -17,8 +17,8 @@ function Interiores() {
 
   const [selectedEspecial1, setSelectedEspecial1] = useState({ id: "", nombre: "", puntos: 0 });
   const [selectedEspecial2, setSelectedEspecial2] = useState({ id: "", nombre: "", puntos: 0 });
-  const [cantidadEspecial1, setCantidadEspecial1] = useState(0);
-  const [cantidadEspecial2, setCantidadEspecial2] = useState(0);
+  const [cantidadEspecial1, setCantidadEspecial1] = useState(1);
+  const [cantidadEspecial2, setCantidadEspecial2] = useState(1);
   const [puntosEspecial1, setPuntosEspecial1] = useState(0);
   const [puntosEspecial2, setPuntosEspecial2] = useState(0);
 
@@ -116,10 +116,10 @@ function Interiores() {
         nombre: data.interiores.selectedEspecial2Nombre || "",
         puntos: data.interiores.selectedEspecial2Puntos || 0,
       });
-      setCantidadEspecial1(data.interiores.cantidadEspecial1 || 0);
-      setCantidadEspecial2(data.interiores.cantidadEspecial2 || 0);
-      setPuntosEspecial1((data.interiores.selectedEspecial1Puntos || 0) * (data.interiores.cantidadEspecial1 || 0));
-      setPuntosEspecial2((data.interiores.selectedEspecial2Puntos || 0) * (data.interiores.cantidadEspecial2 || 0));
+      setCantidadEspecial1(data.interiores.cantidadEspecial1 || 1);
+      setCantidadEspecial2(data.interiores.cantidadEspecial2 || 1);
+      setPuntosEspecial1((data.interiores.selectedEspecial1Puntos || 0) * (data.interiores.cantidadEspecial1 || 1));
+      setPuntosEspecial2((data.interiores.selectedEspecial2Puntos || 0) * (data.interiores.cantidadEspecial2 || 1));
     }
   }, []);
 
@@ -148,7 +148,7 @@ function Interiores() {
     saveData("interiores", formattedData);
   }, [
     selectedArticulos,
-    selectedColores,  // Añadir selectedColores al useEffect
+    selectedColores,
     cantidades,
     puntos,
     selectedEspecial1,
@@ -213,35 +213,31 @@ function Interiores() {
     const nombre = event.target.options[index].text;
     const id = event.target.value;
     const selectedEspecial = listEspeciales.find((especial) => especial.articulo_id === parseInt(id));
-  
+
     if (selectedEspecial) {
       if (especialIndex === 1) {
         setSelectedEspecial1({ id, nombre, puntos: selectedEspecial.puntos });
         setCantidadEspecial1(1);
-        setPuntosEspecial1(selectedEspecial.puntos * cantidadEspecial1);
-         
-        // Asegúrate de que se multiplique por la cantidad actual
-        
+        setPuntosEspecial1(selectedEspecial.puntos);
       } else if (especialIndex === 2) {
         setSelectedEspecial2({ id, nombre, puntos: selectedEspecial.puntos });
-        setCantidadEspecial2(1);// Asegúrate de que se multiplique por
-        setPuntosEspecial2(selectedEspecial.puntos * cantidadEspecial2); // Asegúrate de que se multiplique por la cantidad actual
+        setCantidadEspecial2(1);
+        setPuntosEspecial2(selectedEspecial.puntos);
       }
     }
   };
-  
+
   const handleCantidadEspecialChange = (especialIndex, event) => {
     const value = parseInt(event.target.value, 10);
-  
+
     if (especialIndex === 1) {
       setCantidadEspecial1(isNaN(value) ? 1 : value);
-      setPuntosEspecial1(selectedEspecial1.puntos * (isNaN(value) ? 1 : value)); // Multiplicar por la cantidad seleccionada
+      setPuntosEspecial1(selectedEspecial1.puntos * (isNaN(value) ? 1 : value));
     } else if (especialIndex === 2) {
       setCantidadEspecial2(isNaN(value) ? 1 : value);
-      setPuntosEspecial2(selectedEspecial2.puntos * (isNaN(value) ? 1 : value)); // Multiplicar por la cantidad seleccionada
+      setPuntosEspecial2(selectedEspecial2.puntos * (isNaN(value) ? 1 : value));
     }
   };
-  
 
   const renderSelectArticulo = (index) => (
     <div key={index}>
@@ -283,6 +279,45 @@ function Interiores() {
     </div>
   );
 
+  const renderEspecialSelect = (especialIndex) => {
+    const selectedEspecial = especialIndex === 1 ? selectedEspecial1 : selectedEspecial2;
+    const cantidadEspecial = especialIndex === 1 ? cantidadEspecial1 : cantidadEspecial2;
+    const puntosEspecial = especialIndex === 1 ? puntosEspecial1 : puntosEspecial2;
+
+    return (
+      <div>
+        <div className="field-special">
+          <label htmlFor={`especial${especialIndex}`}>Artículo Especial {especialIndex}:</label>
+          <select
+            id={`especial${especialIndex}`}
+            onChange={(event) => handleSelectEspecialChange(especialIndex, event)}
+            value={selectedEspecial.id || ""}
+          >
+            <option value="">--Selecciona una opción--</option>
+            {listEspeciales.map((especial) => (
+              <option key={especial.articulo_id} value={especial.articulo_id}>
+                {especial.articulo_nombre}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="field-special">
+          <label htmlFor={`cantidadEspecial${especialIndex}`}>Cantidad:</label>
+          <input
+            type="number"
+            id={`cantidadEspecial${especialIndex}`}
+            value={cantidadEspecial}
+            onChange={(event) => handleCantidadEspecialChange(especialIndex, event)}
+            min="0"
+          />
+        </div>
+        <div className="fake-field-special">
+          <label htmlFor={`puntosEspecial${especialIndex}`}>Puntos:</label>
+          <input type="text" disabled value={puntosEspecial} />
+        </div>
+      </div>
+    );
+  };
   return (
     <div className="container">
   <div className="section">
@@ -372,4 +407,3 @@ function Interiores() {
 }
 
 export default Interiores;
-
