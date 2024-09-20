@@ -1,5 +1,4 @@
 import { jsPDF } from "jspdf";
-import autoTable from 'jspdf-autotable';
 
 const labelsMap = {
   selectedProductoNombre: "Producto",
@@ -62,21 +61,19 @@ const labelsMap = {
 export const generatePDF = (data, userInfo) => {
   const doc = new jsPDF();
 
-  // Helper para verificar si hay espacio suficiente en la página
   const checkPageSpace = (doc, startY) => {
-    const marginBottom = 10;  // Margin at the bottom of the page
+    const marginBottom = 10;  // Margen en la parte inferior de la página
     const pageHeight = doc.internal.pageSize.getHeight();
-    console.log("El valor de startY es " + startY);
     if (startY >= pageHeight - marginBottom) {
       doc.addPage();
-      return 20;  // Start at the top of the new page
+      return 20;  // Reiniciar la posición vertical en la nueva página
     }
     return startY;
   };
 
   // Agregar logotipo
   const user = JSON.parse(localStorage.getItem('user'));
-  const centro = user?.centro || 'Centro no especificado'; // Campo centro del user
+  const centro = user?.centro || 'Centro no especificado';
   let logo = 'logoAELE.png';
   if (centro === "Leroy Merlin") {
     logo = 'logoLeroy.png';
@@ -84,26 +81,23 @@ export const generatePDF = (data, userInfo) => {
 
   doc.addImage(logo, 'PNG', 10, 10, 50, 20);
 
-  // Recuadro para toda la página
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
   doc.setLineWidth(0.5);
   doc.rect(5, 5, pageWidth - 10, pageHeight - 10); // Recuadro con bordes finos
 
-  // Detalles de la empresa en varias líneas en la esquina superior derecha
   doc.setFontSize(8);
   const companyDetails = [
     `Centro: ${centro}`,
     `Cliente: ${userInfo.cliente}`,
-    `Teléfono: ${userInfo.telefono}`
+    `Teléfono: ${userInfo.telefono}`,
   ];
   companyDetails.forEach((line, index) => {
-    doc.text(line, pageWidth - 90, 15 + (index * 7)); // Ajuste de líneas
+    doc.text(line, pageWidth - 90, 15 + (index * 7));
   });
 
-  // Título ajustado a "Presupuesto"
   doc.setFontSize(15);
-  doc.text("Presupuesto", pageWidth - 90, 40); // En la esquina derecha, junto a los datos
+  doc.text("Presupuesto", pageWidth - 90, 40);
 
   // Tabla de datos
   const sections = {
@@ -115,7 +109,7 @@ export const generatePDF = (data, userInfo) => {
     equipamiento3: "Equipamiento",
     baldas: "Baldas e iluminación",
     remates: "Remates a medida",
-    instalacion: "Instalacion"
+    instalacion: "Instalación"
   };
 
   let startY = 50;
@@ -123,125 +117,52 @@ export const generatePDF = (data, userInfo) => {
 
   Object.entries(sections).forEach(([section, title]) => {
     if (data[section]) {
-      let articuloCounter = 1;
-      const sectionData = [];
-
+      let sectionData = [];
+      
       // Procesar y agregar datos de la sección
       Object.entries(data[section]).forEach(([key, value]) => {
-        if (key === 'cantidadFrente') return; // Excluir cantidadFrente
-        if (key.endsWith('Nombre') && value && !key.startsWith('selectedEspecial')) {
-          if (key.startsWith('articulo')) {
-            sectionData.push([`Artículo ${articuloCounter}`, value]);
-            articuloCounter++;
-          } else {
-            sectionData.push([labelsMap[key] || key, value]);
-          }
-        } else if ((key === 'cantidad' || key.startsWith('cantidad')) && value && value !== 0 && !key.startsWith('cantidadEspecial')) {
-          sectionData.push([labelsMap[key] || key, value]);
-          if (section === 'frentes' || section === 'frentes2' || section === 'frentes3' || section === 'interiores') {
-            totalFrentesInteriores += Number(value);
-          }
-        } else if ((key === 'puntos' || key.startsWith('puntos')) && value && !key.startsWith('puntosEspecial')) {
-          sectionData.push([labelsMap[key] || key, value]);
+        if (
+          value &&
+          labelsMap[key] &&
+          !key.startsWith('selectedEspecial') &&
+          !key.startsWith('puntosEspecial') &&
+          !key.startsWith('cantidadEspecial')
+        ) {
+          sectionData.push(`${labelsMap[key]}: ${value}`);
         }
       });
 
-      // Filtrar productos que solo tengan "Cantidad"
-      const filteredSectionData = sectionData.filter(row => row[1] !== 'Cantidad');
-
-      // Añadir los especiales y sus puntos después de los datos procesados
+      // Especiales a medida
       if (data[section].selectedEspecial1Nombre) {
-        filteredSectionData.push([labelsMap.selectedEspecial1Nombre, data[section].selectedEspecial1Nombre]);
-        if (data[section].puntosEspecial1) {
-          filteredSectionData.push([labelsMap.puntosEspecial1, data[section].puntosEspecial1]);
-        }
-        if (data[section].cantidadEspecial1) {
-          filteredSectionData.push([labelsMap.cantidadEspecial1, data[section].cantidadEspecial1]);
-        }
+        sectionData.push(`${labelsMap.selectedEspecial1Nombre}: ${data[section].selectedEspecial1Nombre}`);
+        sectionData.push(`Puntos: ${data[section].puntosEspecial1}`);
+        sectionData.push(`Cantidad: ${data[section].cantidadEspecial1}`);
       }
       if (data[section].selectedEspecial2Nombre) {
-        filteredSectionData.push([labelsMap.selectedEspecial2Nombre, data[section].selectedEspecial2Nombre]);
-        if (data[section].puntosEspecial2) {
-          filteredSectionData.push([labelsMap.puntosEspecial2, data[section].puntosEspecial2]);
-        }
-        if (data[section].cantidadEspecial2) {
-          filteredSectionData.push([labelsMap.cantidadEspecial2, data[section].cantidadEspecial2]);
-        }
+        sectionData.push(`${labelsMap.selectedEspecial2Nombre}: ${data[section].selectedEspecial2Nombre}`);
+        sectionData.push(`Puntos: ${data[section].puntosEspecial2}`);
+        sectionData.push(`Cantidad: ${data[section].cantidadEspecial2}`);
       }
 
-      // Solo continuar si hay datos relevantes
-      if (filteredSectionData.length > 0) {
-        doc.setFontSize(8);
-        doc.text(title, 12, startY);
-        startY += 12;
-    
-        // Dividimos la tabla en dos partes
-        const half = Math.ceil(filteredSectionData.length / 2);
-        const firstHalf = filteredSectionData.slice(0, half);
-        const secondHalf = filteredSectionData.slice(half);
-    
-        // Calculamos la altura disponible en la página
-        const pageHeight = doc.internal.pageSize.getHeight();
-        const availableHeight = pageHeight - startY - 20; // Ajusta 20 para márgenes inferiores
-    
-        // Primera columna
-        startY = checkPageSpace(doc, startY);
-        autoTable(doc, {
-          head: [['Concepto', 'Detalles']],
-          body: firstHalf,
-          startY: startY,
-          margin: { left: 9 },
-          tableWidth: doc.internal.pageSize.getWidth() / 2 - 10,
-          theme: 'grid',
-          styles: {
-            cellPadding: 1,
-            fillColor: [255, 255, 255], // Celdas sin color
-            textColor: 0,
-          },
-          headStyles: {
-            fillColor: [220, 220, 220], // Color gris claro para los títulos
-            textColor: 0,
-          },
-          pageBreak: 'auto',
-        });
-    
-        const finalY1 = doc.lastAutoTable.finalY;
-    
-        // Determinamos si la segunda columna puede comenzar en la misma página
-        let secondStartY = startY;
-        if (finalY1 + 10 > availableHeight) { // 10 es un margen pequeño para no cortar al final
-            doc.addPage();
-            secondStartY = 12; // Reiniciar startY en la nueva página
-        } else {
-            secondStartY = startY;
-        }
-    
-        // Segunda columna
-        autoTable(doc, {
-          head: [['Concepto', 'Detalles']],
-          body: secondHalf,
-          startY: secondStartY,
-          margin: { left: doc.internal.pageSize.getWidth() / 2 + 2 },
-          tableWidth: doc.internal.pageSize.getWidth() / 2 - 10,
-          theme: 'grid',
-          styles: {
-            cellPadding: 1,
-            fillColor: [255, 255, 255], // Celdas sin color
-            textColor: 0,
-          },
-          headStyles: {
-            fillColor: [220, 220, 220], // Color gris claro para los títulos
-            textColor: 0,
-          },
-          pageBreak: 'auto',
-        });
-    
-        // Ajustamos startY para el siguiente contenido
-        startY = Math.max(doc.lastAutoTable.finalY, finalY1);
-    }    
+      // Imprimir título de la sección
+      doc.setFontSize(10);
+      doc.text(title, 12, startY);
+      startY += 10;
 
-    
-    
+      // Imprimir los datos de la sección en líneas
+      doc.setFontSize(8);
+      sectionData.forEach((line) => {
+        doc.text(line, 12, startY);
+        startY += 6;
+
+        // Si se llena la página, crear una nueva
+        if (startY > pageHeight - 20) {
+          doc.addPage();
+          startY = 20;
+        }
+      });
+
+      startY += 10; // Espacio después de cada sección
     }
   });
 
@@ -258,29 +179,15 @@ export const generatePDF = (data, userInfo) => {
   // Cálculo de montaje e instalación
   const numFrentesInteriores = data.instalacion?.numFrentesInteriores || 0;
   const numArmariosCompletos = data.instalacion?.numArmariosCompletos || 0;
-  const presupuestoData = {
-    centro: centro,
-    puntos: totalPuntos,
-    tienda: userInfo.tienda,
-    cliente: userInfo.cliente
-  };
   let totalMontaje = (numFrentesInteriores * 110) + (numArmariosCompletos * 146) + 50;
-  startY = checkPageSpace(doc, startY);
 
-  doc.setFontSize(8);
-
+  doc.setFontSize(10);
   startY += 15;
-
-  // Primera línea que agrupa los puntos y frentes/interiores
-  const linea1 = `Total Puntos: ${totalPuntos} | Total Frentes/Interiores: ${numFrentesInteriores}`;
-  doc.text(linea1, 12, startY);  // Ajustamos el margen izquierdo a 12
+  doc.text(`Total Puntos: ${totalPuntos}`, 12, startY);
   startY += 10;
+  doc.text(`Total Montaje e Instalación: ${totalMontaje.toFixed(2)} €`, 12, startY);
 
-  // Segunda línea que agrupa armarios completos y montaje/instalación
-  const linea2 = `Total Armarios Completos: ${numArmariosCompletos} | Total Montaje e Instalación: ${totalMontaje.toFixed(2)} €`;
-  doc.text(linea2, 12, startY);  // Ajustamos el margen izquierdo a 12
-
-  // Guardar el PDF con el nombre correcto
+  // Guardar el PDF
   const centroAbreviado = centro.substring(0, 3).toUpperCase();
   fetch('http://194.164.166.129:6969/presupuesto', {
     method: 'POST',
@@ -293,7 +200,7 @@ export const generatePDF = (data, userInfo) => {
       cliente: userInfo.cliente,
       tienda: userInfo.tienda
     }),
-    credentials: 'include' // Enviar cookies o autenticación si es necesario
+    credentials: 'include'
   })
     .then(response => response.json())
     .then(data => {
@@ -304,3 +211,4 @@ export const generatePDF = (data, userInfo) => {
       console.error("Error al enviar datos del presupuesto:", error);
     });
 };
+

@@ -17,8 +17,8 @@ function Interiores() {
 
   const [selectedEspecial1, setSelectedEspecial1] = useState({ id: "", nombre: "", puntos: 0 });
   const [selectedEspecial2, setSelectedEspecial2] = useState({ id: "", nombre: "", puntos: 0 });
-  const [cantidadEspecial1, setCantidadEspecial1] = useState(1);
-  const [cantidadEspecial2, setCantidadEspecial2] = useState(1);
+  const [cantidadEspecial1, setCantidadEspecial1] = useState(0);
+  const [cantidadEspecial2, setCantidadEspecial2] = useState(0);
   const [puntosEspecial1, setPuntosEspecial1] = useState(0);
   const [puntosEspecial2, setPuntosEspecial2] = useState(0);
 
@@ -116,10 +116,10 @@ function Interiores() {
         nombre: data.interiores.selectedEspecial2Nombre || "",
         puntos: data.interiores.selectedEspecial2Puntos || 0,
       });
-      setCantidadEspecial1(data.interiores.cantidadEspecial1 || 1);
-      setCantidadEspecial2(data.interiores.cantidadEspecial2 || 1);
-      setPuntosEspecial1((data.interiores.selectedEspecial1Puntos || 0) * (data.interiores.cantidadEspecial1 || 1));
-      setPuntosEspecial2((data.interiores.selectedEspecial2Puntos || 0) * (data.interiores.cantidadEspecial2 || 1));
+      setCantidadEspecial1(data.interiores.cantidadEspecial1 || 0);
+      setCantidadEspecial2(data.interiores.cantidadEspecial2 || 0);
+      setPuntosEspecial1((data.interiores.selectedEspecial1Puntos || 0) * (data.interiores.cantidadEspecial1 || 0));
+      setPuntosEspecial2((data.interiores.selectedEspecial2Puntos || 0) * (data.interiores.cantidadEspecial2 || 0));
     }
   }, []);
 

@@ -14,7 +14,7 @@ function Tiradores() {
   var [cantidades, setCantidades] = useState(Array(6).fill(0));
   const [puntos, setPuntos] = useState(Array(6).fill(0));
 
-  const backendUrl = 'http://194.164.166.129:6969'; // URL de ngrok para el backend
+  const backendUrl = 'http://194.164.166.129:6969'; //Url para el backend
   
   useEffect(() => {
     const user = localStorage.getItem('user');
@@ -24,13 +24,13 @@ function Tiradores() {
   }, []);
 
   useEffect(() => {
-    if (data.tiradores) {
+    if (data.tiradores) { //Recoge los datos al volver a la pestaña
       const restoredArticulos = Array(6).fill({ id: "", nombre: "", puntos: 0, serieId: "" });
       const restoredColores = Array(6).fill({ id: "", nombre: "" });
       const restoredCantidades = Array(6).fill(1);
       const restoredPuntos = Array(6).fill(0);
 
-      for (let i = 0; i < 6; i++) {
+      for (let i = 0; i < 6; i++) { // Bucle que accede a los datos de cada artículo de tiradores. 
         restoredArticulos[i] = {
           id: data.tiradores[`articulo${i + 1}Id`] || "",
           nombre: data.tiradores[`articulo${i + 1}Nombre`] || "",
@@ -53,7 +53,7 @@ function Tiradores() {
   }, []);
 
   useEffect(() => {
-    const formattedData = selectedArticulos.reduce((acc, articulo, index) => {
+    const formattedData = selectedArticulos.reduce((acc, articulo, index) => { 
       acc[`articulo${index + 1}Nombre`] = articulo.nombre;
       acc[`articulo${index + 1}Id`] = articulo.id;
       acc[`articulo${index + 1}Puntos`] = articulo.puntos;
