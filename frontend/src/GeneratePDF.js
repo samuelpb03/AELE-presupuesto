@@ -2,7 +2,6 @@ import { jsPDF } from "jspdf";
 
 const labelsMap = {
   selectedProductoNombre: "Producto",
-  selectedSerieNombre: "Serie",
   selectedArticuloNombre: "Artículo",
   selectedMaterialNombre: "Material",
   selectedColorNombre: "Color",
@@ -12,8 +11,8 @@ const labelsMap = {
   puntos: "Puntos",
   cantidad: "Cantidad",
   selectedEspecial1Nombre: "Especial a medida 1",
-  selectedEspecial2Nombre: "Especial a medida 2",
   puntosEspecial1: "Puntos Especial 1",
+  selectedEspecial2Nombre: "Especial a medida 2",
   puntosEspecial2: "Puntos Especial 2",
   cantidadEspecial1: "Cantidad Especial 1",
   cantidadEspecial2: "Cantidad Especial 2",
@@ -80,13 +79,17 @@ const labelsMap = {
 // Función para generar el PDF
 export const generatePDF = (data, userInfo) => {
   const doc = new jsPDF();
+  const drawBorder = () => {
+    doc.setLineWidth(0.5);
+    doc.rect(5, 5, pageWidth - 10, pageHeight - 10); // Dibujar el borde
+  };
 
   const checkPageSpace = (doc, startY) => {
     const marginBottom = 10;
     const pageHeight = doc.internal.pageSize.getHeight();
-    
+    drawBorder();
     if (startY >= pageHeight - marginBottom) {
-      doc.addPage(doc.rect(5, 5, pageWidth - 10, pageHeight - 10));
+      doc.addPage();
       return 20;  // Reiniciar posición vertical en la nueva página
     }
     return startY;
@@ -158,6 +161,7 @@ export const generatePDF = (data, userInfo) => {
       doc.setFontSize(7);
       let currentRow = 0;
       startY = checkPageSpace(doc, startY);
+      drawBorder();
 
       sectionData.forEach((line, index) => {
         let xPosition;
