@@ -125,7 +125,7 @@ function Frentes() {
       selectedEspecial2Nombre: selectedEspecial2.nombre,
       selectedEspecial2Puntos: selectedEspecial2.puntos,
       cantidad,
-      puntos: puntos * cantidad, // Guardar puntos actualizados
+      puntos, // Guardar puntos actualizados
       isColorValueAdded, // Guardar el estado del incremento
       cantidadEspecial1,
       cantidadEspecial2,

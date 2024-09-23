@@ -30,6 +30,8 @@ const labelsMap = {
   color5Nombre: "Color 5",
   color6Nombre: "Color 6",
   color7Nombre: "Color 7",
+  color8Nombre: "Color 8",
+  color9Nombre: "Color 9",
   cantidad4: "Cantidad 4",
   articulo1Nombre: "Articulo 1",
   articulo2Nombre: "Articulo 2",
@@ -44,6 +46,9 @@ const labelsMap = {
   articulo11Nombre: "Articulo 11",
   cantidad5: "Cantidad 5",
   cantidad6: "Cantidad 6",
+  cantidad7: "Cantidad 7",
+  cantidad8: "Cantidad 8",
+  cantidad9: "Cantidad 9",
   puntos4: "Puntos 4",
   puntos5: "Puntos 5",
   puntos6: "Puntos 6",
@@ -79,8 +84,9 @@ export const generatePDF = (data, userInfo) => {
   const checkPageSpace = (doc, startY) => {
     const marginBottom = 10;
     const pageHeight = doc.internal.pageSize.getHeight();
+    
     if (startY >= pageHeight - marginBottom) {
-      doc.addPage();
+      doc.addPage(doc.rect(5, 5, pageWidth - 10, pageHeight - 10));
       return 20;  // Reiniciar posición vertical en la nueva página
     }
     return startY;
@@ -136,15 +142,14 @@ export const generatePDF = (data, userInfo) => {
       Object.entries(data[section]).forEach(([key, value]) => {
         if (value && labelsMap[key]) {
           sectionData.push(`${value}`);
+          startY = checkPageSpace(doc, startY);
         }
-      });
-
-      // Especiales a medida
-      
+      });     
 
       // Imprimir el título de la sección
       doc.setFontSize(10);
       doc.setFillColor(220, 220, 220);
+      startY = checkPageSpace(doc, startY);
       doc.rect(10, startY - 5, pageWidth - 20, 10, 'F');
       doc.text(title, 12, startY);
       startY += 10;
@@ -152,6 +157,7 @@ export const generatePDF = (data, userInfo) => {
       // Imprimir los datos de la sección en filas de 4 elementos
       doc.setFontSize(7);
       let currentRow = 0;
+      startY = checkPageSpace(doc, startY);
 
       sectionData.forEach((line, index) => {
         let xPosition;
@@ -203,6 +209,7 @@ export const generatePDF = (data, userInfo) => {
 
   doc.setFontSize(8);
   startY += 15;
+  startY = checkPageSpace(doc, startY);
   doc.text(`Total Puntos: ${totalPuntos}`, 12, startY);
   startY += 10;
   doc.text(`Total Montaje e Instalación: ${totalMontaje.toFixed(2)} €`, 12, startY);

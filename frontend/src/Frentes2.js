@@ -133,7 +133,7 @@ function Frentes2() {
       selectedEspecial2Nombre: selectedEspecial2.nombre,
       selectedEspecial2Puntos: selectedEspecial2.puntos,
       cantidad,
-      puntos: puntos * cantidad,
+      puntos,
       isColorValueAdded,  // Guarda el estado del incremento
       cantidadEspecial1,
       cantidadEspecial2,
@@ -411,6 +411,12 @@ function Frentes2() {
     const id = event.target.value;
     setSelectedArticulo({ id, nombre });
     handleSelectChange("articulo", id, nombre);
+    setSelectedMaterial({ id: "", nombre: "" }); // Restablecer material
+    setSelectedColor({ id: "", nombre: "" }); // Restablecer color
+    setSelectedMedidas({ id: "", nombre: "", puntos: 0 }); // Restablecer medidas
+    setSelectedMaterialFranja({ id: "", nombre: "" }); // Restablecer material franja
+    setSelectedColorFranja({ id: "", nombre: "" }); // Restablecer color franja
+    setPuntos(0); // Restablecer puntos
   };
 
   const handleSelectMaterialChange = (event) => {
@@ -419,6 +425,11 @@ function Frentes2() {
     const id = event.target.value;
     setSelectedMaterial({ id, nombre });
     handleSelectChange("material", id, nombre);
+    setSelectedColor({ id: "", nombre: "" }); // Restablecer color
+    setSelectedMedidas({ id: "", nombre: "", puntos: 0 }); // Restablecer medidas
+    setSelectedMaterialFranja({ id: "", nombre: "" }); // Restablecer material franja
+    setSelectedColorFranja({ id: "", nombre: "" }); // Restablecer color franja
+    setPuntos(0); // Restablecer puntos
   };
 
   const handleSelectColorChange = (event) => {
