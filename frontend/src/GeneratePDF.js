@@ -31,12 +31,27 @@ const labelsMap = {
   color6Nombre: "Color 6",
   color7Nombre: "Color 7",
   cantidad4: "Cantidad 4",
+  articulo1Nombre: "Articulo 1",
+  articulo2Nombre: "Articulo 2",
+  articulo3Nombre: "Articulo 3",
+  articulo4Nombre: "Articulo 4",
+  articulo5Nombre: "Articulo 5",
+  articulo6Nombre: "Articulo 6",
+  articulo7Nombre: "Articulo 7",
+  articulo8Nombre: "Articulo 8",
+  articulo9Nombre: "Articulo 9",
+  articulo10Nombre: "Articulo 10",
+  articulo11Nombre: "Articulo 11",
   cantidad5: "Cantidad 5",
   cantidad6: "Cantidad 6",
   puntos4: "Puntos 4",
   puntos5: "Puntos 5",
   puntos6: "Puntos 6",
   puntos7: "Puntos 7",
+  puntos8: "Puntos 8",
+  puntos9: "Puntos 9",
+  puntos10: "Puntos 10",
+  puntos11: "Puntos 11",
   medidas1Nombre: "Medidas 1",
   medidas2Nombre: "Medidas 2",
   medidas3Nombre: "Medidas 3",
@@ -85,7 +100,7 @@ export const generatePDF = (data, userInfo) => {
   doc.setLineWidth(0.5);
   doc.rect(5, 5, pageWidth - 10, pageHeight - 10); // Recuadro con bordes finos
 
-  doc.setFontSize(8);
+  doc.setFontSize(7);
   const companyDetails = [
     `Centro: ${centro}`,
     `Cliente: ${userInfo.cliente}`,
@@ -95,7 +110,7 @@ export const generatePDF = (data, userInfo) => {
     doc.text(line, pageWidth - 90, 15 + (index * 7));
   });
 
-  doc.setFontSize(15);
+  doc.setFontSize(13);
   doc.text("Presupuesto", pageWidth - 90, 40);
 
   // Configuramos las secciones
@@ -108,7 +123,6 @@ export const generatePDF = (data, userInfo) => {
     equipamiento3: "Equipamiento",
     baldas: "Baldas e iluminación",
     remates: "Remates a medida",
-    instalacion: "Instalación"
   };
 
   let startY = 50;
@@ -117,57 +131,45 @@ export const generatePDF = (data, userInfo) => {
   Object.entries(sections).forEach(([section, title]) => {
     if (data[section]) {
       let sectionData = [];
-
-      // Procesamos y agregamos los datos de la sección
-      Object.entries(data[section]).forEach(([key, value]) => {
-        if (key === 'cantidadFrente') return; // Excluir cantidadFrente
-        
-        // Capturar todos los datos que terminan en 'Nombre' y que no sean especiales
-        if (key.endsWith('Nombre') && value && !key.startsWith('selectedEspecial')) {
-          sectionData.push(`${labelsMap[key] || key}: ${value}`);
-        }
-        
-        // Capturar cantidades y puntos
-        if ((key === 'cantidad' || key.startsWith('cantidad')) && value && value !== 0 && !key.startsWith('cantidadEspecial')) {
-          sectionData.push(`${labelsMap[key] || key}: ${value}`);
-        }
       
-        if ((key === 'puntos' || key.startsWith('puntos')) && value && !key.startsWith('puntosEspecial')) {
-          sectionData.push(`${labelsMap[key] || key}: ${value}`);
+      // Procesar y agregar datos de la sección
+      Object.entries(data[section]).forEach(([key, value]) => {
+        if (value && labelsMap[key]) {
+          sectionData.push(`${value}`);
         }
       });
+
+      // Especiales a medida
       
-      // Procesar especiales a medida
-      if (data[section].selectedEspecial1Nombre) {
-        sectionData.push(`${labelsMap.selectedEspecial1Nombre}: ${data[section].selectedEspecial1Nombre}`);
-        sectionData.push(`Puntos: ${data[section].puntosEspecial1}`);
-        sectionData.push(`Cantidad: ${data[section].cantidadEspecial1}`);
-      }
-      
-      if (data[section].selectedEspecial2Nombre) {
-        sectionData.push(`${labelsMap.selectedEspecial2Nombre}: ${data[section].selectedEspecial2Nombre}`);
-        sectionData.push(`Puntos: ${data[section].puntosEspecial2}`);
-        sectionData.push(`Cantidad: ${data[section].cantidadEspecial2}`);
-      }
 
       // Imprimir el título de la sección
       doc.setFontSize(10);
+      doc.setFillColor(220, 220, 220);
+      doc.rect(10, startY - 5, pageWidth - 20, 10, 'F');
       doc.text(title, 12, startY);
       startY += 10;
 
       // Imprimir los datos de la sección en filas de 4 elementos
-      doc.setFontSize(8);
+      doc.setFontSize(7);
       let currentRow = 0;
 
       sectionData.forEach((line, index) => {
-        const xPosition = 12 + (index % 4) * (pageWidth / 4 - 10); // Calculamos la posición X de los 4 elementos por fila
+        let xPosition;
+        
+        // Si es un valor de 'cantidad' o 'puntos', alinear a la derecha
+        if (line.toLowerCase().includes('cantidad') || line.toLowerCase().includes('puntos')) {
+          xPosition = pageWidth - 20;  // Alinear hacia la derecha (ajusta 50 según sea necesario)
+        } else {
+          xPosition = 12 + (index % 4) * (pageWidth / 4 );  // Posición normal para otros datos
+        }
+      
         doc.text(line, xPosition, startY);
-
+      
         if ((index + 1) % 4 === 0) {
           startY += 6;  // Avanza a la siguiente fila después de 4 elementos
           currentRow++;
         }
-
+      
         // Si la página se llena, agregamos una nueva
         if (startY > pageHeight - 20) {
           doc.addPage();
@@ -199,7 +201,7 @@ export const generatePDF = (data, userInfo) => {
   const numArmariosCompletos = data.instalacion?.numArmariosCompletos || 0;
   let totalMontaje = (numFrentesInteriores * 110) + (numArmariosCompletos * 146) + 50;
 
-  doc.setFontSize(10);
+  doc.setFontSize(8);
   startY += 15;
   doc.text(`Total Puntos: ${totalPuntos}`, 12, startY);
   startY += 10;
