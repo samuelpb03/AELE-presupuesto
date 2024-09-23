@@ -120,23 +120,30 @@ export const generatePDF = (data, userInfo) => {
 
       // Procesamos y agregamos los datos de la sección
       Object.entries(data[section]).forEach(([key, value]) => {
-        if (
-          value &&
-          labelsMap[key] &&
-          !key.startsWith('selectedEspecial') &&
-          !key.startsWith('puntosEspecial') &&
-          !key.startsWith('cantidadEspecial')
-        ) {
-          sectionData.push(`${labelsMap[key]}: ${value}`);
+        if (key === 'cantidadFrente') return; // Excluir cantidadFrente
+        
+        // Capturar todos los datos que terminan en 'Nombre' y que no sean especiales
+        if (key.endsWith('Nombre') && value && !key.startsWith('selectedEspecial')) {
+          sectionData.push(`${labelsMap[key] || key}: ${value}`);
+        }
+        
+        // Capturar cantidades y puntos
+        if ((key === 'cantidad' || key.startsWith('cantidad')) && value && value !== 0 && !key.startsWith('cantidadEspecial')) {
+          sectionData.push(`${labelsMap[key] || key}: ${value}`);
+        }
+      
+        if ((key === 'puntos' || key.startsWith('puntos')) && value && !key.startsWith('puntosEspecial')) {
+          sectionData.push(`${labelsMap[key] || key}: ${value}`);
         }
       });
-
-      // Especiales a medida
+      
+      // Procesar especiales a medida
       if (data[section].selectedEspecial1Nombre) {
         sectionData.push(`${labelsMap.selectedEspecial1Nombre}: ${data[section].selectedEspecial1Nombre}`);
         sectionData.push(`Puntos: ${data[section].puntosEspecial1}`);
         sectionData.push(`Cantidad: ${data[section].cantidadEspecial1}`);
       }
+      
       if (data[section].selectedEspecial2Nombre) {
         sectionData.push(`${labelsMap.selectedEspecial2Nombre}: ${data[section].selectedEspecial2Nombre}`);
         sectionData.push(`Puntos: ${data[section].puntosEspecial2}`);
