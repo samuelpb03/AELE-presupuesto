@@ -77,19 +77,17 @@ const labelsMap = {
 };
 
 // Función para generar el PDF
+// Función para generar el PDF
 export const generatePDF = (data, userInfo) => {
   const doc = new jsPDF();
-  const drawBorder = () => {
-    doc.setLineWidth(0.5);
-    doc.rect(5, 5, pageWidth - 10, pageHeight - 10); // Dibujar el borde
-  };
 
   const checkPageSpace = (doc, startY) => {
     const marginBottom = 10;
     const pageHeight = doc.internal.pageSize.getHeight();
-    drawBorder();
+
     if (startY >= pageHeight - marginBottom) {
       doc.addPage();
+      doc.rect(5, 5, pageWidth - 10, pageHeight - 10); 
       return 20;  // Reiniciar posición vertical en la nueva página
     }
     return startY;
@@ -147,7 +145,7 @@ export const generatePDF = (data, userInfo) => {
           sectionData.push(`${value}`);
           startY = checkPageSpace(doc, startY);
         }
-      });     
+      });
 
       // Imprimir el título de la sección
       doc.setFontSize(10);
@@ -161,16 +159,15 @@ export const generatePDF = (data, userInfo) => {
       doc.setFontSize(7);
       let currentRow = 0;
       startY = checkPageSpace(doc, startY);
-      drawBorder();
 
       sectionData.forEach((line, index) => {
         let xPosition;
         
         // Si es un valor de 'cantidad' o 'puntos', alinear a la derecha
         if (line.toLowerCase().includes('cantidad') || line.toLowerCase().includes('puntos')) {
-          xPosition = pageWidth - 20;  // Alinear hacia la derecha (ajusta 50 según sea necesario)
+          xPosition = pageWidth - 20;  // Alinear hacia la derecha
         } else {
-          xPosition = 12 + (index % 4) * (pageWidth / 4 );  // Posición normal para otros datos
+          xPosition = 12 + (index % 4) * (pageWidth / 4);  // Posición normal para otros datos
         }
       
         doc.text(line, xPosition, startY);
@@ -195,6 +192,36 @@ export const generatePDF = (data, userInfo) => {
       startY += 10; // Espacio después de cada sección
     }
   });
+
+  // **Apartado Especiales a Medida**
+  doc.setFontSize(10);
+  doc.setFillColor(220, 220, 220);
+  startY = checkPageSpace(doc, startY);
+  doc.rect(10, startY - 5, pageWidth - 20, 10, 'F');
+  doc.text("Especiales a Medida", 12, startY);
+  startY += 10;
+
+  const frentesEspeciales = ['frentes', 'frentes2', 'frentes3'];
+  frentesEspeciales.forEach(frente => {
+    if (data[frente]) {
+      const { selectedEspecial1Nombre, cantidadEspecial1, puntosEspecial1, selectedEspecial2Nombre, cantidadEspecial2, puntosEspecial2 } = data[frente];
+
+      if (selectedEspecial1Nombre) {
+        doc.setFontSize(7);
+        startY = checkPageSpace(doc, startY);
+        doc.text(`Especial 1 - ${selectedEspecial1Nombre}: ${cantidadEspecial1} unidades, ${puntosEspecial1} puntos`, 12, startY);
+        startY += 6;
+      }
+      if (selectedEspecial2Nombre) {
+        doc.setFontSize(7);
+        startY = checkPageSpace(doc, startY);
+        doc.text(`Especial 2 - ${selectedEspecial2Nombre}: ${cantidadEspecial2} unidades, ${puntosEspecial2} puntos`, 12, startY);
+        startY += 6;
+      }
+    }
+  });
+
+  startY += 10; // Espacio después del apartado de Especiales
 
   // Calcular totales
   const totalPuntos = Object.entries(sections).reduce((total, [section]) => {
