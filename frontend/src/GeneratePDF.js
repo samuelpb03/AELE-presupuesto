@@ -75,19 +75,21 @@ const labelsMap = {
   puntosTotales8: "Puntos 8",
   puntosTotales9: "Puntos 9",
 };
-
-// Función para generar el PDF
+let lastFrenteProcessed = "";
 // Función para generar el PDF
 export const generatePDF = (data, userInfo) => {
   const doc = new jsPDF();
+  const drawBorder = () => {
+    doc.setLineWidth(0.5);
+    doc.rect(5, 5, pageWidth - 10, pageHeight - 10); // Dibujar el borde
+  };
 
   const checkPageSpace = (doc, startY) => {
     const marginBottom = 10;
     const pageHeight = doc.internal.pageSize.getHeight();
-
+    drawBorder();
     if (startY >= pageHeight - marginBottom) {
       doc.addPage();
-      doc.rect(5, 5, pageWidth - 10, pageHeight - 10); 
       return 20;  // Reiniciar posición vertical en la nueva página
     }
     return startY;
@@ -135,12 +137,21 @@ export const generatePDF = (data, userInfo) => {
   let startY = 50;
   let totalFrentesInteriores = 0;
 
+  // Procesar y agregar datos de la sección
   Object.entries(sections).forEach(([section, title]) => {
     if (data[section]) {
       let sectionData = [];
-      
+
       // Procesar y agregar datos de la sección
       Object.entries(data[section]).forEach(([key, value]) => {
+        // Excluir los especiales a medida de la sección de frentes
+        if (
+          key.startsWith('selectedEspecial') ||
+          key.startsWith('cantidadEspecial') ||
+          key.startsWith('puntosEspecial')
+        ) {
+          return; // Omitir los especiales
+        }
         if (value && labelsMap[key]) {
           sectionData.push(`${value}`);
           startY = checkPageSpace(doc, startY);
@@ -157,71 +168,65 @@ export const generatePDF = (data, userInfo) => {
 
       // Imprimir los datos de la sección en filas de 4 elementos
       doc.setFontSize(7);
-      let currentRow = 0;
-      startY = checkPageSpace(doc, startY);
-
       sectionData.forEach((line, index) => {
         let xPosition;
-        
-        // Si es un valor de 'cantidad' o 'puntos', alinear a la derecha
         if (line.toLowerCase().includes('cantidad') || line.toLowerCase().includes('puntos')) {
-          xPosition = pageWidth - 20;  // Alinear hacia la derecha
+          xPosition = pageWidth - 20;
         } else {
-          xPosition = 12 + (index % 4) * (pageWidth / 4);  // Posición normal para otros datos
+          xPosition = 12 + (index % 4) * (pageWidth / 4);
         }
-      
+
         doc.text(line, xPosition, startY);
-      
+
         if ((index + 1) % 4 === 0) {
-          startY += 6;  // Avanza a la siguiente fila después de 4 elementos
-          currentRow++;
+          startY += 6; // Avanza a la siguiente fila después de 4 elementos
         }
-      
-        // Si la página se llena, agregamos una nueva
-        if (startY > pageHeight - 20) {
-          doc.addPage();
-          startY = 20;
-        }
+        startY = checkPageSpace(doc, startY);
       });
 
-      // Asegurarse de que una fila parcial también avance
-      if (sectionData.length % 4 !== 0) {
-        startY += 6; // Si la última fila tiene menos de 4 elementos
-      }
-
       startY += 10; // Espacio después de cada sección
+
+      // Verificar si es el último frente (frentes3 o el último de los frentes) y agregar los especiales a medida después
+      if (section === 'frentes' || section === 'frentes2' || section === 'frentes3') {
+        lastFrenteProcessed = section;
+      } 
+      if (lastFrenteProcessed) {
+        doc.setFontSize(10);
+        doc.setFillColor(220, 220, 220);
+        startY = checkPageSpace(doc, startY);
+        doc.rect(10, startY - 5, pageWidth - 20, 10, 'F');
+        doc.text("Especiales frentes a medida", 12, startY);
+        startY += 10;
+
+        doc.setFontSize(7);
+
+        // Agregar los datos de los especiales a medida
+        const especiales = [
+          { nombre: data.frentes?.selectedEspecial1Nombre, cantidad: data.frentes?.cantidadEspecial1, puntos: data.frentes?.puntosEspecial1 },
+          { nombre: data.frentes2?.selectedEspecial1Nombre, cantidad: data.frentes2?.cantidadEspecial1, puntos: data.frentes2?.puntosEspecial1 },
+          { nombre: data.frentes3?.selectedEspecial1Nombre, cantidad: data.frentes3?.cantidadEspecial1, puntos: data.frentes3?.puntosEspecial1 },
+        ];
+
+        especiales.forEach((especial) => {
+          if (especial.nombre) {
+            doc.text(`${especial.nombre}`, 12, startY);
+            doc.text(`Cantidad: ${especial.cantidad}`, pageWidth - 50, startY);
+            doc.text(`Puntos: ${especial.puntos}`, pageWidth - 30, startY);
+            startY += 10;
+            startY = checkPageSpace(doc, startY);
+          }
+        });
+
+        startY += 10; // Espacio después de los especiales
+      }
+
+      // Continuar con el resto del PDF (montaje e instalación, totales, etc.)
+      startY += 10; // Espacio después del apartado de Especiales
     }
   });
 
-  // **Apartado Especiales a Medida**
-  doc.setFontSize(10);
-  doc.setFillColor(220, 220, 220);
-  startY = checkPageSpace(doc, startY);
-  doc.rect(10, startY - 5, pageWidth - 20, 10, 'F');
-  doc.text("Especiales a Medida", 12, startY);
-  startY += 10;
+  // Imprimir los especiales a medida después del último frente procesado
 
-  const frentesEspeciales = ['frentes', 'frentes2', 'frentes3'];
-  frentesEspeciales.forEach(frente => {
-    if (data[frente]) {
-      const { selectedEspecial1Nombre, cantidadEspecial1, puntosEspecial1, selectedEspecial2Nombre, cantidadEspecial2, puntosEspecial2 } = data[frente];
-
-      if (selectedEspecial1Nombre) {
-        doc.setFontSize(7);
-        startY = checkPageSpace(doc, startY);
-        doc.text(`Especial 1 - ${selectedEspecial1Nombre}: ${cantidadEspecial1} unidades, ${puntosEspecial1} puntos`, 12, startY);
-        startY += 6;
-      }
-      if (selectedEspecial2Nombre) {
-        doc.setFontSize(7);
-        startY = checkPageSpace(doc, startY);
-        doc.text(`Especial 2 - ${selectedEspecial2Nombre}: ${cantidadEspecial2} unidades, ${puntosEspecial2} puntos`, 12, startY);
-        startY += 6;
-      }
-    }
-  });
-
-  startY += 10; // Espacio después del apartado de Especiales
 
   // Calcular totales
   const totalPuntos = Object.entries(sections).reduce((total, [section]) => {
