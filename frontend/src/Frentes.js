@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useTabs } from "./TabsContext";
 import { useData } from './context/DataContext';
-
+// Constantes que guardarán los datos del frente
 function Frentes() {
   const { handleSelectChange } = useTabs();
   const { data, saveData } = useData();
@@ -15,7 +15,6 @@ function Frentes() {
   const [listMaterialFranja, setListMaterialFranja] = useState([]);
   const [listColorFranja, setListColorFranja] = useState([]);
   const [listEspeciales, setListEspeciales] = useState([]);
-
   const [selectedProducto, setSelectedProducto] = useState({ id: "", nombre: "" });
   const [selectedSerie, setSelectedSerie] = useState({ id: "", nombre: "" });
   const [selectedArticulo, setSelectedArticulo] = useState({ id: "", nombre: "" });
@@ -23,9 +22,8 @@ function Frentes() {
   const [selectedColor, setSelectedColor] = useState({ id: "", nombre: "" });
   const [selectedMedidas, setSelectedMedidas] = useState({ id: "", nombre: "", puntos: 0 });
   const [selectedMaterialFranja, setSelectedMaterialFranja] = useState({ id: "", nombre: "" });
-  const [selectedColorFranja, setSelectedColorFranja] = useState({ id: "", nombre: "" }); // Estado para cantidad
-  const [puntos, setPuntos] = useState(0); // Estado para puntos
-
+  const [selectedColorFranja, setSelectedColorFranja] = useState({ id: "", nombre: "" });
+  const [puntos, setPuntos] = useState(0); 
   const [selectedEspecial1, setSelectedEspecial1] = useState({ id: "", nombre: "", puntos: 0 });
   const [selectedEspecial2, setSelectedEspecial2] = useState({ id: "", nombre: "", puntos: 0 });
   const [puntosEspecial1, setPuntosEspecial1] = useState(0);
@@ -36,55 +34,55 @@ function Frentes() {
   var [cantidad, setCantidad] = useState(0);
   const [isColorValueAdded, setIsColorValueAdded] = useState(false);
   const [shouldApplyColorIncrement, setShouldApplyColorIncrement] = useState(false);
-  const backendUrl = 'http://194.164.166.129:6969'; // URL de ngrok para el backend
-  // Verificar si el usuario está autenticado
+  const backendUrl = 'http://194.164.166.129:6969'; //URL a la que se está conectando esta clase
+  // Verificación del usuario, si no ha iniciado sesión, no puede entrar directamente a esta clase
   const user = localStorage.getItem('user');
   if (!user) {
     //Redirigir a login.php si no está autenticado
     window.location.href = '/login.php';
   }
-
+  // Este código devuelve los valores a los campos al cambiar de pestaña y volver, o, en su defecto, los mantiene vacíos
   useEffect(() => {
-    if (data.frentes) {
+    if (data.frentes) { //ID y nombre del producto
       setSelectedProducto({
         id: data.frentes.selectedProductoId || "",
         nombre: data.frentes.selectedProductoNombre || "",
       });
-      setSelectedSerie({
+      setSelectedSerie({ //ID y nombre de la serie
         id: data.frentes.selectedSerieId || "",
         nombre: data.frentes.selectedSerieNombre || "",
       });
-      setSelectedArticulo({
+      setSelectedArticulo({ //ID y nombre del artículo
         id: data.frentes.selectedArticuloId || "",
         nombre: data.frentes.selectedArticuloNombre || "",
       });
-      setSelectedMaterial({
+      setSelectedMaterial({ //ID y nombre del material
         id: data.frentes.selectedMaterialId || "",
         nombre: data.frentes.selectedMaterialNombre || "",
       });
-      setSelectedColor({
+      setSelectedColor({ //ID y nombre del color
         id: data.frentes.selectedColorId || "",
         nombre: data.frentes.selectedColorNombre || "",
       });
-      setSelectedMedidas({
+      setSelectedMedidas({ //ID y nombre de las medidas
         id: data.frentes.selectedMedidasId || "",
         nombre: data.frentes.selectedMedidasNombre || "",
         puntos: data.frentes.selectedMedidasPuntos || 0,
       });
-      setSelectedMaterialFranja({
+      setSelectedMaterialFranja({ //ID y nombre del material de la franja
         id: data.frentes.selectedMaterialFranjaId || "",
         nombre: data.frentes.selectedMaterialFranjaNombre || "",
       });
-      setSelectedColorFranja({
+      setSelectedColorFranja({ //ID y nombre del color de la franja
         id: data.frentes.selectedColorFranjaId || "",
         nombre: data.frentes.selectedColorFranjaNombre || "",
       });
-      setSelectedEspecial1({
+      setSelectedEspecial1({ //ID, nombre y puntos del primer especial a medida
         id: data.frentes.selectedEspecial1Id || "",
         nombre: data.frentes.selectedEspecial1Nombre || "",
         puntos: data.frentes.selectedEspecial1Puntos || 0,
       });
-      setSelectedEspecial2({
+      setSelectedEspecial2({ //ID, nombre y puntos del segundo especial a medida
         id: data.frentes.selectedEspecial2Id || "",
         nombre: data.frentes.selectedEspecial2Nombre || "",
         puntos: data.frentes.selectedEspecial2Puntos || 0,
@@ -98,7 +96,7 @@ function Frentes() {
       setCantidadEspecial2(data.frentes.cantidadEspecial2 || 0);
     }
   }, []);
-
+  // Guardar los datos formateados en el estado 
   useEffect(() => {
     const formattedData = {
       selectedProductoId: selectedProducto.id,
@@ -133,6 +131,7 @@ function Frentes() {
       puntosEspecial2: selectedEspecial2.puntos * cantidadEspecial2,
     };
     saveData("frentes", formattedData);
+    //Lista de dependencias de estos datos
   }, [
     selectedProducto,
     selectedSerie,
@@ -147,15 +146,15 @@ function Frentes() {
     cantidad,
     cantidadEspecial1,
     cantidadEspecial2,
-    puntos, // Incluye puntos en la lista de dependencias
-    isColorValueAdded, // Asegura que se guarde el estado del incremento
+    puntos, 
+    isColorValueAdded,
     saveData,
   ]);
 
-
+  // Fragmento que recoge del backend los datos del producto (la tabla Producto de la base de datos)
   useEffect(() => {
     axios.get(`${backendUrl}/producto`).then((res) => {
-      console.log('Full response:', res); // Registrar la respuesta completa
+      console.log('Full response:', res); // Muestra en la consola la respuesta completa
       if (Array.isArray(res.data)) {
         const filteredProducts = res.data.filter((producto) => [1, 4, 5].includes(producto.producto_id));
         setListProducto(filteredProducts);
@@ -165,12 +164,12 @@ function Frentes() {
     }).catch(error => {
       console.error("Error fetching productos:", error);
     });
-
+    // Este fragmento recoge del backend los datos de los especiales para frentes
     axios.get(`${backendUrl}/especialesConPuntosFrentes`).then((res) => {
-      console.log('Full response:', res); // Registrar la respuesta completa
+      console.log('Full response:', res); // Muestra en la consola la respuesta completa
       if (Array.isArray(res.data)) {
         setListEspeciales(res.data);
-      } else {
+      } else { // En caso de error, también se muestra en la consola
         console.error("Error fetching articulos especiales: res.data is not an array", res.data);
       }
     }).catch(error => {

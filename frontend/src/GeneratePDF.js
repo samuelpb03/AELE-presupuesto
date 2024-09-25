@@ -1,5 +1,5 @@
 import { jsPDF } from "jspdf";
-
+//Labels para cambiar los nombres que lleguen de las otras clases y mejorar la estética
 const labelsMap = {
   selectedProductoNombre: "Producto",
   selectedArticuloNombre: "Artículo",
@@ -75,16 +75,13 @@ const labelsMap = {
   puntosTotales8: "Puntos 8",
   puntosTotales9: "Puntos 9",
 };
-let lastFrenteProcessed = "";
-let lastInterioresProcessed = ""; // Añadir variable para interiores
 
-// Función para generar el PDF
 // Función para generar el PDF
 export const generatePDF = (data, userInfo) => {
   const doc = new jsPDF();
   const drawBorder = () => {
     doc.setLineWidth(0.5);
-    doc.rect(5, 5, pageWidth - 10, pageHeight - 10); // Dibujar el borde
+    doc.rect(2, 2, pageWidth - 4, pageHeight - 4); // Dibujar el borde
   };
 
   const checkPageSpace = (doc, startY) => {
@@ -110,7 +107,7 @@ export const generatePDF = (data, userInfo) => {
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
   doc.setLineWidth(0.5);
-  doc.rect(5, 5, pageWidth - 10, pageHeight - 10); // Recuadro con bordes finos
+  doc.rect(2, 2, pageWidth - 4, pageHeight - 4); // Recuadro con bordes finos
 
   doc.setFontSize(7);
   const companyDetails = [
@@ -131,7 +128,7 @@ export const generatePDF = (data, userInfo) => {
     frentes2: "Frentes 2",
     frentes3: "Frentes 3",
     tiradores: "Tiradores y cerraduras",
-    interiores: "Interiores",  // Interiores aquí
+    interiores: "Interiores", 
     equipamiento3: "Equipamiento",
     baldas: "Baldas e iluminación",
     remates: "Remates a medida",
