@@ -115,6 +115,11 @@ export const generatePDF = (data, userInfo) => {
     `Cliente: ${userInfo.cliente}`,
     `Teléfono: ${userInfo.telefono}`,
   ];
+  // Añadiendo la fecha al PDF
+  const today = new Date();
+  const dateStr = `${today.getDate()}/${today.getMonth() + 1}/${today.getFullYear()}`;
+  doc.text(`Fecha: ${dateStr}`, pageWidth - 90, 45);
+
   companyDetails.forEach((line, index) => {
     doc.text(line, pageWidth - 90, 15 + (index * 7));
   });
@@ -134,7 +139,7 @@ export const generatePDF = (data, userInfo) => {
     remates: "Remates a medida",
   };
 
-  let startY = 50;
+  let startY = 52;
   let lastFrenteProcessed = "";
   let lastInterioresProcessed = "";
 
