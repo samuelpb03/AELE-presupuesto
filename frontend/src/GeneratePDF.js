@@ -75,7 +75,6 @@ const labelsMap = {
   puntosTotales8: "Puntos 8",
   puntosTotales9: "Puntos 9",
 };
-
 // Función para generar el PDF
 export const generatePDF = (data, userInfo) => {
   const doc = new jsPDF();
@@ -204,6 +203,7 @@ export const generatePDF = (data, userInfo) => {
       });
 
       // Imprimir los puntos de la sección (si hay puntos)
+      puntosSeccion = Math.round(puntosSeccion);
       if (puntosSeccion > 0) {
         doc.setFontSize(7);
         doc.setFont("helvetica", "bold"); // Texto en negrita
@@ -225,13 +225,10 @@ export const generatePDF = (data, userInfo) => {
       }
     }
   });
-
-  // Imprimir los especiales a medida después del último frente procesado
   // Comprobación para verificar si hay datos en los especiales
 const hasEspeciales = (especiales) => {
   return especiales.some(especial => especial.nombre || especial.cantidad || especial.puntos);
 };
-
 // Imprimir los especiales a medida después del último frente procesado
 if (lastFrenteProcessed) {
   const especialesFrentes = [
@@ -242,7 +239,6 @@ if (lastFrenteProcessed) {
     { nombre: data.frentes3?.selectedEspecial1Nombre, cantidad: data.frentes3?.cantidadEspecial1, puntos: data.frentes3?.puntosEspecial1 },
     { nombre: data.frentes3?.selectedEspecial2Nombre, cantidad: data.frentes3?.cantidadEspecial2, puntos: data.frentes3?.puntosEspecial2 }, // Especial 2 de frentes3
   ];
-
   // Solo imprimir si hay datos en los especiales
   if (hasEspeciales(especialesFrentes)) {
     doc.setFontSize(10);
@@ -264,14 +260,12 @@ if (lastFrenteProcessed) {
     });
   }
 }
-
 // Imprimir los especiales de interiores después de procesar la sección "Interiores"
 if (lastInterioresProcessed) {
   const especialesInteriores = [
     { nombre: data.interiores?.selectedEspecial1Nombre, cantidad: data.interiores?.cantidadEspecial1, puntos: data.interiores?.puntosEspecial1 },
     { nombre: data.interiores?.selectedEspecial2Nombre, cantidad: data.interiores?.cantidadEspecial2, puntos: data.interiores?.puntosEspecial2 },
   ];
-
   // Solo imprimir si hay datos en los especiales
   if (hasEspeciales(especialesInteriores)) {
     doc.setFontSize(10);
@@ -293,9 +287,7 @@ if (lastInterioresProcessed) {
     });
   }
 }
-  // Continuar con el resto del PDF (montaje e instalación, totales, etc.)
   startY += 10; // Espacio después del apartado de Especiales
-
   // Calcular totales
   const totalPuntos = Object.entries(sections).reduce((total, [section]) => {
     return total + Object.entries(data[section] || {}).reduce((subTotal, [key, value]) => {
@@ -305,7 +297,6 @@ if (lastInterioresProcessed) {
       return subTotal;
     }, 0);
   }, 0);
-
   // Cálculo de montaje e instalación
   const numFrentesInteriores = data.instalacion?.numFrentesInteriores || 0;
   const numArmariosCompletos = data.instalacion?.numArmariosCompletos || 0;
@@ -317,8 +308,7 @@ if (lastInterioresProcessed) {
   doc.text(`Total Puntos: ${totalPuntos}`, 12, startY);
   startY += 10;
   doc.text(`Total Montaje e Instalación: ${totalMontaje.toFixed(2)} €`, 12, startY);
-
-  // Guardar el PDF
+  // Crear el nombre del PDF
   const centroAbreviado = centro.substring(0, 3).toUpperCase();
   fetch('http://194.164.166.129:6969/presupuesto', {
     method: 'POST',
@@ -332,7 +322,7 @@ if (lastInterioresProcessed) {
       tienda: userInfo.tienda
     }),
     credentials: 'include'
-  })
+  })// Guardar el PDF
     .then(response => response.json())
     .then(data => {
       const nombrePresupuesto = `${centroAbreviado}-${data.idPresupuesto}`;

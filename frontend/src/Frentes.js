@@ -33,6 +33,7 @@ function Frentes() {
   const [franjaActiva, setFranjaActiva] = useState(false);
   var [cantidad, setCantidad] = useState(0);
   const [isColorValueAdded, setIsColorValueAdded] = useState(false);
+  const [includeBrakes, setIncludeBrakes] = useState(false); //Nuevo estado para la comprobación de los frenos
   const [shouldApplyColorIncrement, setShouldApplyColorIncrement] = useState(false);
   const backendUrl = 'http://194.164.166.129:6969'; //URL a la que se está conectando esta clase
   // Verificación del usuario, si no ha iniciado sesión, no puede entrar directamente a esta clase
@@ -333,6 +334,16 @@ function Frentes() {
       });
     }
   }, [selectedMaterialFranja.id, backendUrl]);
+  useEffect(() => {
+    if (selectedProducto.id === "4") { // Solo mostrar checkbox para el producto con Id 4
+      setIncludeBrakes(true);
+    } else {
+      setIncludeBrakes(false);
+      if (puntos > 0) {
+        setPuntos(puntos - 73);  // Asegurarse de quitar los puntos si se cambia de producto
+      }
+    }
+  }, [selectedProducto.id]);
 
   const handleSelectProductChange = (event) => {
     const index = event.target.selectedIndex;
@@ -548,6 +559,13 @@ function Frentes() {
     const newCantidad = parseInt(event.target.value, 10);
     setCantidad(newCantidad);
   };
+  const handleBrakesChange = (event) => {
+    if (event.target.checked) {
+      setPuntos(puntos + 73); // Añadir 73 puntos si los frenos están activados
+    } else {
+      setPuntos(puntos - 73); // Restar 73 puntos si los frenos están desactivados
+    }
+  };
 
   return (
     <div className="container">
@@ -654,6 +672,18 @@ function Frentes() {
             )}
             <label htmlFor="puntos">Puntos: {puntos * cantidad}</label>
           </div>
+          {includeBrakes && (
+        <div className="field">
+          <label htmlFor="addBrakes" style={{ color: 'red' }}>Frenos seleccionados por defecto:</label>
+          <input
+            type="checkbox"
+            id="addBrakes"
+            checked={includeBrakes}
+            onChange={handleBrakesChange}
+            style={{ marginLeft: '10px' }}
+          />
+        </div>
+      )}
         </div>
       </div>
 
