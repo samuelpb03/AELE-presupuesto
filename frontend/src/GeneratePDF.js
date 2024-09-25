@@ -225,7 +225,24 @@ export const generatePDF = (data, userInfo) => {
   });
 
   // Imprimir los especiales a medida después del último frente procesado
-  if (lastFrenteProcessed) {
+  // Comprobación para verificar si hay datos en los especiales
+const hasEspeciales = (especiales) => {
+  return especiales.some(especial => especial.nombre || especial.cantidad || especial.puntos);
+};
+
+// Imprimir los especiales a medida después del último frente procesado
+if (lastFrenteProcessed) {
+  const especialesFrentes = [
+    { nombre: data.frentes?.selectedEspecial1Nombre, cantidad: data.frentes?.cantidadEspecial1, puntos: data.frentes?.puntosEspecial1 },
+    { nombre: data.frentes?.selectedEspecial2Nombre, cantidad: data.frentes?.cantidadEspecial2, puntos: data.frentes?.puntosEspecial2 }, // Especial 2 de frentes
+    { nombre: data.frentes2?.selectedEspecial1Nombre, cantidad: data.frentes2?.cantidadEspecial1, puntos: data.frentes2?.puntosEspecial1 },
+    { nombre: data.frentes2?.selectedEspecial2Nombre, cantidad: data.frentes2?.cantidadEspecial2, puntos: data.frentes2?.puntosEspecial2 }, // Especial 2 de frentes2
+    { nombre: data.frentes3?.selectedEspecial1Nombre, cantidad: data.frentes3?.cantidadEspecial1, puntos: data.frentes3?.puntosEspecial1 },
+    { nombre: data.frentes3?.selectedEspecial2Nombre, cantidad: data.frentes3?.cantidadEspecial2, puntos: data.frentes3?.puntosEspecial2 }, // Especial 2 de frentes3
+  ];
+
+  // Solo imprimir si hay datos en los especiales
+  if (hasEspeciales(especialesFrentes)) {
     doc.setFontSize(10);
     doc.setFillColor(220, 220, 220);
     startY = checkPageSpace(doc, startY);
@@ -234,29 +251,27 @@ export const generatePDF = (data, userInfo) => {
     startY += 10;
 
     doc.setFontSize(7);
-
-    // Agregar los datos de los especiales a medida para frentes
-    const especialesFrentes = [
-      { nombre: data.frentes?.selectedEspecial1Nombre, cantidad: data.frentes?.cantidadEspecial1, puntos: data.frentes?.puntosEspecial1 },
-      { nombre: data.frentes2?.selectedEspecial1Nombre, cantidad: data.frentes2?.cantidadEspecial1, puntos: data.frentes2?.puntosEspecial1 },
-      { nombre: data.frentes3?.selectedEspecial1Nombre, cantidad: data.frentes3?.cantidadEspecial1, puntos: data.frentes3?.puntosEspecial1 },
-    ];
-
     especialesFrentes.forEach((especial) => {
-      if (especial.nombre) {
-        doc.text(`${especial.nombre}`, 12, startY);
-        doc.text(`Cantidad: ${especial.cantidad}`, pageWidth - 50, startY);
-        doc.text(`Puntos: ${especial.puntos}`, pageWidth - 30, startY);
+      if (especial.nombre || especial.cantidad || especial.puntos) {
+        doc.text(`${especial.nombre || ''}`, 12, startY);
+        doc.text(`Cantidad: ${especial.cantidad || ''}`, pageWidth - 50, startY);
+        doc.text(`Puntos: ${especial.puntos || ''}`, pageWidth - 30, startY);
         startY += 10;
         startY = checkPageSpace(doc, startY);
       }
     });
-
-    startY += 10; // Espacio después de los especiales
   }
+}
 
-  // Imprimir los especiales de interiores después de procesar la sección "Interiores"
-  if (lastInterioresProcessed) {
+// Imprimir los especiales de interiores después de procesar la sección "Interiores"
+if (lastInterioresProcessed) {
+  const especialesInteriores = [
+    { nombre: data.interiores?.selectedEspecial1Nombre, cantidad: data.interiores?.cantidadEspecial1, puntos: data.interiores?.puntosEspecial1 },
+    { nombre: data.interiores?.selectedEspecial2Nombre, cantidad: data.interiores?.cantidadEspecial2, puntos: data.interiores?.puntosEspecial2 },
+  ];
+
+  // Solo imprimir si hay datos en los especiales
+  if (hasEspeciales(especialesInteriores)) {
     doc.setFontSize(10);
     doc.setFillColor(220, 220, 220);
     startY = checkPageSpace(doc, startY);
@@ -265,26 +280,17 @@ export const generatePDF = (data, userInfo) => {
     startY += 10;
 
     doc.setFontSize(7);
-
-    // Agregar los datos de los especiales a medida para interiores
-    const especialesInteriores = [
-      { nombre: data.interiores?.selectedEspecial1Nombre, cantidad: data.interiores?.cantidadEspecial1, puntos: data.interiores?.puntosEspecial1 },
-      { nombre: data.interiores?.selectedEspecial2Nombre, cantidad: data.interiores?.cantidadEspecial2, puntos: data.interiores?.puntosEspecial2 },
-    ];
-
     especialesInteriores.forEach((especial) => {
-      if (especial.nombre) {
-        doc.text(`${especial.nombre}`, 12, startY);
-        doc.text(`Cantidad: ${especial.cantidad}`, pageWidth - 50, startY);
-        doc.text(`Puntos: ${especial.puntos}`, pageWidth - 30, startY);
+      if (especial.nombre || especial.cantidad || especial.puntos) {
+        doc.text(`${especial.nombre || ''}`, 12, startY);
+        doc.text(`Cantidad: ${especial.cantidad || ''}`, pageWidth - 50, startY);
+        doc.text(`Puntos: ${especial.puntos || ''}`, pageWidth - 30, startY);
         startY += 10;
         startY = checkPageSpace(doc, startY);
       }
     });
-
-    startY += 10; // Espacio después de los especiales de interiores
   }
-
+}
   // Continuar con el resto del PDF (montaje e instalación, totales, etc.)
   startY += 10; // Espacio después del apartado de Especiales
 
