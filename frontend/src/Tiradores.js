@@ -80,7 +80,9 @@ function Tiradores() {
     })
       .then((res) => {
         if (Array.isArray(res.data)) {
-          setListTiradores(res.data);
+          // Ordenar alfabéticamente por el nombre del tirador
+          const sortedTiradores = res.data.sort((a, b) => a.nombre.localeCompare(b.nombre));
+          setListTiradores(sortedTiradores);
         } else {
           console.error("Error fetching tiradores: res.data is not an array");
         }
