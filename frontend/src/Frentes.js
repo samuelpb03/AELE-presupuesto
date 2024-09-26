@@ -167,7 +167,8 @@ function Frentes() {
       console.log('Full response:', res); // Muestra en la consola la respuesta completa
       if (Array.isArray(res.data)) {
         const filteredProducts = res.data.filter((producto) => [1, 4, 5].includes(producto.producto_id));
-        setListProducto(filteredProducts);
+        const sortedProducts = filteredProducts.sort((a, b) => a.nombre.localeCompare(b.nombre));
+        setListProducto(sortedProducts);
       } else {
         console.error("Error fetching productos: res.data is not an array", res.data);
       }
@@ -193,7 +194,12 @@ function Frentes() {
         params: { productoId: selectedProducto.id }
       }).then((res) => {
         if (Array.isArray(res.data)) {
-          setListSerie(res.data);
+          // Separar "Kanto" y ponerlo primero
+          const kantoSeries = res.data.filter(serie => serie.nombre === "kanto");
+          const otherSeries = res.data.filter(serie => serie.nombre !== "kanto");
+          const sortedSeries = [...kantoSeries, ...otherSeries]; // Poner Kanto primero
+  
+          setListSerie(sortedSeries);
           document.getElementById("serie").disabled = false;
         } else {
           console.error("Error fetching series: res.data is not an array");
