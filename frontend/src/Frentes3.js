@@ -28,6 +28,8 @@ function Frentes3() {
   const [selectedColorFranja, setSelectedColorFranja] = useState({ id: "", nombre: "" });
   var [cantidad, setCantidad] = useState(0);
   const [puntos, setPuntos] = useState(0); // Estado para puntos
+  const [brakesChecked, setBrakesChecked] = useState(false);
+  const [brakesPointsApplied, setBrakesPointsApplied] = useState(false);
 
   const [selectedEspecial1, setSelectedEspecial1] = useState({ id: "", nombre: "", puntos: 0 });
   const [selectedEspecial2, setSelectedEspecial2] = useState({ id: "", nombre: "", puntos: 0 });
@@ -97,6 +99,10 @@ function Frentes3() {
       setCantidadEspecial2(data.frentes3.cantidadEspecial2 || 0);
       setIsColorValueAdded(data.frentes3.isColorValueAdded || false);
       setShouldApplyColorIncrement(data.frentes3.shouldApplyColorIncrement || false);
+      setBrakesChecked(data.frentes3.brakesChecked || false);
+      if (data.frentes3.brakesChecked) {
+        setPuntos((prevPuntos) => prevPuntos - 73); // Restar 73 puntos si los frenos estaban activados
+      }
     }
   }, []);
 
@@ -126,6 +132,7 @@ function Frentes3() {
       selectedEspecial2Nombre: selectedEspecial2.nombre,
       selectedEspecial2Puntos: selectedEspecial2.puntos,
       cantidad,
+      brakesChecked,
       puntos, // Guardar puntos actualizados
       isColorValueAdded, // Guardar el estado del incremento
       cantidadEspecial1,
@@ -152,6 +159,7 @@ function Frentes3() {
     puntos, // Incluye puntos en la lista de dependencias
     isColorValueAdded, // Asegura que se guarde el estado del incremento
     saveData,
+    brakesChecked,
   ]);
 
   useEffect(() => {
@@ -477,6 +485,9 @@ const handleSelectMedidasChange = (event) => {
   if (selectedColor.id === '55' || selectedColor.id === '56') {
       newPuntos = Math.ceil(selectedMedida.puntos * 1.2);  // Aplicar incremento del 20% y redondear hacia arriba
   }
+  if (brakesChecked) {
+    newPuntos += 73;  // Añadir puntos por los frenos si el checkbox está marcado
+  }
 
   setPuntos(newPuntos);  // Actualizar los puntos con o sin incremento
 };
@@ -565,6 +576,30 @@ const handleSelectMedidasChange = (event) => {
   const handleCantidadChange = (event) => {
     const newCantidad = parseInt(event.target.value, 10);
     setCantidad(newCantidad);
+  };
+  useEffect(() => {
+    if (selectedProducto.id === "4") {
+      setBrakesChecked(true);
+      if (!brakesPointsApplied) {
+        setPuntos(puntos + 73);
+        setBrakesPointsApplied(true);
+      }
+    } else {
+      if (brakesPointsApplied) {
+        setPuntos(puntos - 73);
+        setBrakesPointsApplied(false);
+      }
+      setBrakesChecked(false);
+    }
+  }, [selectedProducto.id]);
+  const handleBrakesChange = (event) => {
+    const isChecked = event.target.checked;
+    setBrakesChecked(isChecked);
+    if (isChecked) {
+      setPuntos(puntos + 73); // Solo si el producto es correcto, ajusta según tu lógica
+    } else {
+      setPuntos(puntos - 73);
+    }
   };
 
   return (
@@ -671,6 +706,21 @@ const handleSelectMedidasChange = (event) => {
               </label>
             )}
             <label htmlFor="puntos">Puntos: {puntos * cantidad}</label>
+          </div>
+          <div className="container">
+            {selectedProducto.id === "4" && (
+              <div className="field">
+                <label htmlFor="addBrakes" style={{ color: 'red' }}>Con freno:</label>
+                <div className="checkbox-field">
+                  <input
+                    type="checkbox"
+                    id="addBrakes"
+                    checked={brakesChecked}
+                    onChange={handleBrakesChange}
+                  />
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

@@ -27,6 +27,8 @@ function Frentes2() {
   const [selectedMaterialFranja, setSelectedMaterialFranja] = useState({ id: "", nombre: "" });
   const [selectedColorFranja, setSelectedColorFranja] = useState({ id: "", nombre: "" });
   var [cantidad, setCantidad] = useState(0);
+  const [brakesChecked, setBrakesChecked] = useState(false);
+  const [brakesPointsApplied, setBrakesPointsApplied] = useState(false);
   const [puntos, setPuntos] = useState(0); // Estado para puntos
 
   const [selectedEspecial1, setSelectedEspecial1] = useState({ id: "", nombre: "", puntos: 0 });
@@ -36,7 +38,7 @@ function Frentes2() {
   const [cantidadEspecial1, setCantidadEspecial1] = useState(0);
   const [cantidadEspecial2, setCantidadEspecial2] = useState(0);
   const [franjaActiva, setFranjaActiva] = useState(false);
-  
+
   const backendUrl = 'http://194.164.166.129:6969'; // URL de ngrok para el backend
   useEffect(() => {
     const user = localStorage.getItem('user');
@@ -91,19 +93,21 @@ function Frentes2() {
       });
       setCantidad(data.frentes2.cantidad || 0);
       setPuntos(data.frentes2.puntos || 0); // Restaurar puntos base
-  
       // Restaurar los puntos de especiales
       setPuntosEspecial1((data.frentes2.selectedEspecial1Puntos || 0) * (data.frentes2.cantidadEspecial1 || 0));
       setPuntosEspecial2((data.frentes2.selectedEspecial2Puntos || 0) * (data.frentes2.cantidadEspecial2 || 0));
       setCantidadEspecial1(data.frentes2.cantidadEspecial1 || 0);
       setCantidadEspecial2(data.frentes2.cantidadEspecial2 || 0);
-  
       // RESTAURA EL ESTADO DE isColorValueAdded Y shouldApplyColorIncrement
       setIsColorValueAdded(data.frentes2.isColorValueAdded || false);
       setShouldApplyColorIncrement(data.frentes2.shouldApplyColorIncrement || false);
+      setBrakesChecked(data.frentes2.brakesChecked || false);
+      if (data.frentes2.brakesChecked) {
+        setPuntos((prevPuntos) => prevPuntos - 73); // Restar 73 puntos si los frenos estaban activados
+      }
     }
   }, []);
-  
+
 
 
 
@@ -136,6 +140,7 @@ function Frentes2() {
       puntos,
       isColorValueAdded,  // Guarda el estado del incremento
       cantidadEspecial1,
+      brakesChecked,
       cantidadEspecial2,
       puntosEspecial1: selectedEspecial1.puntos * cantidadEspecial1,
       puntosEspecial2: selectedEspecial2.puntos * cantidadEspecial2,
@@ -156,11 +161,13 @@ function Frentes2() {
     cantidad,
     cantidadEspecial1,
     cantidadEspecial2,
+    brakesChecked,
     puntos,  // Incluye puntos en la lista de dependencias
     isColorValueAdded,  // Asegura que se guarde el estado del incremento
     saveData,
+
   ]);
-  
+
 
   useEffect(() => {
     axios.get(`${backendUrl}/producto`).then((res) => {
@@ -349,11 +356,11 @@ function Frentes2() {
     const index = event.target.selectedIndex;
     const nombre = event.target.options[index].text;
     const id = event.target.value;
-    
+
     // Actualizar el producto seleccionado
     setSelectedProducto({ id, nombre });
     handleSelectChange("producto", id, nombre);
-  
+
     // Limpiar los especiales seleccionados
     setSelectedEspecial1({ id: "", nombre: "", puntos: 0 });
     setSelectedEspecial2({ id: "", nombre: "", puntos: 0 });
@@ -361,7 +368,7 @@ function Frentes2() {
     setCantidadEspecial2(0);
     setPuntosEspecial1(0);
     setPuntosEspecial2(0);
-  
+
     // Si el producto es 4 o 5, filtrar solo "Gran Altura"
     if (id === "4" || id === "5") {
       const especialGranAltura = listEspeciales.find(especial => especial.articulo_id === 195);
@@ -376,7 +383,7 @@ function Frentes2() {
         console.error("Error fetching articulos especiales:", error);
       });
     }
-  
+
     // Resetear los demás campos relacionados con puntos
     setSelectedArticulo({ id: "", nombre: "" });
     setSelectedMaterial({ id: "", nombre: "" });
@@ -391,10 +398,10 @@ function Frentes2() {
     const index = event.target.selectedIndex;
     const nombre = event.target.options[index].text;
     const id = event.target.value;
-  
+
     setSelectedSerie({ id, nombre });
     handleSelectChange("serie", id, nombre);
-  
+
     // Restablecer los campos siguientes y los puntos al cambiar la serie
     setSelectedArticulo({ id: "", nombre: "" }); // Restablecer artículo
     setSelectedMaterial({ id: "", nombre: "" }); // Restablecer material
@@ -441,19 +448,19 @@ function Frentes2() {
     handleSelectChange("color", id, nombre);
 
     if (id === '55' || id === '56') {
-        setShouldApplyColorIncrement(true);  // Marcar que se debe aplicar el incremento cuando haya puntos
-        setIsColorValueAdded(true);  // Activar el mensaje del 20%
+      setShouldApplyColorIncrement(true);  // Marcar que se debe aplicar el incremento cuando haya puntos
+      setIsColorValueAdded(true);  // Activar el mensaje del 20%
 
-        // Si las medidas ya están seleccionadas, aplicar el incremento inmediatamente
-        if (selectedMedidas.id) {
-            setPuntos(Math.ceil(selectedMedidas.puntos * 1.2));  // Aplicar incremento si ya hay medidas seleccionadas
-        }
+      // Si las medidas ya están seleccionadas, aplicar el incremento inmediatamente
+      if (selectedMedidas.id) {
+        setPuntos(Math.ceil(selectedMedidas.puntos * 1.2));  // Aplicar incremento si ya hay medidas seleccionadas
+      }
     } else {
-        setShouldApplyColorIncrement(false);  // No aplicar incremento
-        setIsColorValueAdded(false);  // Desactivar el mensaje
-        setPuntos(selectedMedidas.puntos);  // Restablecer los puntos originales si no aplica
+      setShouldApplyColorIncrement(false);  // No aplicar incremento
+      setIsColorValueAdded(false);  // Desactivar el mensaje
+      setPuntos(selectedMedidas.puntos);  // Restablecer los puntos originales si no aplica
     }
-};
+  };
 
   const handleSelectMedidasChange = (event) => {
     const index = event.target.selectedIndex;
@@ -464,15 +471,19 @@ function Frentes2() {
     setSelectedMedidas({ id, nombre, puntos: selectedMedida.puntos });
     handleSelectChange("medidas", id, nombre);
 
+
     let newPuntos = selectedMedida.puntos;
 
     // Verificar si el color seleccionado es "Color según muestra" o "Laca según muestra"
     if (selectedColor.id === '55' || selectedColor.id === '56') {
-        newPuntos = Math.ceil(selectedMedida.puntos * 1.2);  // Aplicar incremento del 20% y redondear hacia arriba
+      newPuntos = Math.ceil(selectedMedida.puntos * 1.2);  // Aplicar incremento del 20% y redondear hacia arriba
+    }
+    if (brakesChecked) {
+      newPuntos += 73;  // Añadir puntos por los frenos si el checkbox está marcado
     }
 
     setPuntos(newPuntos);  // Actualizar los puntos con o sin incremento
-};
+  };
 
   const handleSelectMaterialFranjaChange = (event) => {
     const index = event.target.selectedIndex;
@@ -494,7 +505,7 @@ function Frentes2() {
     const index = event.target.selectedIndex;
     const nombre = event.target.options[index].text;
     const id = event.target.value;
-  
+
     // Si el producto es 4 o 5, solo permitir seleccionar "Gran Altura"
     if (selectedProducto.id === "4" || selectedProducto.id === "5") {
       if (id !== "195") {
@@ -513,8 +524,8 @@ function Frentes2() {
         return;
       }
     }
-  
-  
+
+
     // Si el usuario selecciona la opción vacía
     if (id === "") {
       if (especialIndex === 1) {
@@ -528,10 +539,10 @@ function Frentes2() {
       }
       return; // Salir de la función si se selecciona el valor vacío
     }
-  
+
     // Buscar el especial seleccionado en la lista de especiales
     const selectedEspecial = listEspeciales.find(especial => especial.articulo_id === parseInt(id));
-  
+
     if (especialIndex === 1) {
       setSelectedEspecial1({ id, nombre, puntos: selectedEspecial.puntos });
       setPuntosEspecial1(selectedEspecial.puntos);
@@ -558,6 +569,30 @@ function Frentes2() {
   const handleCantidadChange = (event) => {
     const newCantidad = parseInt(event.target.value, 10);
     setCantidad(newCantidad);
+  };
+  useEffect(() => {
+    if (selectedProducto.id === "4") {
+      setBrakesChecked(true);
+      if (!brakesPointsApplied) {
+        setPuntos(puntos + 73);
+        setBrakesPointsApplied(true);
+      }
+    } else {
+      if (brakesPointsApplied) {
+        setPuntos(puntos - 73);
+        setBrakesPointsApplied(false);
+      }
+      setBrakesChecked(false);
+    }
+  }, [selectedProducto.id]);
+  const handleBrakesChange = (event) => {
+    const isChecked = event.target.checked;
+    setBrakesChecked(isChecked);
+    if (isChecked) {
+      setPuntos(puntos + 73); // Solo si el producto es correcto, ajusta según tu lógica
+    } else {
+      setPuntos(puntos - 73);
+    }
   };
 
   return (
@@ -665,9 +700,24 @@ function Frentes2() {
             )}
             <label htmlFor="puntos">Puntos: {puntos * cantidad}</label>
           </div>
+          <div className="container">
+            {selectedProducto.id === "4" && (
+              <div className="field">
+                <label htmlFor="addBrakes" style={{ color: 'red' }}>Con freno:</label>
+                <div className="checkbox-field">
+                  <input
+                    type="checkbox"
+                    id="addBrakes"
+                    checked={brakesChecked}
+                    onChange={handleBrakesChange}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
-  
+
       <div className="section">
         <div className="container4">
           <h2>Especiales a Medida</h2>
@@ -686,7 +736,7 @@ function Frentes2() {
               ))}
             </select>
           </div>
-          
+
           <div className="field-special">
             <label htmlFor="cantidadEspecial1">Cantidad:</label>
             <input
@@ -702,7 +752,7 @@ function Frentes2() {
             <select disabled>
               <option value="" >{puntosEspecial1}</option>
             </select>
-            
+
           </div>
           <div className="field-special">
             <label htmlFor="especial2">Artículo Especial 2:</label>
@@ -719,7 +769,7 @@ function Frentes2() {
               ))}
             </select>
           </div>
-          
+
           <div className="field-special">
             <label htmlFor="cantidadEspecial2">Cantidad:</label>
             <input

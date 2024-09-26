@@ -288,3 +288,33 @@ a:link, a:visited, a:active {
   width: 10%;
   height: 10%;
 }
+.checkbox-field input[type="checkbox"] {
+  margin-right: 10px;
+  width: 20px;  /* Ancho del checkbox */
+  height: 20px; /* Altura del checkbox */
+  appearance: none; /* Deshabilitar la apariencia por defecto */
+  background-color: #fff; /* Color de fondo */
+  border: 2px solid #ccc; /* Borde del checkbox */
+  border-radius: 4px; /* Bordes redondeados */
+  cursor: pointer; /* Cursor de mano al pasar el ratón */
+  position: relative; /* Posición relativa para los pseudo-elementos */
+}
+
+.checkbox-field input[type="checkbox"]:checked {
+  background-color: #007BFF; /* Cambiar el color de fondo cuando esté marcado */
+  border-color: #0056b3; /* Cambiar el color del borde cuando esté marcado */
+}
+
+.checkbox-field input[type="checkbox"]:checked::after {
+  font-size: 14px; /* Tamaño del tick */
+  color: white; /* Color del tick */
+  position: absolute;
+  top: 1px; /* Posición vertical del tick dentro del checkbox */
+  left: 4px; /* Posición horizontal del tick dentro del checkbox */
+}
+
+/* Mejora del enfoque visual para accesibilidad */
+.checkbox-field input[type="checkbox"]:focus {
+  outline: none; /* Quitar el outline por defecto */
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.5); /* Añadir un shadow box para el foco */
+}

@@ -33,7 +33,8 @@ function Frentes() {
   const [franjaActiva, setFranjaActiva] = useState(false);
   var [cantidad, setCantidad] = useState(0);
   const [isColorValueAdded, setIsColorValueAdded] = useState(false);
-  const [includeBrakes, setIncludeBrakes] = useState(false); //Nuevo estado para la comprobación de los frenos
+  const [brakesChecked, setBrakesChecked] = useState(false);
+  const [brakesPointsApplied, setBrakesPointsApplied] = useState(false);
   const [shouldApplyColorIncrement, setShouldApplyColorIncrement] = useState(false);
   const backendUrl = 'http://194.164.166.129:6969'; //URL a la que se está conectando esta clase
   // Verificación del usuario, si no ha iniciado sesión, no puede entrar directamente a esta clase
@@ -95,11 +96,16 @@ function Frentes() {
       setPuntosEspecial2((data.frentes.selectedEspecial2Puntos || 0) * (data.frentes.cantidadEspecial2 || 0));
       setCantidadEspecial1(data.frentes.cantidadEspecial1 || 0);
       setCantidadEspecial2(data.frentes.cantidadEspecial2 || 0);
+      setBrakesChecked(data.frentes.brakesChecked || false);
+      if (data.frentes.brakesChecked) {
+        setPuntos((prevPuntos) => prevPuntos - 73); // Restar 73 puntos si los frenos estaban activados
+      }
     }
   }, []);
   // Guardar los datos formateados en el estado 
   useEffect(() => {
     const formattedData = {
+      
       selectedProductoId: selectedProducto.id,
       selectedProductoNombre: selectedProducto.nombre,
       selectedSerieId: selectedSerie.id,
@@ -124,8 +130,10 @@ function Frentes() {
       selectedEspecial2Nombre: selectedEspecial2.nombre,
       selectedEspecial2Puntos: selectedEspecial2.puntos,
       cantidad,
+      brakesChecked,
       puntos, // Guardar puntos actualizados
       isColorValueAdded, // Guardar el estado del incremento
+      brakesChecked,
       cantidadEspecial1,
       cantidadEspecial2,
       puntosEspecial1: selectedEspecial1.puntos * cantidadEspecial1,
@@ -150,6 +158,7 @@ function Frentes() {
     puntos, 
     isColorValueAdded,
     saveData,
+    brakesChecked,
   ]);
 
   // Fragmento que recoge del backend los datos del producto (la tabla Producto de la base de datos)
@@ -334,16 +343,6 @@ function Frentes() {
       });
     }
   }, [selectedMaterialFranja.id, backendUrl]);
-  useEffect(() => {
-    if (selectedProducto.id === "4") { // Solo mostrar checkbox para el producto con Id 4
-      setIncludeBrakes(true);
-    } else {
-      setIncludeBrakes(false);
-      if (puntos > 0) {
-        setPuntos(puntos - 73);  // Asegurarse de quitar los puntos si se cambia de producto
-      }
-    }
-  }, [selectedProducto.id]);
 
   const handleSelectProductChange = (event) => {
     const index = event.target.selectedIndex;
@@ -384,7 +383,7 @@ function Frentes() {
     setSelectedMedidas({ id: "", nombre: "", puntos: 0 });
     setSelectedMaterialFranja({ id: "", nombre: "" });
     setSelectedColorFranja({ id: "", nombre: "" });
-    setPuntos(0);
+    setPuntos(0); // Restablecer puntos
   };
 
   const handleSelectSerieChange = (event) => {
@@ -403,6 +402,7 @@ function Frentes() {
     setSelectedMaterialFranja({ id: "", nombre: "" }); // Restablecer material franja
     setSelectedColorFranja({ id: "", nombre: "" }); // Restablecer color franja
     setPuntos(0); // Restablecer puntos
+      
   };
 
   const handleSelectArticuloChange = (event) => {
@@ -468,6 +468,9 @@ function Frentes() {
     // Verificar si el color seleccionado es "Color según muestra" o "Laca según muestra"
     if (selectedColor.id === '55' || selectedColor.id === '56') {
       newPuntos = Math.ceil(selectedMedida.puntos * 1.2);  // Aplicar incremento del 20% y redondear hacia arriba
+    }
+    if (brakesChecked) {
+      newPuntos += 73;  // Añadir puntos por los frenos si el checkbox está marcado
     }
 
     setPuntos(newPuntos);  // Actualizar los puntos con o sin incremento
@@ -559,14 +562,31 @@ function Frentes() {
     const newCantidad = parseInt(event.target.value, 10);
     setCantidad(newCantidad);
   };
-  const handleBrakesChange = (event) => {
-    if (event.target.checked) {
-      setPuntos(puntos + 73); // Añadir 73 puntos si los frenos están activados
+  useEffect(() => {
+    if (selectedProducto.id === "4") {
+      setBrakesChecked(true);
+      if (!brakesPointsApplied) {
+        setPuntos(puntos + 73);
+        setBrakesPointsApplied(true);
+      }
     } else {
-      setPuntos(puntos - 73); // Restar 73 puntos si los frenos están desactivados
+      if (brakesPointsApplied) {
+        setPuntos(puntos - 73);
+        setBrakesPointsApplied(false);
+      }
+      setBrakesChecked(false);
+    }
+  }, [selectedProducto.id]);
+
+  const handleBrakesChange = (event) => {
+    const isChecked = event.target.checked;
+    setBrakesChecked(isChecked);
+    if (isChecked) {
+      setPuntos(puntos + 73); // Solo si el producto es correcto, ajusta según tu lógica
+    } else {
+      setPuntos(puntos - 73);
     }
   };
-
   return (
     <div className="container">
       <div className="section">
@@ -672,16 +692,18 @@ function Frentes() {
             )}
             <label htmlFor="puntos">Puntos: {puntos * cantidad}</label>
           </div>
-          {includeBrakes && (
+          <div className="container">
+      {selectedProducto.id === "4" && (
         <div className="field">
-          <label htmlFor="addBrakes" style={{ color: 'red' }}>Frenos seleccionados por defecto:</label>
-          <input
-            type="checkbox"
-            id="addBrakes"
-            checked={includeBrakes}
-            onChange={handleBrakesChange}
-            style={{ marginLeft: '10px' }}
-          />
+          <label htmlFor="addBrakes" style={{ color: 'red' }}>Con freno:</label>
+          <div className="checkbox-field">
+            <input
+              type="checkbox"
+              id="addBrakes"
+              checked={brakesChecked}
+              onChange={handleBrakesChange}
+            />
+          </div>
         </div>
       )}
         </div>
@@ -758,6 +780,7 @@ function Frentes() {
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 
