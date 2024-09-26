@@ -13,6 +13,11 @@ function Tiradores() {
   const [selectedColores, setSelectedColores] = useState(Array(6).fill({ id: "", nombre: "" }));
   var [cantidades, setCantidades] = useState(Array(6).fill(0));
   const [puntos, setPuntos] = useState(Array(6).fill(0));
+  // IDs de los tiradores que requieren la advertencia
+  const golaIds = [124, 125, 126, 25];
+
+  // Comprobar si algún artículo seleccionado requiere advertencia
+  const mostrarAdvertenciaGola = selectedArticulos.some(articulo => golaIds.includes(parseInt(articulo.id)));
 
   const backendUrl = 'http://194.164.166.129:6969'; //Url para el backend
   
@@ -279,6 +284,7 @@ function Tiradores() {
         min="1"
       />
       <label htmlFor={`puntos${index + 1}`}>Puntos: {puntos[index]}</label>
+      
     </div>
   );
 
@@ -299,6 +305,11 @@ function Tiradores() {
         <div className="field">
         {renderSelectArticulo(3)}
         </div>
+        {selectedArticulos.some(articulo => golaIds.includes(parseInt(articulo.id))) && (
+          <div style={{ color: 'red', textAlign: 'right', marginTop: '10px', marginLeft: '480px', fontWeight: 'bold' }}>
+            Los tiradores Gola solo pueden seleccionarse con puertas Kanto en laca.
+          </div>
+        )}
         </div>
       <div className="container2">
       <div className="section">
