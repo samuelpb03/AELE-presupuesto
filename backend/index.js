@@ -282,6 +282,22 @@ app.get("/articulo/remates", (req, res) => {
     return res.json(data);
   });
 });
+app.get("/articulo/otros", (req, res) => {
+  const query = `
+    SELECT a.articulo_id, a.nombre AS articulo_nombre, m.puntos, ma.nombre AS material_nombre
+    FROM articulo a
+    JOIN medidas m ON a.articulo_id = m.articulos_id
+    JOIN material ma ON m.material = ma.material_id
+    WHERE a.serie_id = 37
+  `;
+  dbConnection.query(query, (err, data) => {
+    if (err) {
+      console.error("Error fetching articulos:", err);
+      return res.status(500).json(err);
+    }
+    return res.json(data);
+  });
+});
 
 // Nueva ruta para obtener artículos de las series 8 y 9
 app.get("/articulo/cerraduras", (req, res) => {
