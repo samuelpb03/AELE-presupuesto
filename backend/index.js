@@ -288,7 +288,7 @@ app.get("/articulo/otros", (req, res) => {
     FROM articulo a
     JOIN medidas m ON a.articulo_id = m.articulos_id
     JOIN material ma ON m.material = ma.material_id
-    WHERE a.serie_id = 37
+    WHERE a.serie_id = 39
   `;
   dbConnection.query(query, (err, data) => {
     if (err) {
