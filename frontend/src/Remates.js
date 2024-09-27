@@ -68,46 +68,27 @@ function Remates() {
 
   useEffect(() => {
     if (data && data.remates) {
-      const restoredArticulos = Array(3).fill({ id: "", nombre: "", puntos: 0 });
-      const restoredMetros = Array(3).fill(0);
-      const restoredPuntos = Array(3).fill(0);
-
-      for (let i = 0; i < 3; i++) {
-        restoredArticulos[i] = {
-          id: data.remates[`articulo${i + 1}Id`] || "",
-          nombre: data.remates[`articulo${i + 1}Nombre`] || "",
-          puntos: data.remates[`articulo${i + 1}Puntos`] || 0,
-        };
-        restoredMetros[i] = data.remates[`metros${i + 1}`] || 0;
-        restoredPuntos[i] = ((data.remates[`articulo${i + 1}Puntos`] || 0) * (data.remates[`metros${i + 1}`] || 0)) / 2.5;
-      }
-
-      setSelectedArticulos(restoredArticulos);
-      setMetros(restoredMetros);
-      setPuntos(restoredPuntos);
+      // Asumir que data.remates ya incluye todos los campos necesarios
+      setSelectedArticulos(data.remates.selectedArticulos || Array(3).fill({ id: "", nombre: "", puntos: 0 }));
+      setMetros(data.remates.metros || Array(3).fill(0));
+      setPuntos(data.remates.puntos || Array(3).fill(0));
+      setSelectedOtros(data.remates.selectedOtros || Array(3).fill({ id: "", nombre: "", puntos: 0 }));
+      setCantidadesOtros(data.remates.cantidadesOtros || Array(3).fill(1));
+      setPuntosOtros(data.remates.puntosOtros || Array(3).fill(0));
     }
-  }, []);
+  }, [data]);
+
   useEffect(() => {
-    if (data && data.otrosArticulos) {
-      const restoredOtros = Array(3).fill({ id: "", nombre: "", puntos: 0 });
-      const restoredCantidades = Array(3).fill(0);
-      const restoredPuntos = Array(3).fill(0);
-  
-      for (let i = 0; i < 3; i++) {
-        restoredOtros[i] = {
-          id: data.otrosArticulos[`otros${i + 1}Id`] || "",
-          nombre: data.otrosArticulos[`otros${i + 1}Nombre`] || "",
-          puntos: data.otrosArticulos[`otros${i + 1}Puntos`] || 0,
-        };
-        restoredCantidades[i] = data.otrosArticulos[`cantidadesOtros${i + 1}`] || 1;  // Asumimos que por defecto la cantidad debería ser 1
-        restoredPuntos[i] = data.otrosArticulos[`puntosOtros${i + 1}`] || 0;
-      }
-  
-      setSelectedOtros(restoredOtros);
-      setCantidadesOtros(restoredCantidades);
-      setPuntosOtros(restoredPuntos);
-    }
-  }, []);
+    const rematesData = {
+      selectedArticulos,
+      metros,
+      puntos,
+      selectedOtros,
+      cantidadesOtros,
+      puntosOtros
+    };
+    saveData("remates", rematesData);
+  }, [selectedArticulos, metros, puntos, selectedOtros, cantidadesOtros, puntosOtros]);
 
   useEffect(() => {
     const formattedData = selectedArticulos.reduce((acc, articulo, index) => {

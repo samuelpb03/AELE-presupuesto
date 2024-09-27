@@ -137,7 +137,7 @@ function Frentes2() {
       selectedEspecial2Nombre: selectedEspecial2.nombre,
       selectedEspecial2Puntos: selectedEspecial2.puntos,
       cantidad,
-      puntos,
+      puntos: puntos * cantidad,
       isColorValueAdded,  // Guarda el estado del incremento
       cantidadEspecial1,
       brakesChecked,

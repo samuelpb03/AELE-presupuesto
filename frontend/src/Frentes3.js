@@ -133,7 +133,7 @@ function Frentes3() {
       selectedEspecial2Puntos: selectedEspecial2.puntos,
       cantidad,
       brakesChecked,
-      puntos, // Guardar puntos actualizados
+      puntos: puntos * cantidad, // Guardar puntos actualizados
       isColorValueAdded, // Guardar el estado del incremento
       cantidadEspecial1,
       cantidadEspecial2,
