@@ -1,29 +1,24 @@
 import React, { useState, useEffect } from "react";
-import { useTabs } from "./TabsContext";  // Usamos el contexto de TabsProvider
+import { useTabs } from "./TabsContext";
 import { useData } from './context/DataContext';
 import { generatePDF } from "./GeneratePDF";
-import { useNavigate } from 'react-router-dom'; // Para redirigir al index.js
+import { useNavigate } from 'react-router-dom';
 
 function Instalacion() {
-  const { userInfo } = useTabs();  // Obtenemos la info del usuario del contexto
+  const { userInfo } = useTabs();
   const { data, saveData } = useData();
   const [numFrentesInteriores, setNumFrentesInteriores] = useState(0);
   const [numArmariosCompletos, setNumArmariosCompletos] = useState(0);
+  const [numDesmontaje, setNumDesmontaje] = useState(0); // Nuevo estado para el número de desmontajes
   const [montajeAcarreo, setMontajeAcarreo] = useState(true);
-  const [showModal, setShowModal] = useState(false); // Estado para controlar el modal
-  const navigate = useNavigate(); // Para redirigir
-
-  const user = localStorage.getItem('user');
-  if (!user) {
-      // Redirigir a login.php si no está autenticado
-      window.location.href = '/login.php';
-  }
+  const [showModal, setShowModal] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (data.instalacion) {
       setNumFrentesInteriores(data.instalacion.numFrentesInteriores || 0);
       setNumArmariosCompletos(data.instalacion.numArmariosCompletos || 0);
-      setMontajeAcarreo(true);
+      setNumDesmontaje(data.instalacion.numDesmontaje || 0); // Restaurar estado de desmontajes
     }
   }, []);
 
@@ -31,10 +26,11 @@ function Instalacion() {
     const formattedData = {
       numFrentesInteriores,
       numArmariosCompletos,
+      numDesmontaje, // Guardar el número de desmontajes
       montajeAcarreo,
     };
     saveData("instalacion", formattedData);
-  }, [numFrentesInteriores, numArmariosCompletos, montajeAcarreo, saveData]);
+  }, [numFrentesInteriores, numArmariosCompletos, numDesmontaje, montajeAcarreo, saveData]);
 
   const handleGeneratePDF = () => {
     if (!userInfo.tienda.trim() || !userInfo.cliente.trim() || !userInfo.telefono.trim()) {
@@ -42,14 +38,15 @@ function Instalacion() {
       return;
     }
     
-    generatePDF(data, userInfo);
-    setShowModal(true); // Mostrar el modal después de generar el PDF
+    // Pasar la cantidad de desmontajes como parte del objeto data
+    generatePDF({ ...data, instalacion: {...data.instalacion, numDesmontaje }}, userInfo);
+    setShowModal(true);
   };
 
   const handleCloseModal = () => {
-    window.location.href = '/'; // Cambiar a la pestaña del configurador
-     // Refrescar la página después de cambiar a "index"
-  }  // Redirigir al index.js (cambia la ruta según lo necesites
+    setShowModal(false);
+    window.location.href = '/';// Navegar de vuelta a la página principal
+  };
 
   return (
     <div className="container">
@@ -74,16 +71,27 @@ function Instalacion() {
             min={0}
             onChange={(e) => setNumArmariosCompletos(parseInt(e.target.value, 10) || 0)}
           />
-          <button onClick={handleGeneratePDF} style={{ marginTop: "20px" }}>Crear presupuesto</button>
+        </div>
+        <div className="field-instalacion">
+          <label htmlFor="numDesmontaje">Desmontaje de armarios:</label>
+          <input
+            type="number"
+            id="numDesmontaje"
+            value={numDesmontaje}
+            min={0}
+            onChange={(e) => setNumDesmontaje(parseInt(e.target.value, 10) || 0)}
+          />
+        </div>
+        <div className="field-instalacion">
+          <button onClick={handleGeneratePDF} className="generate-button" style={{ marginTop: "20px" }}>Crear presupuesto</button>
         </div>
       </div>
-
       {showModal && (
         <div className="modal-overlay">
           <div className="modal-content">
             <h2>Su presupuesto ha sido realizado con éxito</h2>
             <p>Lo encontrará en su carpeta de descargas</p>
-            <button onClick={handleCloseModal}>Nuevo presupuesto</button>
+            <button onClick={handleCloseModal}>Cerrar</button>
           </div>
         </div>
       )}
@@ -91,4 +99,6 @@ function Instalacion() {
   );
 }
 
+
 export default Instalacion;
+

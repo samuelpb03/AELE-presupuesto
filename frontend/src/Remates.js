@@ -11,14 +11,14 @@ function Remates() {
   const [metros, setMetros] = useState(Array(3).fill(0));
   const [puntos, setPuntos] = useState(Array(3).fill(0));
   const [listOtros, setListOtros] = useState([]);
-const [selectedOtros, setSelectedOtros] = useState(Array(3).fill({ id: "", nombre: "", puntos: 0 }));
-const [metrosOtros, setMetrosOtros] = useState(Array(3).fill(0));
-const [puntosOtros, setPuntosOtros] = useState(Array(3).fill(0));
+  const [selectedOtros, setSelectedOtros] = useState(Array(3).fill({ id: "", nombre: "", puntos: 0 }));
+  const [cantidadesOtros, setCantidadesOtros] = useState(Array(3).fill(1));
+  const [puntosOtros, setPuntosOtros] = useState(Array(3).fill(0));
   const backendUrl = 'http://194.164.166.129:6969';
   const user = localStorage.getItem('user');
   if (!user) {
-      //Redirigir a login.php si no está autenticado
-      window.location.href = '/login.php';
+    //Redirigir a login.php si no está autenticado
+    window.location.href = '/login.php';
   }
   useEffect(() => {
     axios
@@ -49,21 +49,21 @@ const [puntosOtros, setPuntosOtros] = useState(Array(3).fill(0));
         'ngrok-skip-browser-warning': 'true'
       }
     })
-    .then((res) => {
-      if (Array.isArray(res.data)) {
-        const formattedOtros = res.data.map((otro) => ({
-          id: otro.articulo_id,
-          nombre: `${otro.articulo_nombre} - ${otro.material_nombre}`,
-          puntos: otro.puntos
-        }));
-        setListOtros(formattedOtros);
-      } else {
-        console.error("Error fetching otros articulos: res.data is not an array");
-      }
-    })
-    .catch((error) => {
-      console.error("Error fetching otros articulos:", error);
-    });
+      .then((res) => {
+        if (Array.isArray(res.data)) {
+          const formattedOtros = res.data.map((otro) => ({
+            id: otro.articulo_id,
+            nombre: `${otro.articulo_nombre} - ${otro.material_nombre}`,
+            puntos: otro.puntos
+          }));
+          setListOtros(formattedOtros);
+        } else {
+          console.error("Error fetching otros articulos: res.data is not an array");
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching otros articulos:", error);
+      });
   }, []);
 
   useEffect(() => {
@@ -85,6 +85,27 @@ const [puntosOtros, setPuntosOtros] = useState(Array(3).fill(0));
       setSelectedArticulos(restoredArticulos);
       setMetros(restoredMetros);
       setPuntos(restoredPuntos);
+    }
+  }, []);
+  useEffect(() => {
+    if (data && data.otrosArticulos) {
+      const restoredOtros = Array(3).fill({ id: "", nombre: "", puntos: 0 });
+      const restoredCantidades = Array(3).fill(0);
+      const restoredPuntos = Array(3).fill(0);
+  
+      for (let i = 0; i < 3; i++) {
+        restoredOtros[i] = {
+          id: data.otrosArticulos[`otros${i + 1}Id`] || "",
+          nombre: data.otrosArticulos[`otros${i + 1}Nombre`] || "",
+          puntos: data.otrosArticulos[`otros${i + 1}Puntos`] || 0,
+        };
+        restoredCantidades[i] = data.otrosArticulos[`cantidadesOtros${i + 1}`] || 1;  // Asumimos que por defecto la cantidad debería ser 1
+        restoredPuntos[i] = data.otrosArticulos[`puntosOtros${i + 1}`] || 0;
+      }
+  
+      setSelectedOtros(restoredOtros);
+      setCantidadesOtros(restoredCantidades);
+      setPuntosOtros(restoredPuntos);
     }
   }, []);
 
@@ -136,18 +157,34 @@ const [puntosOtros, setPuntosOtros] = useState(Array(3).fill(0));
       return newPuntos;
     });
   };
+  // Cuando cambias la selección de otros artículos
   const handleSelectOtrosChange = (index, event) => {
     const updatedOtros = [...selectedOtros];
     const selectedIndex = event.target.selectedIndex;
     const nombre = event.target.options[selectedIndex].text;
     const id = event.target.value;
-    const puntos = parseInt(event.target.options[selectedIndex].getAttribute('data-puntos'), 10);
+    const puntos = parseInt(event.target.options[selectedIndex].getAttribute('data-puntos'), 10) || 0;
   
     updatedOtros[index] = { id, nombre, puntos };
     setSelectedOtros(updatedOtros);
-    // Resto de la lógica para manejar metros y puntos
+  
+    // Establecer cantidad a 1 automáticamente si se selecciona un artículo, o a 0 si se selecciona la opción por defecto
+    const updatedCantidades = [...cantidadesOtros];
+    updatedCantidades[index] = id ? 1 : 0;
+    setCantidadesOtros(updatedCantidades);
+  
+    const updatedPuntos = [...puntosOtros];
+    updatedPuntos[index] = id ? puntos * updatedCantidades[index] : 0;
+    setPuntosOtros(updatedPuntos);
   };
   
+  useEffect(() => {
+    const newPuntos = selectedOtros.map((otro, index) => otro.puntos * cantidadesOtros[index]);
+    setPuntosOtros(newPuntos);
+  }, [selectedOtros, cantidadesOtros]);
+  // Calcula los puntos basados en la cantidad seleccionada
+
+
   const renderSelectOtros = (index) => (
     <div key={index}>
       <label htmlFor={`otros${index + 1}`}>Otros Artículo {index + 1}:</label>
@@ -163,12 +200,20 @@ const [puntosOtros, setPuntosOtros] = useState(Array(3).fill(0));
           </option>
         ))}
       </select>
-      <label htmlFor={`metrosOtros${index + 1}`}>Metros:</label>
+
+      <label htmlFor={`cantidadesOtros${index + 1}`}>Cantidad:</label>
       <input
         type="number"
-        id={`metrosOtros${index + 1}`}
-        // Resto de lógica para input de metros
+        id={`cantidadesOtros${index + 1}`}
+        value={cantidadesOtros[index]}
+        onChange={(e) => {
+          const newCantidades = [...cantidadesOtros];
+          newCantidades[index] = Math.max(0, parseInt(e.target.value, 10) || 0);
+          setCantidadesOtros(newCantidades);
+        }}
+        min="0"
       />
+
       <label htmlFor={`puntosOtros${index + 1}`}>Puntos: {puntosOtros[index].toFixed(2)}</label>
     </div>
   );
@@ -206,21 +251,27 @@ const [puntosOtros, setPuntosOtros] = useState(Array(3).fill(0));
       <div className="container2">
         <h1>Remates</h1>
         <div className="field-special">
-        {renderSelectArticulo(0)}
+          {renderSelectArticulo(0)}
         </div>
         <div className="field-special">
-        {renderSelectArticulo(1)}
+          {renderSelectArticulo(1)}
         </div>
-      <div className="field-special">
-        {renderSelectArticulo(2)}
+        <div className="field-special">
+          {renderSelectArticulo(2)}
+        </div>
       </div>
-      <div className="container3">
-      <h1>Otros Artículos</h1>
-      {renderSelectOtros(0)}
-      {renderSelectOtros(1)}
-      {renderSelectOtros(2)}
-    </div>
-      </div >
+      <div className="container2">
+        <h1>Otros Artículos</h1>
+        <div className="field-special">
+          {renderSelectOtros(0)}
+        </div>
+        <div className="field-special">
+          {renderSelectOtros(1)}
+        </div>
+        <div className="field-special">
+          {renderSelectOtros(2)}
+        </div>
+      </div>
     </div>
   );
 }

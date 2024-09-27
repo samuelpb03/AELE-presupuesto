@@ -74,6 +74,7 @@ const labelsMap = {
   puntosTotales7: "Puntos 7",
   puntosTotales8: "Puntos 8",
   puntosTotales9: "Puntos 9",
+
 };
 // Función para generar el PDF
 export const generatePDF = (data, userInfo) => {
@@ -298,6 +299,7 @@ if (lastInterioresProcessed) {
     }, 0);
   }, 0);
   // Cálculo de montaje e instalación
+  const numDesmontaje = data.instalacion?.numDesmontaje || 0;
   const numFrentesInteriores = data.instalacion?.numFrentesInteriores || 0;
   const numArmariosCompletos = data.instalacion?.numArmariosCompletos || 0;
   let totalMontaje = (numFrentesInteriores * 110) + (numArmariosCompletos * 146) + 50;
@@ -305,7 +307,7 @@ if (lastInterioresProcessed) {
   doc.setFontSize(8);
   startY += 15;
   startY = checkPageSpace(doc, startY);
-  doc.text(`Total Puntos: ${totalPuntos}`, 12, startY);
+  doc.text(`Total Puntos: ${totalPuntos + (numDesmontaje * 121)}`, 12, startY);
   startY += 10;
   doc.text(`Total Montaje e Instalación: ${totalMontaje.toFixed(2)} €`, 12, startY);
   // Crear el nombre del PDF

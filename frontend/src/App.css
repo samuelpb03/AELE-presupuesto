@@ -172,6 +172,16 @@ h1, h2 {
   font-family: "Poppins", sans-serif;
   transition: border-color 0.3s, box-shadow 0.3s; 
 }
+.field-special-horizontal {
+  display: flex;
+  justify-content: space-around; /* Esto distribuirá uniformemente el espacio entre los elementos */
+  align-items: center; /* Alinea los elementos verticalmente en el centro */
+}
+.field-otros {
+  flex: 1; /* Esto hace que cada campo de 'Otros' ocupe igual espacio en el contenedor */
+  padding: 10px; /* Agrega un poco de espacio alrededor de cada campo */
+  box-sizing: border-box; /* Asegura que el padding no afecte la anchura externa */
+}
 .field input[type="number"] {
   width: 100%; /* Asegurarse de que los campos ocupen todo el ancho del contenedor */
   max-width: 250px; /* Limitar el ancho máximo */
