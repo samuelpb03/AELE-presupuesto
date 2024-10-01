@@ -161,7 +161,7 @@ export const generatePDF = (data, userInfo) => {
     interiores: "Interiores",
     equipamiento3: "Equipamiento",
     baldas: "Baldas e iluminación",
-    remates: "Remates a medida",
+    remates: "Remates a medida", // Aquí incluimos los remates como una sección más
   };
 
   let startY = 52;
@@ -170,9 +170,10 @@ export const generatePDF = (data, userInfo) => {
   let totalEspecialesFrentes = 0;
   let totalEspecialesInteriores = 0;
 
-  // Procesar y agregar datos de la sección
+  // Procesar y agregar datos de la sección, incluyendo los remates
   Object.entries(sections).forEach(([section, title]) => {
     const hasData = Object.entries(data[section] || {}).some(([key, value]) => value && labelsMap[key]);
+    
 
     if (!hasData) {
       return;  // Saltar esta sección si no tiene datos
@@ -196,7 +197,7 @@ export const generatePDF = (data, userInfo) => {
 
         if (key.toLowerCase().includes('puntos') && value) {
           const cantidad = data[section]?.cantidad || 1; // Asume que la cantidad es 1 si no está definida
-          
+
           // Condicional: si la cantidad es 1, no dividir; si es mayor a 1, dividir
           if (cantidad > 1) {
             puntosSeccion += Number(value) / 1.5;
@@ -221,6 +222,10 @@ export const generatePDF = (data, userInfo) => {
 
       // Imprimir los datos de la sección en filas de 4 elementos
       doc.setFontSize(7);
+      sectionData.push(`${data.remates.selectedArticulos.map(a => a.nombre).join(", ")}`);
+      sectionData.push(`${data.remates.metros.join(", ")}`);
+      sectionData.push(`${data.remates.selectedOtros.map(o => o.nombre).join(", ")}`);
+      sectionData.push(`${data.remates.cantidadesOtros.join(", ")}`);
       sectionData.forEach((line, index) => {
         let xPosition;
         if (line.toLowerCase().includes('cantidad') || line.toLowerCase().includes('puntos')) {
