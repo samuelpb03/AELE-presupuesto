@@ -414,6 +414,12 @@ function Frentes2() {
     setSelectedMedidas({ id: "", nombre: "", puntos: 0 }); // Restablecer medidas
     setSelectedMaterialFranja({ id: "", nombre: "" }); // Restablecer material franja
     setSelectedColorFranja({ id: "", nombre: "" }); // Restablecer color franja
+    setSelectedEspecial1({ id: "", nombre: "", cantidad: 0 });
+    setSelectedEspecial2({ id: "", nombre: "", cantidad: 0 });
+    setCantidadEspecial1(0);
+    setPuntosEspecial1(0);
+    setCantidadEspecial2(0);
+    setPuntosEspecial2(0);
     setPuntos(0); // Restablecer puntos
   };
 
@@ -510,27 +516,22 @@ function Frentes2() {
     const index = event.target.selectedIndex;
     const nombre = event.target.options[index].text;
     const id = event.target.value;
-
-    // Si el producto es 4 o 5, solo permitir seleccionar "Gran Altura"
+  
+    // Verificar si es el especial "Gran Altura" y el producto es 4 o 5
     if (selectedProducto.id === "4" || selectedProducto.id === "5") {
-      if (id !== "195") {
-        if (id === "") {
-          if (especialIndex === 1) {
-            setSelectedEspecial1({ id: "", nombre: "", puntos: 0 });
-            setPuntosEspecial1(0);
-            setCantidadEspecial1(0); // Restablecer la cantidad a 0
-          } else if (especialIndex === 2) {
-            setSelectedEspecial2({ id: "", nombre: "", puntos: 0 });
-            setPuntosEspecial2(0);
-            setCantidadEspecial2(0); // Restablecer la cantidad a 0
-          }
-          return; // Salir de la función si se selecciona el valor vacío
-        }
-        return;
+      // Solo permitir "Gran Altura" si la serie es 195
+      if (selectedSerie.id === "195" && id !== "") {
+        alert("Solo puedes seleccionar 'Gran Altura' para esta serie.");
+        return; // Bloquear selección si la serie no es la correcta
       }
     }
-
-
+  
+    // Verificar si es el especial "tirada vertical" (ID 194)
+    if (id === "194" && selectedSerie.nombre.toLowerCase() !== "kanto") {
+      alert("El especial 'tirada vertical' solo está disponible para la serie Kanto.");
+      return; // Bloquear selección si la serie no es Kanto
+    }
+  
     // Si el usuario selecciona la opción vacía
     if (id === "") {
       if (especialIndex === 1) {
@@ -544,10 +545,9 @@ function Frentes2() {
       }
       return; // Salir de la función si se selecciona el valor vacío
     }
-
-    // Buscar el especial seleccionado en la lista de especiales
+  
+    // Procesar la selección de especiales como de costumbre
     const selectedEspecial = listEspeciales.find(especial => especial.articulo_id === parseInt(id));
-
     if (especialIndex === 1) {
       setSelectedEspecial1({ id, nombre, puntos: selectedEspecial.puntos });
       setPuntosEspecial1(selectedEspecial.puntos);
