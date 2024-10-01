@@ -260,56 +260,61 @@ export const generatePDF = (data, userInfo) => {
     }
   });
   // Procesar remates a medida
-  if (data.remates) {
-    let rematesData = []; // Declarar array para los datos de los remates
-    const { selectedArticulos = [], metros = [], selectedOtros = [], cantidadesOtros = [] } = data.remates;
+let puntosRematesTotal = 0; // Inicializar los puntos de los remates
+if (data.remates) {
+  let rematesData = []; // Declarar array para los datos de los remates
+  const { selectedArticulos = [], metros = [], selectedOtros = [], cantidadesOtros = [] } = data.remates;
 
-    // Procesar los artículos de remates y agregar a rematesData
-    selectedArticulos.forEach((articulo, index) => {
-      if (articulo.nombre && metros[index] > 0) {
-        rematesData.push({
-          nombre: articulo.nombre,
-          metros: metros[index],
-          puntos: articulo.puntos,
-        });
-      }
-    });
-
-    // Procesar otros artículos de remates y agregar a rematesData
-    selectedOtros.forEach((otro, index) => {
-      if (otro.nombre && cantidadesOtros[index] > 0) {
-        rematesData.push({
-          nombre: otro.nombre,
-          cantidad: cantidadesOtros[index],
-          puntos: otro.puntos * cantidadesOtros[index],
-        });
-      }
-    });
-
-    // Imprimir los datos de remates en el PDF
-    if (rematesData.length > 0) {
-      doc.setFontSize(10);
-      doc.setFillColor(220, 220, 220);
-      startY = checkPageSpace(doc, startY);
-      doc.rect(10, startY - 4, pageWidth - 20, 5, 'F');
-      doc.text("Remates a medida", 12, startY);
-      startY += 6;
-
-      doc.setFontSize(7); // Ajustar el tamaño de la fuente para los datos
-      rematesData.forEach((remate, index) => {
-        doc.text(`${remate.nombre || ''}`, 12, startY);
-        if (remate.metros) {
-          doc.text(`Metros: ${remate.metros.toFixed(2)}`, pageWidth - 50, startY);
-        }
-        if (remate.cantidad) {
-          doc.text(`Cantidad: ${remate.cantidad}`, pageWidth - 50, startY);
-        }
-        doc.text(`Puntos: ${remate.puntos.toFixed(2)}`, pageWidth - 30, startY);
-        startY += 6;
-        startY = checkPageSpace(doc, startY);
+  // Procesar los artículos de remates y agregar a rematesData
+  selectedArticulos.forEach((articulo, index) => {
+    if (articulo.nombre && metros[index] > 0) {
+      rematesData.push({
+        nombre: articulo.nombre,
+        metros: metros[index],
+        puntos: articulo.puntos,
       });
+      // Sumar los puntos de remates por metros
+      puntosRematesTotal += articulo.puntos;
     }
+  });
+
+  // Procesar otros artículos de remates y agregar a rematesData
+  selectedOtros.forEach((otro, index) => {
+    if (otro.nombre && cantidadesOtros[index] > 0) {
+      rematesData.push({
+        nombre: otro.nombre,
+        cantidad: cantidadesOtros[index],
+        puntos: otro.puntos * cantidadesOtros[index],
+      });
+      // Sumar los puntos de otros remates por cantidad
+      puntosRematesTotal += otro.puntos * cantidadesOtros[index];
+    }
+  });
+
+  // Imprimir los datos de remates en el PDF
+  if (rematesData.length > 0) {
+    doc.setFontSize(10);
+    doc.setFillColor(220, 220, 220);
+    startY = checkPageSpace(doc, startY);
+    doc.rect(10, startY - 4, pageWidth - 20, 5, 'F');
+    doc.text("Remates a medida", 12, startY);
+    startY += 6;
+
+    doc.setFontSize(7); // Ajustar el tamaño de la fuente para los datos
+    rematesData.forEach((remate, index) => {
+      doc.text(`${remate.nombre || ''}`, 12, startY);
+      if (remate.metros) {
+        doc.text(`Metros: ${remate.metros.toFixed(2)}`, pageWidth - 50, startY);
+      }
+      if (remate.cantidad) {
+        doc.text(`Cantidad: ${remate.cantidad}`, pageWidth - 50, startY);
+      }
+      doc.text(`Puntos: ${remate.puntos.toFixed(2)}`, pageWidth - 30, startY);
+      startY += 6;
+      startY = checkPageSpace(doc, startY);
+    });
   }
+}
 
   // Comprobación para verificar si hay datos en los especiales
   const hasEspeciales = (especiales) => {
@@ -402,7 +407,7 @@ export const generatePDF = (data, userInfo) => {
       }
       return subTotal;
     }, 0);
-  }, 0) + puntosEspecialesTotal; // Añadir los puntos especiales
+  }, 0) + puntosEspecialesTotal + puntosRematesTotal; // Añadir los puntos especiales y los puntos de remates
 
   // Cálculo de montaje e instalación
   const numDesmontaje = data.instalacion?.numDesmontaje || 0;
