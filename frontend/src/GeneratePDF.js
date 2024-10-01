@@ -173,7 +173,7 @@ export const generatePDF = (data, userInfo) => {
   // Procesar y agregar datos de la sección, incluyendo los remates
   Object.entries(sections).forEach(([section, title]) => {
     const hasData = Object.entries(data[section] || {}).some(([key, value]) => value && labelsMap[key]);
-    
+
 
     if (!hasData) {
       return;  // Saltar esta sección si no tiene datos
@@ -221,11 +221,6 @@ export const generatePDF = (data, userInfo) => {
       startY += 5;
 
       // Imprimir los datos de la sección en filas de 4 elementos
-      doc.setFontSize(7);
-      sectionData.push(`${data.remates.selectedArticulos.map(a => a.nombre).join(", ")}`);
-      sectionData.push(`${data.remates.metros.join(", ")}`);
-      sectionData.push(`${data.remates.selectedOtros.map(o => o.nombre).join(", ")}`);
-      sectionData.push(`${data.remates.cantidadesOtros.join(", ")}`);
       sectionData.forEach((line, index) => {
         let xPosition;
         if (line.toLowerCase().includes('cantidad') || line.toLowerCase().includes('puntos')) {
@@ -265,6 +260,57 @@ export const generatePDF = (data, userInfo) => {
       }
     }
   });
+  // Procesar remates a medida
+  if (data.remates) {
+    let rematesData = []; // Declarar array para los datos de los remates
+    const { selectedArticulos = [], metros = [], selectedOtros = [], cantidadesOtros = [] } = data.remates;
+
+    // Procesar los artículos de remates y agregar a rematesData
+    selectedArticulos.forEach((articulo, index) => {
+      if (articulo.nombre && metros[index] > 0) {
+        rematesData.push({
+          nombre: articulo.nombre,
+          metros: metros[index],
+          puntos: articulo.puntos,
+        });
+      }
+    });
+
+    // Procesar otros artículos de remates y agregar a rematesData
+    selectedOtros.forEach((otro, index) => {
+      if (otro.nombre && cantidadesOtros[index] > 0) {
+        rematesData.push({
+          nombre: otro.nombre,
+          cantidad: cantidadesOtros[index],
+          puntos: otro.puntos * cantidadesOtros[index],
+        });
+      }
+    });
+
+    // Imprimir los datos de remates en el PDF
+    if (rematesData.length > 0) {
+      doc.setFontSize(10);
+      doc.setFillColor(220, 220, 220);
+      startY = checkPageSpace(doc, startY);
+      doc.rect(10, startY - 4, pageWidth - 20, 5, 'F');
+      doc.text("Remates a medida", 12, startY);
+      startY += 6;
+
+      doc.setFontSize(7); // Ajustar el tamaño de la fuente para los datos
+      rematesData.forEach((remate, index) => {
+        doc.text(`${remate.nombre || ''}`, 12, startY);
+        if (remate.metros) {
+          doc.text(`Metros: ${remate.metros.toFixed(2)}`, pageWidth - 50, startY);
+        }
+        if (remate.cantidad) {
+          doc.text(`Cantidad: ${remate.cantidad}`, pageWidth - 50, startY);
+        }
+        doc.text(`Puntos: ${remate.puntos.toFixed(2)}`, pageWidth - 30, startY);
+        startY += 6;
+        startY = checkPageSpace(doc, startY);
+      });
+    }
+  }
 
   // Comprobación para verificar si hay datos en los especiales
   const hasEspeciales = (especiales) => {
