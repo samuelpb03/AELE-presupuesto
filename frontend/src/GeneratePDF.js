@@ -1,5 +1,5 @@
 import { jsPDF } from "jspdf";
-//Labels para cambiar los nombres que lleguen de las otras clases y mejorar la estética
+// Labels para cambiar los nombres que lleguen de las otras clases y mejorar la estética
 const labelsMap = {
   selectedProductoNombre: "Producto",
   selectedArticuloNombre: "Artículo",
@@ -16,6 +16,27 @@ const labelsMap = {
   puntosEspecial2: "Puntos Especial 2",
   cantidadEspecial1: "Cantidad Especial 1",
   cantidadEspecial2: "Cantidad Especial 2",
+  selectedEspecial3Nombre: "Especial a medida 3",
+  puntosEspecial3: "Puntos Especial 3",
+  selectedEspecial4Nombre: "Especial a medida 4",
+  puntosEspecial4: "Puntos Especial 4",
+  cantidadEspecial3: "Cantidad Especial 3",
+  cantidadEspecial4: "Cantidad Especial 4",
+  selectedEspecial5Nombre: "Especial a medida 5",
+  puntosEspecial4: "Puntos Especial 5",
+  cantidadEspecial4: "Cantidad Especial 5",
+  interioresOtros1Nombre: "Otros Artículo 1",
+  cantidadInterioresOtros1: "Cantidad Otros 1",
+  puntosInterioresOtros1: "Puntos Otros 1",
+  interioresOtros2Nombre: "Otros Artículo 2",
+  cantidadInterioresOtros2: "Cantidad Otros 2",
+  puntosInterioresOtros2: "Puntos Otros 2",
+  interioresOtros3Nombre: "Otros Artículo 3",
+  cantidadInterioresOtros3: "Cantidad Otros 3",
+  puntosInterioresOtros3: "Puntos Otros 3",
+  interioresOtros4Nombre: "Otros Artículo 4",
+  cantidadInterioresOtros4: "Cantidad Otros 4",
+  puntosInterioresOtros4: "Puntos Otros 4",
   cantidad1: "Cantidad 1",
   puntos1: "Puntos 1",
   cantidad2: "Cantidad 2",
@@ -74,8 +95,8 @@ const labelsMap = {
   puntosTotales7: "Puntos 7",
   puntosTotales8: "Puntos 8",
   puntosTotales9: "Puntos 9",
-
 };
+
 // Función para generar el PDF
 export const generatePDF = (data, userInfo) => {
   const doc = new jsPDF();
@@ -133,7 +154,7 @@ export const generatePDF = (data, userInfo) => {
     frentes2: "Frentes 2",
     frentes3: "Frentes 3",
     tiradores: "Tiradores y cerraduras",
-    interiores: "Interiores", 
+    interiores: "Interiores",
     equipamiento3: "Equipamiento",
     baldas: "Baldas e iluminación",
     remates: "Remates a medida",
@@ -142,33 +163,42 @@ export const generatePDF = (data, userInfo) => {
   let startY = 52;
   let lastFrenteProcessed = "";
   let lastInterioresProcessed = "";
+  let totalEspecialesFrentes = 0;
+  let totalEspecialesInteriores = 0;
 
   // Procesar y agregar datos de la sección
   Object.entries(sections).forEach(([section, title]) => {
-  const hasData = Object.entries(data[section] || {}).some(([key, value]) => value && labelsMap[key]);
+    const hasData = Object.entries(data[section] || {}).some(([key, value]) => value && labelsMap[key]);
 
-  // Si no hay datos en la sección, la omitimos
-  if (!hasData) {
-    return;  // Saltar esta sección si no tiene datos
-  }
+    if (!hasData) {
+      return;  // Saltar esta sección si no tiene datos
+    }
+
     if (data[section]) {
       let sectionData = [];
       let puntosSeccion = 0; // Inicializar acumulador de puntos
 
-      // Procesar y agregar datos de la sección
       Object.entries(data[section]).forEach(([key, value]) => {
-        // Excluir los especiales a medida de la sección de frentes e interiores
         if (
           key.startsWith('selectedEspecial') ||
           key.startsWith('cantidadEspecial') ||
-          key.startsWith('puntosEspecial')
+          key.startsWith('puntosEspecial') ||
+          key.startsWith('interioresOtros') ||
+          key.startsWith('cantidadInterioresOtros') ||
+          key.startsWith('puntosInterioresOtros')
         ) {
           return; // Omitir los especiales
         }
 
-        // Acumular los puntos de la sección
         if (key.toLowerCase().includes('puntos') && value) {
-          puntosSeccion += Number(value); // Sumar los puntos de la sección
+          const cantidad = data[section]?.cantidad || 1; // Asume que la cantidad es 1 si no está definida
+          
+          // Condicional: si la cantidad es 1, no dividir; si es mayor a 1, dividir
+          if (cantidad > 1) {
+            puntosSeccion += Number(value) / 1.5;
+          } else {
+            puntosSeccion += Number(value); // No dividir si la cantidad es 1
+          }
         }
 
         if (value && labelsMap[key]) {
@@ -209,11 +239,11 @@ export const generatePDF = (data, userInfo) => {
         doc.setFontSize(7);
         doc.setFont("helvetica", "bold"); // Texto en negrita
         startY = checkPageSpace(doc, startY);
-        doc.text(`Puntos sección: ${puntosSeccion / 2}`, pageWidth - 50, startY); // Imprimir los puntos alineados a la derecha
+        doc.text(`Puntos sección: ${puntosSeccion}`, pageWidth - 50, startY); // Imprimir los puntos alineados a la derecha
         doc.setFont("helvetica", "normal");  // Volver a la fuente normal
       }
 
-      startY += 10; // Espacio después de cada sección
+      startY += 10;
 
       // Verificar si es el último frente (frentes3 o el último de los frentes) y agregar los especiales a medida después
       if (section === 'frentes' || section === 'frentes2' || section === 'frentes3') {
@@ -226,70 +256,91 @@ export const generatePDF = (data, userInfo) => {
       }
     }
   });
+
   // Comprobación para verificar si hay datos en los especiales
-const hasEspeciales = (especiales) => {
-  return especiales.some(especial => especial.nombre || especial.cantidad || especial.puntos);
-};
-// Imprimir los especiales a medida después del último frente procesado
-if (lastFrenteProcessed) {
-  const especialesFrentes = [
-    { nombre: data.frentes?.selectedEspecial1Nombre, cantidad: data.frentes?.cantidadEspecial1, puntos: data.frentes?.puntosEspecial1 },
-    { nombre: data.frentes?.selectedEspecial2Nombre, cantidad: data.frentes?.cantidadEspecial2, puntos: data.frentes?.puntosEspecial2 }, // Especial 2 de frentes
-    { nombre: data.frentes2?.selectedEspecial1Nombre, cantidad: data.frentes2?.cantidadEspecial1, puntos: data.frentes2?.puntosEspecial1 },
-    { nombre: data.frentes2?.selectedEspecial2Nombre, cantidad: data.frentes2?.cantidadEspecial2, puntos: data.frentes2?.puntosEspecial2 }, // Especial 2 de frentes2
-    { nombre: data.frentes3?.selectedEspecial1Nombre, cantidad: data.frentes3?.cantidadEspecial1, puntos: data.frentes3?.puntosEspecial1 },
-    { nombre: data.frentes3?.selectedEspecial2Nombre, cantidad: data.frentes3?.cantidadEspecial2, puntos: data.frentes3?.puntosEspecial2 }, // Especial 2 de frentes3
-  ];
-  // Solo imprimir si hay datos en los especiales
-  if (hasEspeciales(especialesFrentes)) {
-    doc.setFontSize(10);
-    doc.setFillColor(220, 220, 220);
-    startY = checkPageSpace(doc, startY);
-    doc.rect(10, startY - 4, pageWidth - 20, 5, 'F');
-    doc.text("Especiales frentes a medida", 12, startY);
-    startY += 10;
+  const hasEspeciales = (especiales) => {
+    return especiales.some(especial => especial.nombre || especial.cantidad || especial.puntos);
+  };
 
-    doc.setFontSize(7);
+  // Imprimir los especiales a medida después del último frente procesado
+  if (lastFrenteProcessed) {
+    const especialesFrentes = [
+      { nombre: data.frentes?.selectedEspecial1Nombre, cantidad: data.frentes?.cantidadEspecial1, puntos: data.frentes?.puntosEspecial1 },
+      { nombre: data.frentes?.selectedEspecial2Nombre, cantidad: data.frentes?.cantidadEspecial2, puntos: data.frentes?.puntosEspecial2 },
+      { nombre: data.frentes2?.selectedEspecial1Nombre, cantidad: data.frentes2?.cantidadEspecial1, puntos: data.frentes2?.puntosEspecial1 },
+      { nombre: data.frentes2?.selectedEspecial2Nombre, cantidad: data.frentes2?.cantidadEspecial2, puntos: data.frentes2?.puntosEspecial2 },
+      { nombre: data.frentes3?.selectedEspecial1Nombre, cantidad: data.frentes3?.cantidadEspecial1, puntos: data.frentes3?.puntosEspecial1 },
+      { nombre: data.frentes3?.selectedEspecial2Nombre, cantidad: data.frentes3?.cantidadEspecial2, puntos: data.frentes3?.puntosEspecial2 },
+    ];
+
+    // Sumar la cantidad total de especiales de frentes
     especialesFrentes.forEach((especial) => {
-      if (especial.nombre || especial.cantidad || especial.puntos) {
-        doc.text(`${especial.nombre || ''}`, 12, startY);
-        doc.text(`Cantidad: ${especial.cantidad || ''}`, pageWidth - 50, startY);
-        doc.text(`Puntos: ${especial.puntos || ''}`, pageWidth - 30, startY);
-        startY += 10;
-        startY = checkPageSpace(doc, startY);
-      }
+      totalEspecialesFrentes += Number(especial.cantidad || 0);
     });
-  }
-}
-// Imprimir los especiales de interiores después de procesar la sección "Interiores"
-if (lastInterioresProcessed) {
-  const especialesInteriores = [
-    { nombre: data.interiores?.selectedEspecial1Nombre, cantidad: data.interiores?.cantidadEspecial1, puntos: data.interiores?.puntosEspecial1 },
-    { nombre: data.interiores?.selectedEspecial2Nombre, cantidad: data.interiores?.cantidadEspecial2, puntos: data.interiores?.puntosEspecial2 },
-  ];
-  // Solo imprimir si hay datos en los especiales
-  if (hasEspeciales(especialesInteriores)) {
-    doc.setFontSize(10);
-    doc.setFillColor(220, 220, 220);
-    startY = checkPageSpace(doc, startY);
-    doc.rect(10, startY - 4, pageWidth - 20, 5, 'F');
-    doc.text("Especiales interiores a medida", 12, startY);
-    startY += 10;
 
-    doc.setFontSize(7);
-    especialesInteriores.forEach((especial) => {
-      if (especial.nombre || especial.cantidad || especial.puntos) {
-        doc.text(`${especial.nombre || ''}`, 12, startY);
-        doc.text(`Cantidad: ${especial.cantidad || ''}`, pageWidth - 50, startY);
-        doc.text(`Puntos: ${especial.puntos || ''}`, pageWidth - 30, startY);
-        startY += 10;
-        startY = checkPageSpace(doc, startY);
-      }
-    });
+    // Solo imprimir si hay datos en los especiales
+    if (hasEspeciales(especialesFrentes)) {
+      doc.setFontSize(10);
+      doc.setFillColor(220, 220, 220);
+      startY = checkPageSpace(doc, startY);
+      doc.rect(10, startY - 4, pageWidth - 20, 5, 'F');
+      doc.text("Especiales frentes a medida", 12, startY);
+      startY += 6;
+
+      doc.setFontSize(7);
+      especialesFrentes.forEach((especial) => {
+        if (especial.nombre || especial.cantidad || especial.puntos) {
+          doc.text(`${especial.nombre || ''}`, 12, startY);
+          doc.text(`Cantidad: ${especial.cantidad || ''}`, pageWidth - 50, startY);
+          doc.text(`Puntos: ${especial.puntos || ''}`, pageWidth - 30, startY);
+          startY += 6;
+          startY = checkPageSpace(doc, startY);
+        }
+      });
+    }
   }
-}
-  startY += 10; // Espacio después del apartado de Especiales
-  // Calcular totales
+
+  // Imprimir los especiales de interiores después de procesar la sección "Interiores"
+  if (lastInterioresProcessed) {
+    const especialesInteriores = [
+      { nombre: data.interiores?.selectedEspecial1Nombre, cantidad: data.interiores?.cantidadEspecial1, puntos: data.interiores?.puntosEspecial1 },
+      { nombre: data.interiores?.selectedEspecial2Nombre, cantidad: data.interiores?.cantidadEspecial2, puntos: data.interiores?.puntosEspecial2 },
+      { nombre: data.interiores?.selectedEspecial3Nombre, cantidad: data.interiores?.cantidadEspecial3, puntos: data.interiores?.puntosEspecial3 },
+      { nombre: data.interiores?.selectedEspecial4Nombre, cantidad: data.interiores?.cantidadEspecial4, puntos: data.interiores?.puntosEspecial4 },
+      { nombre: data.interiores?.selectedEspecial5Nombre, cantidad: data.interiores?.cantidadEspecial5, puntos: data.interiores?.puntosEspecial5 },
+    ];
+
+    // Sumar la cantidad total de especiales de interiores
+    especialesInteriores.forEach((especial) => {
+      totalEspecialesInteriores += Number(especial.cantidad || 0);
+    });
+
+    // Solo imprimir si hay datos en los especiales
+    if (hasEspeciales(especialesInteriores)) {
+      doc.setFontSize(10);
+      doc.setFillColor(220, 220, 220);
+      startY = checkPageSpace(doc, startY);
+      doc.rect(10, startY - 4, pageWidth - 20, 5, 'F');
+      doc.text("Especiales interiores a medida", 12, startY);
+      startY += 6;
+
+      doc.setFontSize(7);
+      especialesInteriores.forEach((especial) => {
+        if (especial.nombre || especial.cantidad || especial.puntos) {
+          doc.text(`${especial.nombre || ''}`, 12, startY);
+          doc.text(`Cantidad: ${especial.cantidad || ''}`, pageWidth - 50, startY);
+          doc.text(`Puntos: ${especial.puntos || ''}`, pageWidth - 30, startY);
+          startY += 6;
+          startY = checkPageSpace(doc, startY);
+        }
+      });
+    }
+  }
+
+  // Sumar 32 puntos por cada unidad de especial (frentes + interiores)
+  const puntosEspecialesTotal = (totalEspecialesFrentes + totalEspecialesInteriores) * 32;
+
+  // Calcular los puntos totales, sumando los puntos de los especiales
   const totalPuntos = Object.entries(sections).reduce((total, [section]) => {
     return total + Object.entries(data[section] || {}).reduce((subTotal, [key, value]) => {
       if (key.startsWith('puntos') && value) {
@@ -297,20 +348,22 @@ if (lastInterioresProcessed) {
       }
       return subTotal;
     }, 0);
-  }, 0);
+  }, 0) + puntosEspecialesTotal; // Añadir los puntos especiales
+
   // Cálculo de montaje e instalación
   const numDesmontaje = data.instalacion?.numDesmontaje || 0;
   const numFrentesInteriores = data.instalacion?.numFrentesInteriores || 0;
   const numArmariosCompletos = data.instalacion?.numArmariosCompletos || 0;
   let totalMontaje = (numFrentesInteriores * 110) + (numArmariosCompletos * 146) + 50;
 
-  doc.setFontSize(8);
+  // Imprimir totales
   startY += 15;
   startY = checkPageSpace(doc, startY);
   doc.text(`Total Puntos: ${totalPuntos + (numDesmontaje * 121)}`, 12, startY);
   startY += 10;
   doc.text(`Total Montaje e Instalación: ${totalMontaje.toFixed(2)} €`, 12, startY);
-  // Crear el nombre del PDF
+
+  // Crear el nombre del PDF y enviarlo
   const centroAbreviado = centro.substring(0, 3).toUpperCase();
   fetch('http://194.164.166.129:6969/presupuesto', {
     method: 'POST',
@@ -324,7 +377,7 @@ if (lastInterioresProcessed) {
       tienda: userInfo.tienda
     }),
     credentials: 'include'
-  })// Guardar el PDF
+  })
     .then(response => response.json())
     .then(data => {
       const nombrePresupuesto = `${centroAbreviado}-${data.idPresupuesto}`;

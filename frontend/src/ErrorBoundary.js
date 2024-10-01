@@ -19,6 +19,7 @@ class ErrorBoundary extends React.Component {
   render() {
     if (this.state.hasError) {
       // Puedes renderizar cualquier UI alternativa
+      // En el reto de hoy si mi código da error me betan de todos los supermercados de Guadalajara
       return <h1>Something went wrong.</h1>;
     }
 

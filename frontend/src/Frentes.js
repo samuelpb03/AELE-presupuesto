@@ -105,7 +105,6 @@ function Frentes() {
   // Guardar los datos formateados en el estado 
   useEffect(() => {
     const formattedData = {
-      
       selectedProductoId: selectedProducto.id,
       selectedProductoNombre: selectedProducto.nombre,
       selectedSerieId: selectedSerie.id,
@@ -399,6 +398,19 @@ function Frentes() {
 
     setSelectedSerie({ id, nombre });
     handleSelectChange("serie", id, nombre);
+    if (id !== 30) {
+      const especialGranAltura = listEspeciales.find(especial => especial.articulo_id === 195);
+      setListEspeciales([especialGranAltura]); // Mostrar solo "Gran Altura"
+    } else {
+      // Si es otro producto, restaurar todos los especiales
+      axios.get(`${backendUrl}/especialesConPuntosFrentes`).then((res) => {
+        if (Array.isArray(res.data)) {
+          setListEspeciales(res.data); // Restaurar la lista de especiales
+        }
+      }).catch(error => {
+        console.error("Error fetching articulos especiales:", error);
+      });
+    }
 
     // Restablecer los campos siguientes y los puntos al cambiar la serie
     setSelectedArticulo({ id: "", nombre: "" }); // Restablecer artículo
@@ -506,7 +518,7 @@ function Frentes() {
   
     // Si el producto es 4 o 5, solo permitir seleccionar "Gran Altura"
     if (selectedProducto.id === "4" || selectedProducto.id === "5") {
-      if (id !== "195") {
+      if (selectedSerie.id !== "195") {
         if (id === "") {
           if (especialIndex === 1) {
             setSelectedEspecial1({ id: "", nombre: "", puntos: 0 });
@@ -522,8 +534,6 @@ function Frentes() {
         return;
       }
     }
-  
-  
     // Si el usuario selecciona la opción vacía
     if (id === "") {
       if (especialIndex === 1) {
@@ -537,10 +547,8 @@ function Frentes() {
       }
       return; // Salir de la función si se selecciona el valor vacío
     }
-  
     // Buscar el especial seleccionado en la lista de especiales
     const selectedEspecial = listEspeciales.find(especial => especial.articulo_id === parseInt(id));
-  
     if (especialIndex === 1) {
       setSelectedEspecial1({ id, nombre, puntos: selectedEspecial.puntos });
       setPuntosEspecial1(selectedEspecial.puntos);

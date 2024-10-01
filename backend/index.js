@@ -430,6 +430,21 @@ app.get("/articuloEspecialesInteriores", (req, res) => {
     return res.json(data);
   });
 });
+app.get("/articulo/interioresOtros", (req, res) => {
+  const query = `
+    SELECT a.articulo_id, a.nombre, m.puntos
+    FROM articulo a
+    LEFT JOIN medidas m ON a.articulo_id = m.articulos_id
+    WHERE a.serie_id = 40
+  `;
+  dbConnection.query(query, (err, data) => {
+    if (err) {
+      console.error("Error fetching articulos:", err);
+      return res.status(500).json(err);
+    }
+    return res.json(data);
+  });
+});
 
 // Ruta para obtener materiales únicos desde medidas
 app.get("/materialesPorArticulo", (req, res) => {

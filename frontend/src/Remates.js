@@ -9,11 +9,9 @@ function Remates() {
   const [listArticulo, setListArticulo] = useState([]);
   const [selectedArticulos, setSelectedArticulos] = useState(Array(3).fill({ id: "", nombre: "", puntos: 0 }));
   const [metros, setMetros] = useState(Array(3).fill(0));
-  const [puntos, setPuntos] = useState(Array(3).fill(0));
   const [listOtros, setListOtros] = useState([]);
   const [selectedOtros, setSelectedOtros] = useState(Array(3).fill({ id: "", nombre: "", puntos: 0 }));
-  const [cantidadesOtros, setCantidadesOtros] = useState(Array(3).fill(1));
-  const [puntosOtros, setPuntosOtros] = useState(Array(3).fill(0));
+  const [cantidadesOtros, setCantidadesOtros] = useState(Array(3).fill(0));
   const backendUrl = 'http://194.164.166.129:6969';
   const user = localStorage.getItem('user');
   
@@ -65,30 +63,38 @@ function Remates() {
     });
   }, []);
 
-  // Cargar los datos iniciales desde el estado global (sin interferir con otros cálculos)
+  // Cargar los datos iniciales desde el estado global
   useEffect(() => {
     if (data && data.remates) {
       setSelectedArticulos(data.remates.selectedArticulos || Array(3).fill({ id: "", nombre: "", puntos: 0 }));
       setMetros(data.remates.metros || Array(3).fill(0));
-      setPuntos(data.remates.puntos || Array(3).fill(0));
       setSelectedOtros(data.remates.selectedOtros || Array(3).fill({ id: "", nombre: "", puntos: 0 }));
       setCantidadesOtros(data.remates.cantidadesOtros || Array(3).fill(1));
-      setPuntosOtros(data.remates.puntosOtros || Array(3).fill(0));
     }
-  }, []); // <- No se necesita `[data]` aquí para evitar ciclos innecesarios.
+  }, []); 
 
   // Guardar los datos de remates cuando cambian
   useEffect(() => {
     const rematesData = {
       selectedArticulos,
       metros,
-      puntos,
       selectedOtros,
-      cantidadesOtros,
-      puntosOtros
+      cantidadesOtros
     };
     saveData("remates", rematesData);
-  }, [selectedArticulos, metros, puntos, selectedOtros, cantidadesOtros, puntosOtros, saveData]);
+  }, [selectedArticulos, metros, selectedOtros, cantidadesOtros, saveData]);
+
+  // Función para calcular puntos
+  const calculatePuntos = (articulo, metros) => {
+    var puntos = articulo?.puntos || 0;
+    if (metros < 2.5) {
+      puntos = puntos;
+    }
+    else {
+      puntos = puntos * metros / 2.5;
+    }
+    return (puntos);  // Ajusta esta fórmula según tu lógica
+  };
 
   // Manejar el cambio de selección de artículos
   const handleSelectArticuloChange = (index, event) => {
@@ -96,32 +102,46 @@ function Remates() {
     const selectedIndex = event.target.selectedIndex;
     const nombre = event.target.options[selectedIndex].text;
     const id = event.target.value;
-    const puntos = parseInt(event.target.options[selectedIndex].getAttribute('data-puntos'), 10);
+    const puntos = parseInt(event.target.options[selectedIndex].getAttribute('data-puntos'), 10) || 0;
 
     updatedArticulos[index] = { id, nombre, puntos };
     setSelectedArticulos(updatedArticulos);
 
     const updatedMetros = [...metros];
-    updatedMetros[index] = 0;
+    updatedMetros[index] = 0;  // Reset metros al cambiar el artículo
     setMetros(updatedMetros);
-
-    const newPuntos = [...puntos];
-    newPuntos[index] = 0;
-    setPuntos(newPuntos);
-
-    handleSelectChangeZ(`articulo${index + 1}`, id, nombre);
   };
 
   // Manejar el cambio en metros
   const handleMetrosChange = (index, event) => {
+    const value = parseFloat(event.target.value) || 0;  // Asegura valor numérico
     const updatedMetros = [...metros];
-    const value = parseFloat(event.target.value);
-    updatedMetros[index] = isNaN(value) ? 0 : value;
+    updatedMetros[index] = value;
     setMetros(updatedMetros);
+  };
 
-    const newPuntos = [...puntos];
-    newPuntos[index] = (selectedArticulos[index].puntos * updatedMetros[index]) / 2.5;
-    setPuntos(newPuntos);
+  // Manejar el cambio de selección de otros artículos
+  const handleSelectOtrosChange = (index, event) => {
+    const updatedOtros = [...selectedOtros];
+    const selectedIndex = event.target.selectedIndex;
+    const nombre = event.target.options[selectedIndex].text;
+    const id = event.target.value;
+    const puntos = parseInt(event.target.options[selectedIndex].getAttribute('data-puntos'), 10) || 0;
+
+    updatedOtros[index] = { id, nombre, puntos };
+    setSelectedOtros(updatedOtros);
+
+    const updatedCantidades = [...cantidadesOtros];
+    updatedCantidades[index] = id ? 1 : 0;  // Reiniciar a 1 cuando se selecciona un nuevo artículo
+    setCantidadesOtros(updatedCantidades);
+  };
+
+  // Manejar el cambio de cantidad para otros artículos
+  const handleCantidadOtrosChange = (index, event) => {
+    const newCantidades = [...cantidadesOtros];
+    const value = Math.max(0, parseInt(event.target.value, 10) || 0);  // Asegurar cantidad numérica
+    newCantidades[index] = value;
+    setCantidadesOtros(newCantidades);
   };
 
   // Renderizar selectores de artículos
@@ -150,29 +170,9 @@ function Remates() {
         onChange={(event) => handleMetrosChange(index, event)}
         min="0"
       />
-      <label htmlFor={`puntos${index + 1}`}>Puntos: {puntos[index].toFixed(2)}</label>
+      <label htmlFor={`puntos${index + 1}`}>Puntos: {calculatePuntos(selectedArticulos[index], metros[index]).toFixed(2)}</label>
     </div>
   );
-
-  // Manejar el cambio de selección de otros artículos
-  const handleSelectOtrosChange = (index, event) => {
-    const updatedOtros = [...selectedOtros];
-    const selectedIndex = event.target.selectedIndex;
-    const nombre = event.target.options[selectedIndex].text;
-    const id = event.target.value;
-    const puntos = parseInt(event.target.options[selectedIndex].getAttribute('data-puntos'), 10) || 0;
-
-    updatedOtros[index] = { id, nombre, puntos };
-    setSelectedOtros(updatedOtros);
-
-    const updatedCantidades = [...cantidadesOtros];
-    updatedCantidades[index] = id ? 1 : 0;
-    setCantidadesOtros(updatedCantidades);
-
-    const updatedPuntos = [...puntosOtros];
-    updatedPuntos[index] = id ? puntos * updatedCantidades[index] : 0;
-    setPuntosOtros(updatedPuntos);
-  };
 
   const renderSelectOtros = (index) => (
     <div key={index}>
@@ -195,15 +195,11 @@ function Remates() {
         type="number"
         id={`cantidadesOtros${index + 1}`}
         value={cantidadesOtros[index]}
-        onChange={(e) => {
-          const newCantidades = [...cantidadesOtros];
-          newCantidades[index] = Math.max(0, parseInt(e.target.value, 10) || 0);
-          setCantidadesOtros(newCantidades);
-        }}
+        onChange={(e) => handleCantidadOtrosChange(index, e)}
         min="0"
       />
 
-      <label htmlFor={`puntosOtros${index + 1}`}>Puntos: {puntosOtros[index].toFixed(2)}</label>
+      <label htmlFor={`puntosOtros${index + 1}`}>Puntos: {(selectedOtros[index].puntos * cantidadesOtros[index]).toFixed(2)}</label>
     </div>
   );
 
