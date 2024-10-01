@@ -160,8 +160,7 @@ export const generatePDF = (data, userInfo) => {
     tiradores: "Tiradores y cerraduras",
     interiores: "Interiores",
     equipamiento3: "Equipamiento",
-    baldas: "Baldas e iluminación",
-    remates: "Remates a medida", // Aquí incluimos los remates como una sección más
+    baldas: "Baldas e iluminación", // Aquí incluimos los remates como una sección más
   };
 
   let startY = 52;
@@ -219,7 +218,7 @@ export const generatePDF = (data, userInfo) => {
       doc.rect(10, startY - 4, pageWidth - 20, 5, 'F');
       doc.text(title, 12, startY);
       startY += 5;
-
+      doc.setFontSize(7);
       // Imprimir los datos de la sección en filas de 4 elementos
       sectionData.forEach((line, index) => {
         let xPosition;
