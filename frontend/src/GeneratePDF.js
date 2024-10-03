@@ -186,10 +186,7 @@ export const generatePDF = (data, userInfo) => {
         if (
           key.startsWith('selectedEspecial') ||
           key.startsWith('cantidadEspecial') ||
-          key.startsWith('puntosEspecial') ||
-          key.startsWith('interioresOtros') ||
-          key.startsWith('cantidadInterioresOtros') ||
-          key.startsWith('puntosInterioresOtros')
+          key.startsWith('puntosEspecial') 
         ) {
           return; // Omitir los especiales
         }
