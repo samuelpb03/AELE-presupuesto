@@ -258,27 +258,35 @@ function Interiores() {
   ]);
 
   const handleSelectArticuloChange = (index, event) => {
-    const updatedArticulos = [...selectedArticulos];
     const selectedIndex = event.target.selectedIndex;
-    const nombre = event.target.options[selectedIndex].text;
-    const id = event.target.value;
-    const puntos = parseInt(event.target.options[selectedIndex].getAttribute('data-puntos'), 10);
+    const articuloNombre = event.target.options[selectedIndex].text;
+    const articuloId = event.target.value;
+    const articuloPuntos = parseInt(
+      event.target.options[selectedIndex].getAttribute('data-puntos'),
+      10
+    );
 
-    updatedArticulos[index] = { id, nombre, puntos };
-    setSelectedArticulos(updatedArticulos);
+    setSelectedArticulos((prevArticulos) => {
+      const newArticulos = [...prevArticulos];
+      newArticulos[index] = { id: articuloId, nombre: articuloNombre, puntos: articuloPuntos };
+      return newArticulos;
+    });
 
-    if (id) {
-      const updatedCantidades = [...cantidades];
-      updatedCantidades[index] = 1;
-      setCantidades(updatedCantidades);
+    if (articuloId) {
+      setCantidades((prevCantidades) => {
+        const newCantidades = [...prevCantidades];
+        newCantidades[index] = 1;
+        return newCantidades;
+      });
+
       setPuntos((prevPuntos) => {
         const newPuntos = [...prevPuntos];
-        newPuntos[index] = puntos;
+        newPuntos[index] = articuloPuntos;
         return newPuntos;
       });
     }
 
-    handleSelectChangeG(`articulo${index + 1}`, id, nombre);
+    handleSelectChangeG(`articulo${index + 1}`, articuloId, articuloNombre);
   };
 
   const handleSelectColorChange = (index, event) => {
@@ -368,10 +376,12 @@ function Interiores() {
     const nombre = event.target.options[selectedIndex].text;
     const id = event.target.value;
     const puntos = parseInt(event.target.options[selectedIndex].getAttribute('data-puntos'), 10);
-
+  
     updatedInterioresOtros[index] = { id, nombre, puntos };
     setSelectedInterioresOtros(updatedInterioresOtros);
-
+  
+    console.log("Seleccionado:", updatedInterioresOtros); // Log para verificar el cambio de selección
+  
     if (id) {
       const updatedCantidades = [...cantidadesInterioresOtros];
       updatedCantidades[index] = 1;
@@ -382,10 +392,9 @@ function Interiores() {
         return newPuntos;
       });
     }
-
+  
     handleSelectChangeG(`interioresOtros${index + 1}`, id, nombre);
   };
-
   const handleCantidadInterioresOtrosChange = (index, event) => {
     const updatedCantidades = [...cantidadesInterioresOtros];
     const value = parseInt(event.target.value, 10);
