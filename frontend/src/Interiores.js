@@ -3,6 +3,8 @@ import axios from "axios";
 import { useTabs } from "./TabsContext";
 import { useData } from './context/DataContext';
 
+
+
 function Interiores() {
   const { handleSelectChangeG } = useTabs();
   const { data, saveData } = useData();
@@ -257,6 +259,11 @@ function Interiores() {
     
   ]);
 
+/**
+ * Handles a change in the articulo select input.
+ * @param {number} index The index of the changed articulo.
+ * @param {Event} event The change event.
+ */
   const handleSelectArticuloChange = (index, event) => {
     const selectedIndex = event.target.selectedIndex;
     const articuloNombre = event.target.options[selectedIndex].text;
@@ -370,6 +377,11 @@ function Interiores() {
       setPuntosEspecial5(selectedEspecial5.puntos * (isNaN(value) ? 1 : value));
     }
   };
+  /**
+   * Manejar el cambio de selecci n de los art culos de interiores "otros"
+   * @param {number} index indice del artículo que se está modificando
+   * @param {Event} event Evento que se desencadena al cambiar la selección
+   */
   const handleSelectInterioresOtrosChange = (index, event) => {
     const updatedInterioresOtros = [...selectedInterioresOtros];
     const selectedIndex = event.target.selectedIndex;
@@ -395,6 +407,11 @@ function Interiores() {
   
     handleSelectChangeG(`interioresOtros${index + 1}`, id, nombre);
   };
+  /**
+   * Manejar el cambio de cantidad de los artículos de interiores "otros"
+   * @param {number} index indice del art culo que se está modificando
+   * @param {Event} event Evento que se desencadena al cambiar la cantidad
+   */
   const handleCantidadInterioresOtrosChange = (index, event) => {
     const updatedCantidades = [...cantidadesInterioresOtros];
     const value = parseInt(event.target.value, 10);
@@ -407,6 +424,11 @@ function Interiores() {
     });
   };
 
+  /**
+   * Renderizar selectores de artículos de interiores
+   * @param {number} index Indice del artículo que se está renderizando
+   * @returns {JSX.Element} Elemento JSX que contiene los selectores de artículos y colores, y el input de cantidad
+   */
   const renderSelectArticulo = (index) => (
     <div key={index}>
       <label htmlFor={`articulo${index + 1}`}>Artículo {index + 1}:</label>
@@ -446,6 +468,11 @@ function Interiores() {
       <label htmlFor={`puntos${index + 1}`}>Puntos: {puntos[index]}</label>
     </div>
   );
+  /**
+   * Renderizar selectores de artículos de interiores "otros"
+   * @param {number} index Indice del artículo que se está renderizando
+   * @returns {JSX.Element} Elemento JSX que contiene los selectores de artículos y colores, y el input de cantidad
+   */
   const renderSelectInterioresOtros = (index) => (
     <div key={index}>
       <label htmlFor={`interioresOtros${index + 1}`}>Otros Artículo {index + 1}:</label>
@@ -473,6 +500,11 @@ function Interiores() {
     </div>
   );
 
+  /**
+   * Renderizar selectores de artículos especiales
+   * @param {number} especialIndex Indice del artículo especial que se está renderizando (1 o 2)
+   * @returns {JSX.Element} Elemento JSX que contiene los selectores de artículos especiales, y los inputs de cantidad y puntos
+   */
   const renderEspecialSelect = (especialIndex) => {
     const selectedEspecial = especialIndex === 1 ? selectedEspecial1 : selectedEspecial2;
     const cantidadEspecial = especialIndex === 1 ? cantidadEspecial1 : cantidadEspecial2;

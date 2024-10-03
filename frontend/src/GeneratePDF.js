@@ -119,9 +119,6 @@ export const generatePDF = (data, userInfo) => {
     }
     return startY;
   };
-  const isValueInvalid = (value) => {
-    return value === "" || !value;
-  };
 
   // Agregar logotipo
   const user = JSON.parse(localStorage.getItem('user'));
@@ -195,10 +192,6 @@ export const generatePDF = (data, userInfo) => {
           key.startsWith('puntosInterioresOtros')
         ) {
           return; // Omitir los especiales
-        }
-        if (!isValueInvalid(value) && labelsMap[key]) {
-          sectionData.push(`${value}`);
-          startY = checkPageSpace(doc, startY);
         }
 
         if (key.toLowerCase().includes('puntos') && value) {
@@ -408,20 +401,19 @@ if (data.remates) {
   }
   // Imprimir los datos de "Otros artículos interiores" en el PDF
   // Procesar los datos de "Otros artículos interiores"
-  if (data.interiores && data.interiores.selectedInterioresOtros) {
-    let otrosArticulosInterioresData = [];
-    const { selectedInterioresOtros = [], cantidadesInterioresOtros = [], puntosInterioresOtros = [] } = data.interiores;
-  
-    // Verifica que no estén vacíos
-    selectedInterioresOtros.forEach((articulo, index) => {
-      if (articulo && articulo.nombre && cantidadesInterioresOtros[index] > 0) {
-        otrosArticulosInterioresData.push({
-          nombre: articulo.nombre,
-          cantidad: cantidadesInterioresOtros[index],
-          puntos: puntosInterioresOtros[index],
-        });
-      }
-    });
+if (data.interiores && data.interiores.selectedInterioresOtros) {
+  let otrosArticulosInterioresData = [];
+  const { selectedInterioresOtros = [], cantidadesInterioresOtros = [], puntosInterioresOtros = [] } = data.interiores;
+
+  // Rellenar otrosArticulosInterioresData con los datos de los artículos
+  selectedInterioresOtros.forEach((articulo, index) => {
+      otrosArticulosInterioresData.push({
+        nombre: articulo.nombre,
+        cantidad: cantidadesInterioresOtros[index],
+        puntos: puntosInterioresOtros[index],
+      });
+    
+  });
 
   // Imprimir los datos de "Otros artículos interiores" en el PDF
   if (otrosArticulosInterioresData.length > 0) {
