@@ -63,6 +63,18 @@ function Remates() {
     });
   }, []);
 
+  // Comprobar si solo hay datos de frentes, frentes2 y/o frentes3 en el contexto global
+  const isFrentesOnly = data && 
+    (data.frentes || data.frentes2 || data.frentes3) && // Hay datos en frentes, frentes 2 o frentes 3
+    !data.interiores && // No hay datos en interiores
+    !data.equipamiento3 && // No hay datos en otras secciones
+    !data.baldas;
+
+  // Filtrar artículos si es solo frentes
+  const filteredArticulos = isFrentesOnly 
+    ? listArticulo.filter((articulo) => [205, 209].includes(parseInt(articulo.id))) 
+    : listArticulo;
+
   // Cargar los datos iniciales desde el estado global
   useEffect(() => {
     if (data && data.remates) {
@@ -154,7 +166,7 @@ function Remates() {
         value={selectedArticulos[index].id}
       >
         <option value="">--Selecciona una opción--</option>
-        {listArticulo.map((articulo) => (
+        {filteredArticulos.map((articulo) => (
           <option key={articulo.id} value={articulo.id} data-puntos={articulo.puntos}>
             {articulo.nombre}
           </option>

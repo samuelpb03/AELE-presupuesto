@@ -608,7 +608,7 @@ function Frentes() {
           <div className="field">
             <label htmlFor="producto">Tipo de Frente:</label>
             <select id="producto" onChange={handleSelectProductChange} value={selectedProducto.id || ""}>
-              <option disabled={selectedProducto.id !== ""}>--Selecciona una opción--</option>
+              <option value="" disabled={selectedProducto.id !== ""}>--Selecciona una opción--</option>
               {listProducto.map((producto) => (
                 <option key={producto.producto_id} value={producto.producto_id}>
                   {producto.nombre}

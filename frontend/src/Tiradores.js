@@ -18,9 +18,10 @@ function Tiradores() {
 
   // Comprobar si algún artículo seleccionado requiere advertencia
   const mostrarAdvertenciaGola = selectedArticulos.some(articulo => golaIds.includes(parseInt(articulo.id)));
+  const mostrarAdvertenciaPushCajon = selectedArticulos.some(articulo => parseInt(articulo.id) === 223);
 
   const backendUrl = 'http://194.164.166.129:6969'; //Url para el backend
-  
+
   useEffect(() => {
     const user = localStorage.getItem('user');
     if (!user) {
@@ -58,7 +59,7 @@ function Tiradores() {
   }, []);
 
   useEffect(() => {
-    const formattedData = selectedArticulos.reduce((acc, articulo, index) => { 
+    const formattedData = selectedArticulos.reduce((acc, articulo, index) => {
       acc[`articulo${index + 1}Nombre`] = articulo.nombre;
       acc[`articulo${index + 1}Id`] = articulo.id;
       acc[`articulo${index + 1}Puntos`] = articulo.puntos;
@@ -286,43 +287,48 @@ function Tiradores() {
         min="1"
       />
       <label htmlFor={`puntos${index + 1}`}>Puntos: {puntos[index]}</label>
-      
+
     </div>
   );
 
   return (
     <div className="container">
       <div className="section">
-      <div className="container2">
-        <h1>Tiradores</h1>
-        <div className="field">
-        {renderSelectArticulo(0)}
-        </div>
-        <div className="field">
-        {renderSelectArticulo(1)}
-        </div>
-        <div className="field">
-        {renderSelectArticulo(2)}
-        </div>
-        <div className="field">
-        {renderSelectArticulo(3)}
-        </div>
-        {selectedArticulos.some(articulo => golaIds.includes(parseInt(articulo.id))) && (
-          <div style={{ color: 'red', textAlign: 'right', marginTop: '10px', marginLeft: '480px', fontWeight: 'bold' }}>
-            Los tiradores Gola solo pueden seleccionarse con puertas Kanto en laca.
+        <div className="container2">
+          <h1>Tiradores</h1>
+          <div className="field">
+            {renderSelectArticulo(0)}
           </div>
-        )}
+          <div className="field">
+            {renderSelectArticulo(1)}
+          </div>
+          <div className="field">
+            {renderSelectArticulo(2)}
+          </div>
+          <div className="field">
+            {renderSelectArticulo(3)}
+          </div>
+          {selectedArticulos.some(articulo => golaIds.includes(parseInt(articulo.id))) && (
+            <div style={{ color: 'red', textAlign: 'right', marginTop: '10px', marginLeft: '480px', fontWeight: 'bold' }}>
+              Los tiradores Gola solo pueden seleccionarse con puertas Kanto en laca.
+            </div>
+          )}
+          {mostrarAdvertenciaPushCajon && (
+            <div style={{ color: 'red', textAlign: 'left', marginTop: '10px', marginLeft: '10px', fontWeight: 'bold' }}>
+              Push cajón solo disponible con cajones soft.
+            </div>
+          )}
         </div>
-      <div className="container2">
-      <div className="section">
-      
-        <h1>Cerraduras</h1>
-        <div className="field-special">
-        {renderSelectArticulo(4, true)}
+        <div className="container2">
+          <div className="section">
+
+            <h1>Cerraduras</h1>
+            <div className="field-special">
+              {renderSelectArticulo(4, true)}
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-    </div>
     </div>
   );
 }
