@@ -186,7 +186,10 @@ export const generatePDF = (data, userInfo) => {
         if (
           key.startsWith('selectedEspecial') ||
           key.startsWith('cantidadEspecial') ||
-          key.startsWith('puntosEspecial') 
+          key.startsWith('puntosEspecial') ||
+          key.startsWith('interioresOtros') ||
+          key.startsWith('puntosInterioresOtros') ||
+          key.startsWith('cantidadInterioresOtros')
         ) {
           return; // Omitir los especiales
         }
@@ -195,7 +198,7 @@ export const generatePDF = (data, userInfo) => {
           if (section === 'frentes' || section === 'frentes2' || section === 'frentes3') {
             const cantidad = data[section]?.cantidad || 1;
             if (cantidad > 1) {
-            puntosSeccion += Number(value) / 1.5; // Multiplica por la cantidad cuando es mayor a 1
+            puntosSeccion = Number(value); // Multiplica por la cantidad cuando es mayor a 1
           } else {
             puntosSeccion = Number(value) * 1; // No hacer ninguna operación extra si la cantidad es 1
           }
@@ -369,21 +372,28 @@ if (data.remates) {
       { nombre: data.interiores?.selectedEspecial4Nombre, cantidad: data.interiores?.cantidadEspecial4, puntos: data.interiores?.puntosEspecial4 },
       { nombre: data.interiores?.selectedEspecial5Nombre, cantidad: data.interiores?.cantidadEspecial5, puntos: data.interiores?.puntosEspecial5 },
     ];
-
-    // Sumar la cantidad total de especiales de interiores
+  
+    const otrosArticulosInteriores = [
+      { nombre: data.interiores?.interioresOtros1Nombre, cantidad: data.interiores?.cantidadInterioresOtros1, puntos: data.interiores?.puntosInterioresOtros1 },
+      { nombre: data.interiores?.interioresOtros2Nombre, cantidad: data.interiores?.cantidadInterioresOtros2, puntos: data.interiores?.puntosInterioresOtros2 },
+      { nombre: data.interiores?.interioresOtros3Nombre, cantidad: data.interiores?.cantidadInterioresOtros3, puntos: data.interiores?.puntosInterioresOtros3 },
+      { nombre: data.interiores?.interioresOtros4Nombre, cantidad: data.interiores?.cantidadInterioresOtros4, puntos: data.interiores?.puntosInterioresOtros4 },
+    ];
+  
+    // Sumar la cantidad total de especiales de interiores, excluyendo los "Otros artículos interiores"
     especialesInteriores.forEach((especial) => {
       totalEspecialesInteriores += Number(especial.cantidad || 0);
     });
-
-    // Solo imprimir si hay datos en los especiales
-    if (hasEspeciales(especialesInteriores)) {
+  
+    // Imprimir los especiales de interiores
+    if (especialesInteriores.some(especial => especial.nombre || especial.cantidad || especial.puntos)) {
       doc.setFontSize(10);
       doc.setFillColor(220, 220, 220);
       startY = checkPageSpace(doc, startY);
       doc.rect(10, startY - 4, pageWidth - 20, 5, 'F');
       doc.text("Especiales interiores a medida", 12, startY);
       startY += 6;
-
+  
       doc.setFontSize(7);
       especialesInteriores.forEach((especial) => {
         if (especial.nombre || especial.cantidad || especial.puntos) {
@@ -395,49 +405,32 @@ if (data.remates) {
         }
       });
     }
-  }
-  // Imprimir los datos de "Otros artículos interiores" en el PDF
-  // Procesar los datos de "Otros artículos interiores"
-if (data.interiores && data.interiores.selectedInterioresOtros) {
-  let otrosArticulosInterioresData = [];
-  const { selectedInterioresOtros = [], cantidadesInterioresOtros = [], puntosInterioresOtros = [] } = data.interiores;
-
-  // Rellenar otrosArticulosInterioresData con los datos de los artículos
-  selectedInterioresOtros.forEach((articulo, index) => {
-      otrosArticulosInterioresData.push({
-        nombre: articulo.nombre,
-        cantidad: cantidadesInterioresOtros[index],
-        puntos: puntosInterioresOtros[index],
-      });
-    
-  });
-
-  // Imprimir los datos de "Otros artículos interiores" en el PDF
-  if (otrosArticulosInterioresData.length > 0) {
-    doc.setFontSize(10);
-    doc.setFillColor(220, 220, 220);
-    startY = checkPageSpace(doc, startY);
-    doc.rect(10, startY - 4, pageWidth - 20, 5, 'F');
-    doc.text("Otros artículos interiores", 12, startY);
-    startY += 6;
   
-    doc.setFontSize(7); // Ajustar el tamaño de la fuente para los datos
-    otrosArticulosInterioresData.forEach((articulo, index) => {
-      const nombre = labelsMap[`interioresOtros${index + 1}Nombre`] || `Artículo ${index + 1}`;
-      const cantidadLabel = labelsMap[`cantidadInterioresOtros${index + 1}`] || 'Cantidad';
-      const puntosLabel = labelsMap[`puntosInterioresOtros${index + 1}`] || 'Puntos';
-  
-      doc.text(`${nombre}: ${articulo.nombre}`, 12, startY);
-      doc.text(`${cantidadLabel}: ${articulo.cantidad}`, pageWidth - 50, startY);
-      doc.text(`${puntosLabel}: ${articulo.puntos}`, pageWidth - 30, startY);
-      startY += 6;
+    // Imprimir los "Otros artículos interiores"
+    if (otrosArticulosInteriores.some(articulo => articulo.nombre || articulo.cantidad || articulo.puntos)) {
+      doc.setFontSize(10);
+      doc.setFillColor(220, 220, 220);
       startY = checkPageSpace(doc, startY);
-    });
+      doc.rect(10, startY - 4, pageWidth - 20, 5, 'F');
+      doc.text("Otros artículos interiores", 12, startY);
+      startY += 6;
+  
+      doc.setFontSize(7);
+      otrosArticulosInteriores.forEach((articulo) => {
+        if (articulo.nombre || articulo.cantidad || articulo.puntos) {
+          doc.text(`${articulo.nombre || ''}`, 12, startY);
+          doc.text(`Cantidad: ${articulo.cantidad || ''}`, pageWidth - 50, startY);
+          doc.text(`Puntos: ${articulo.puntos || ''}`, pageWidth - 30, startY);
+          startY += 6;
+          startY = checkPageSpace(doc, startY);
+        }
+      });
+    }
   }
-  console.log('Estructura de data.interiores:', data.interiores);
-  console.log('Estructura de data.interiores:', data.interiores);console.log('Estructura de data.interiores:', data.interiores);console.log('Estructura de data.interiores:', data.interiores);console.log('Estructura de data.interiores:', data.interiores);console.log('Estructura de data.interiores:', data.interiores);console.log('Estructura de data.interiores:', data.interiores);console.log('Estructura de data.interiores:', data.interiores);
-}
+  
 
+    // Solo imprimir si hay datos en los especiales
+    
   // Sumar 32 puntos por cada unidad de especial (frentes + interiores)
   const puntosEspecialesTotal = (totalEspecialesFrentes + totalEspecialesInteriores) * 32;
 

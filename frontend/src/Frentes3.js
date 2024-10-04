@@ -90,9 +90,15 @@ function Frentes3() {
         nombre: data.frentes3.selectedEspecial2Nombre || "",
         puntos: data.frentes3.selectedEspecial2Puntos || 0,
       });
-      setCantidad(data.frentes3.cantidad || 0);
-      setPuntos(data.frentes3.puntos || 0);
+      const restoredCantidad = data.frentes3.cantidad || 0;
+      setCantidad(restoredCantidad);
 
+      // Lógica para restaurar los puntos correctamente
+      let restoredPuntos = data.frentes3.puntos || 0;
+      if (restoredCantidad > 1) {
+        restoredPuntos = restoredPuntos / restoredCantidad; // Dividir por la cantidad si es mayor a 1
+      }
+      setPuntos(restoredPuntos);
       setPuntosEspecial1((data.frentes3.selectedEspecial1Puntos || 0) * (data.frentes3.cantidadEspecial1 || 0));
       setPuntosEspecial2((data.frentes3.selectedEspecial2Puntos || 0) * (data.frentes3.cantidadEspecial2 || 0));
       setCantidadEspecial1(data.frentes3.cantidadEspecial1 || 0);

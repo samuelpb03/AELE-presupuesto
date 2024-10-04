@@ -89,8 +89,15 @@ function Frentes() {
         nombre: data.frentes.selectedEspecial2Nombre || "",
         puntos: data.frentes.selectedEspecial2Puntos || 0,
       });
-      setCantidad(data.frentes.cantidad || 0);
-      setPuntos(data.frentes.puntos || 0);  // Restaurar los puntos guardados
+      const restoredCantidad = data.frentes.cantidad || 0;
+      setCantidad(restoredCantidad);
+
+      // Lógica para restaurar los puntos correctamente
+      let restoredPuntos = data.frentes.puntos || 0;
+      if (restoredCantidad > 1) {
+        restoredPuntos = restoredPuntos / restoredCantidad; // Dividir por la cantidad si es mayor a 1
+      }
+      setPuntos(restoredPuntos);
       setIsColorValueAdded(data.frentes.isColorValueAdded || false);  // Restaurar el estado del incremento del 20%
       setPuntosEspecial1((data.frentes.selectedEspecial1Puntos || 0) * (data.frentes.cantidadEspecial1 || 0));
       setPuntosEspecial2((data.frentes.selectedEspecial2Puntos || 0) * (data.frentes.cantidadEspecial2 || 0));
@@ -516,7 +523,7 @@ function Frentes() {
     const index = event.target.selectedIndex;
     const nombre = event.target.options[index].text;
     const id = event.target.value;
-  
+
     // Verificar si es el especial "Gran Altura" y el producto es 4 o 5
     if (selectedProducto.id === "4" || selectedProducto.id === "5") {
       // Solo permitir "Gran Altura" si la serie es 195
@@ -525,13 +532,13 @@ function Frentes() {
         return; // Bloquear selección si la serie no es la correcta
       }
     }
-  
+
     // Verificar si es el especial "tirada vertical" (ID 194)
     if (id === "194" && selectedSerie.nombre.toLowerCase() !== "kanto") {
       alert("El especial 'tirada vertical' solo está disponible para la serie Kanto.");
       return; // Bloquear selección si la serie no es Kanto
     }
-  
+
     // Si el usuario selecciona la opción vacía
     if (id === "") {
       if (especialIndex === 1) {
@@ -545,7 +552,7 @@ function Frentes() {
       }
       return; // Salir de la función si se selecciona el valor vacío
     }
-  
+
     // Procesar la selección de especiales como de costumbre
     const selectedEspecial = listEspeciales.find(especial => especial.articulo_id === parseInt(id));
     if (especialIndex === 1) {
