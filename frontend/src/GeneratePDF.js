@@ -162,7 +162,7 @@ export const generatePDF = (data, userInfo) => {
     equipamiento3: "Equipamiento",
     baldas: "Baldas e iluminación", // Aquí incluimos los remates como una sección más
   };
-
+  const isValidField = (value) => value && value !== "--Selecciona una opción--";
   let startY = 52;
   let lastFrenteProcessed = "";
   let lastInterioresProcessed = "";
@@ -177,6 +177,7 @@ export const generatePDF = (data, userInfo) => {
     if (!hasData) {
       return;  // Saltar esta sección si no tiene datos
     }
+    
 
     if (data[section]) {
       let sectionData = [];
@@ -208,8 +209,7 @@ export const generatePDF = (data, userInfo) => {
           // Calcular los puntos basado en la cantidad
           
         }
-
-        if (value && labelsMap[key]) {
+        if (isValidField(value) && labelsMap[key]) {
           sectionData.push(`${value}`);
           startY = checkPageSpace(doc, startY);
         }

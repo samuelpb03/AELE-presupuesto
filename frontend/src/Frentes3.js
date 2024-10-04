@@ -488,20 +488,24 @@ function Frentes3() {
 
     setSelectedColor({ id, nombre });
     handleSelectChange("color", id, nombre);
-
-    if (id === '55' || id === '56') {
-      setShouldApplyColorIncrement(true);  // Marcar que se debe aplicar el incremento cuando haya puntos
-      setIsColorValueAdded(true);  // Activar el mensaje del 20%
-
-      // Si las medidas ya están seleccionadas, aplicar el incremento inmediatamente
-      if (selectedMedidas.id) {
-        setPuntos(Math.ceil(selectedMedidas.puntos * 1.2));  // Aplicar incremento si ya hay medidas seleccionadas
-      }
+    if (id === "") {
+      setSelectedColor({ id: "", nombre: "" });
     } else {
-      setShouldApplyColorIncrement(false);  // No aplicar incremento
-      setIsColorValueAdded(false);  // Desactivar el mensaje
-      setPuntos(selectedMedidas.puntos);  // Restablecer los puntos originales si no aplica
+      if (id === '55' || id === '56') {
+        setShouldApplyColorIncrement(true);  // Marcar que se debe aplicar el incremento cuando haya puntos
+        setIsColorValueAdded(true);  // Activar el mensaje del 20%
+
+        // Si las medidas ya están seleccionadas, aplicar el incremento inmediatamente
+        if (selectedMedidas.id) {
+          setPuntos(Math.ceil(selectedMedidas.puntos * 1.2));  // Aplicar incremento si ya hay medidas seleccionadas
+        }
+      } else {
+        setShouldApplyColorIncrement(false);  // No aplicar incremento
+        setIsColorValueAdded(false);  // Desactivar el mensaje
+        setPuntos(selectedMedidas.puntos);  // Restablecer los puntos originales si no aplica
+      }
     }
+
   };
 
   const handleSelectMedidasChange = (event) => {
