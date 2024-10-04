@@ -42,8 +42,8 @@ function Frentes3() {
   const backendUrl = 'http://194.164.166.129:6969'; // URL de ngrok para el backend
   const user = localStorage.getItem('user');
   if (!user) {
-      //Redirigir a login.php si no está autenticado
-      window.location.href = '/login.php';
+    //Redirigir a login.php si no está autenticado
+    window.location.href = '/login.php';
   }
   useEffect(() => {
     if (data.frentes3) {
@@ -214,7 +214,7 @@ function Frentes3() {
           const kantoSeries = res.data.filter(serie => serie.nombre === "kanto");
           const otherSeries = res.data.filter(serie => serie.nombre !== "kanto");
           const sortedSeries = [...kantoSeries, ...otherSeries]; // Poner Kanto primero
-  
+
           setListSerie(sortedSeries);
           document.getElementById("serie").disabled = false;
         } else {
@@ -370,11 +370,11 @@ function Frentes3() {
     const index = event.target.selectedIndex;
     const nombre = event.target.options[index].text;
     const id = event.target.value;
-    
+
     // Actualizar el producto seleccionado
     setSelectedProducto({ id, nombre });
     handleSelectChange("producto", id, nombre);
-  
+
     // Limpiar los especiales seleccionados
     setSelectedEspecial1({ id: "", nombre: "", puntos: 0 });
     setSelectedEspecial2({ id: "", nombre: "", puntos: 0 });
@@ -382,7 +382,7 @@ function Frentes3() {
     setCantidadEspecial2(0);
     setPuntosEspecial1(0);
     setPuntosEspecial2(0);
-  
+
     // Si el producto es 4 o 5, filtrar solo "Gran Altura"
     if (id === "4" || id === "5") {
       const especialGranAltura = listEspeciales.find(especial => especial.articulo_id === 195);
@@ -397,7 +397,7 @@ function Frentes3() {
         console.error("Error fetching articulos especiales:", error);
       });
     }
-  
+
     // Resetear los demás campos relacionados con puntos
     setSelectedArticulo({ id: "", nombre: "" });
     setSelectedMaterial({ id: "", nombre: "" });
@@ -412,10 +412,10 @@ function Frentes3() {
     const index = event.target.selectedIndex;
     const nombre = event.target.options[index].text;
     const id = event.target.value;
-  
+
     setSelectedSerie({ id, nombre });
     handleSelectChange("serie", id, nombre);
-  
+
     // Restablecer los campos siguientes y los puntos al cambiar la serie
     setSelectedArticulo({ id: "", nombre: "" }); // Restablecer artículo
     setSelectedMaterial({ id: "", nombre: "" }); // Restablecer material
@@ -435,14 +435,37 @@ function Frentes3() {
     const index = event.target.selectedIndex;
     const nombre = event.target.options[index].text;
     const id = event.target.value;
-    setSelectedArticulo({ id, nombre });
-    handleSelectChange("articulo", id, nombre);
-    setSelectedMaterial({ id: "", nombre: "" }); // Restablecer material
-    setSelectedColor({ id: "", nombre: "" }); // Restablecer color
-    setSelectedMedidas({ id: "", nombre: "", puntos: 0 }); // Restablecer medidas
-    setSelectedMaterialFranja({ id: "", nombre: "" }); // Restablecer material franja
-    setSelectedColorFranja({ id: "", nombre: "" }); // Restablecer color franja
-    setPuntos(0); // Restablecer puntos
+
+    if (id === "") {
+      // Si se selecciona "--Selecciona una opción--", limpiar todos los campos relacionados
+      setSelectedArticulo({ id: "", nombre: "" });
+      setSelectedMaterial({ id: "", nombre: "" });
+      setSelectedColor({ id: "", nombre: "" });
+      setSelectedMedidas({ id: "", nombre: "", puntos: 0 });
+      setSelectedMaterialFranja({ id: "", nombre: "" });
+      setSelectedColorFranja({ id: "", nombre: "" });
+      setPuntos(0); // Restablecer puntos
+
+      // También actualizar el contexto para que no aparezcan en el PDF
+      handleSelectChange("articulo", "", "");
+      handleSelectChange("material", "", "");
+      handleSelectChange("color", "", "");
+      handleSelectChange("medidas", "", "");
+      handleSelectChange("materialFranja", "", "");
+      handleSelectChange("colorFranja", "", "");
+    } else {
+      // Si se selecciona un artículo válido, continuar normalmente
+      setSelectedArticulo({ id, nombre });
+      handleSelectChange("articulo", id, nombre);
+
+      // Restablecer los otros campos porque el artículo ha cambiado
+      setSelectedMaterial({ id: "", nombre: "" });
+      setSelectedColor({ id: "", nombre: "" });
+      setSelectedMedidas({ id: "", nombre: "", puntos: 0 });
+      setSelectedMaterialFranja({ id: "", nombre: "" });
+      setSelectedColorFranja({ id: "", nombre: "" });
+      setPuntos(0); // Restablecer puntos
+    }
   };
 
   const handleSelectMaterialChange = (event) => {
@@ -467,66 +490,81 @@ function Frentes3() {
     handleSelectChange("color", id, nombre);
 
     if (id === '55' || id === '56') {
-        setShouldApplyColorIncrement(true);  // Marcar que se debe aplicar el incremento cuando haya puntos
-        setIsColorValueAdded(true);  // Activar el mensaje del 20%
+      setShouldApplyColorIncrement(true);  // Marcar que se debe aplicar el incremento cuando haya puntos
+      setIsColorValueAdded(true);  // Activar el mensaje del 20%
 
-        // Si las medidas ya están seleccionadas, aplicar el incremento inmediatamente
-        if (selectedMedidas.id) {
-            setPuntos(Math.ceil(selectedMedidas.puntos * 1.2));  // Aplicar incremento si ya hay medidas seleccionadas
-        }
+      // Si las medidas ya están seleccionadas, aplicar el incremento inmediatamente
+      if (selectedMedidas.id) {
+        setPuntos(Math.ceil(selectedMedidas.puntos * 1.2));  // Aplicar incremento si ya hay medidas seleccionadas
+      }
     } else {
-        setShouldApplyColorIncrement(false);  // No aplicar incremento
-        setIsColorValueAdded(false);  // Desactivar el mensaje
-        setPuntos(selectedMedidas.puntos);  // Restablecer los puntos originales si no aplica
+      setShouldApplyColorIncrement(false);  // No aplicar incremento
+      setIsColorValueAdded(false);  // Desactivar el mensaje
+      setPuntos(selectedMedidas.puntos);  // Restablecer los puntos originales si no aplica
     }
-};
+  };
 
-const handleSelectMedidasChange = (event) => {
-  const index = event.target.selectedIndex;
-  const nombre = event.target.options[index].text;
-  const id = event.target.value;
-  if (cantidad < 1) {
-    setCantidad ++;
-  }
-  const selectedMedida = listMedidas.find(medida => medida.medidas_id === parseInt(id));
+  const handleSelectMedidasChange = (event) => {
+    const index = event.target.selectedIndex;
+    const nombre = event.target.options[index].text;
+    const id = event.target.value;
+    if (cantidad < 1) {
+      setCantidad++;
+    }
+    const selectedMedida = listMedidas.find(medida => medida.medidas_id === parseInt(id));
 
-  setSelectedMedidas({ id, nombre, puntos: selectedMedida.puntos });
-  handleSelectChange("medidas", id, nombre);
+    setSelectedMedidas({ id, nombre, puntos: selectedMedida.puntos });
+    handleSelectChange("medidas", id, nombre);
 
-  let newPuntos = selectedMedida.puntos;
+    let newPuntos = selectedMedida.puntos;
 
-  // Verificar si el color seleccionado es "Color según muestra" o "Laca según muestra"
-  if (selectedColor.id === '55' || selectedColor.id === '56') {
+    // Verificar si el color seleccionado es "Color según muestra" o "Laca según muestra"
+    if (selectedColor.id === '55' || selectedColor.id === '56') {
       newPuntos = Math.ceil(selectedMedida.puntos * 1.2);  // Aplicar incremento del 20% y redondear hacia arriba
-  }
-  if (brakesChecked) {
-    newPuntos += 73;  // Añadir puntos por los frenos si el checkbox está marcado
-  }
+    }
+    if (brakesChecked) {
+      newPuntos += 73;  // Añadir puntos por los frenos si el checkbox está marcado
+    }
 
-  setPuntos(newPuntos);  // Actualizar los puntos con o sin incremento
-};
+    setPuntos(newPuntos);  // Actualizar los puntos con o sin incremento
+  };
 
   const handleSelectMaterialFranjaChange = (event) => {
     const index = event.target.selectedIndex;
     const nombre = event.target.options[index].text;
     const id = event.target.value;
-    setSelectedMaterialFranja({ id, nombre });
-    handleSelectChange("materialFranja", id, nombre);
+    if (id === "") {
+      // Si se selecciona "--Selecciona una opción--", limpiar todos los campos relacionados
+      setSelectedMaterialFranja({ id: "", nombre: "" });
+      setSelectedColorFranja({ id: "", nombre: "" });
+    }
+    else {
+      setSelectedMaterialFranja({ id, nombre });
+      setSelectedColorFranja({ id: "", nombre: "" });
+      handleSelectChange("materialFranja", id, nombre);
+    }
+
   };
 
   const handleSelectColorFranjaChange = (event) => {
     const index = event.target.selectedIndex;
     const nombre = event.target.options[index].text;
     const id = event.target.value;
-    setSelectedColorFranja({ id, nombre });
-    handleSelectChange("colorFranja", id, nombre);
+    if (id === "") {
+      // Si se selecciona "--Selecciona una opción--", limpiar todos los campos relacionados
+      setSelectedColorFranja({ id: "", nombre: "" });
+    }
+    else {
+      setSelectedColorFranja({ id, nombre });
+      handleSelectChange("colorFranja", id, nombre);
+    }
   };
 
   const handleSelectEspecialChange = (especialIndex, event) => {
     const index = event.target.selectedIndex;
     const nombre = event.target.options[index].text;
     const id = event.target.value;
-  
+
     // Verificar si es el especial "Gran Altura" y el producto es 4 o 5
     if (selectedProducto.id === "4" || selectedProducto.id === "5") {
       // Solo permitir "Gran Altura" si la serie es 195
@@ -535,13 +573,13 @@ const handleSelectMedidasChange = (event) => {
         return; // Bloquear selección si la serie no es la correcta
       }
     }
-  
+
     // Verificar si es el especial "tirada vertical" (ID 194)
     if (id === "194" && selectedSerie.nombre.toLowerCase() !== "kanto") {
       alert("El especial 'tirada vertical' solo está disponible para la serie Kanto.");
       return; // Bloquear selección si la serie no es Kanto
     }
-  
+
     // Si el usuario selecciona la opción vacía
     if (id === "") {
       if (especialIndex === 1) {
@@ -555,7 +593,7 @@ const handleSelectMedidasChange = (event) => {
       }
       return; // Salir de la función si se selecciona el valor vacío
     }
-  
+
     // Procesar la selección de especiales como de costumbre
     const selectedEspecial = listEspeciales.find(especial => especial.articulo_id === parseInt(id));
     if (especialIndex === 1) {
@@ -732,7 +770,7 @@ const handleSelectMedidasChange = (event) => {
           </div>
         </div>
       </div>
-  
+
       <div className="section">
         <div className="container4">
           <h2>Especiales a Medida</h2>
@@ -751,7 +789,7 @@ const handleSelectMedidasChange = (event) => {
               ))}
             </select>
           </div>
-          
+
           <div className="field-special">
             <label htmlFor="cantidadEspecial1">Cantidad:</label>
             <input
@@ -767,7 +805,7 @@ const handleSelectMedidasChange = (event) => {
             <select disabled>
               <option value="" >{puntosEspecial1}</option>
             </select>
-            
+
           </div>
           <div className="field-special">
             <label htmlFor="especial2">Artículo Especial 2:</label>
@@ -784,7 +822,7 @@ const handleSelectMedidasChange = (event) => {
               ))}
             </select>
           </div>
-          
+
           <div className="field-special">
             <label htmlFor="cantidadEspecial2">Cantidad:</label>
             <input

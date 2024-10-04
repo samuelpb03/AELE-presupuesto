@@ -434,14 +434,37 @@ function Frentes2() {
     const index = event.target.selectedIndex;
     const nombre = event.target.options[index].text;
     const id = event.target.value;
-    setSelectedArticulo({ id, nombre });
-    handleSelectChange("articulo", id, nombre);
-    setSelectedMaterial({ id: "", nombre: "" }); // Restablecer material
-    setSelectedColor({ id: "", nombre: "" }); // Restablecer color
-    setSelectedMedidas({ id: "", nombre: "", puntos: 0 }); // Restablecer medidas
-    setSelectedMaterialFranja({ id: "", nombre: "" }); // Restablecer material franja
-    setSelectedColorFranja({ id: "", nombre: "" }); // Restablecer color franja
-    setPuntos(0); // Restablecer puntos
+  
+    if (id === "") {
+      // Si se selecciona "--Selecciona una opción--", limpiar todos los campos relacionados
+      setSelectedArticulo({ id: "", nombre: "" });
+      setSelectedMaterial({ id: "", nombre: "" });
+      setSelectedColor({ id: "", nombre: "" });
+      setSelectedMedidas({ id: "", nombre: "", puntos: 0 });
+      setSelectedMaterialFranja({ id: "", nombre: "" });
+      setSelectedColorFranja({ id: "", nombre: "" });
+      setPuntos(0); // Restablecer puntos
+  
+      // También actualizar el contexto para que no aparezcan en el PDF
+      handleSelectChange("articulo", "", "");
+      handleSelectChange("material", "", "");
+      handleSelectChange("color", "", "");
+      handleSelectChange("medidas", "", "");
+      handleSelectChange("materialFranja", "", "");
+      handleSelectChange("colorFranja", "", "");
+    } else {
+      // Si se selecciona un artículo válido, continuar normalmente
+      setSelectedArticulo({ id, nombre });
+      handleSelectChange("articulo", id, nombre);
+  
+      // Restablecer los otros campos porque el artículo ha cambiado
+      setSelectedMaterial({ id: "", nombre: "" });
+      setSelectedColor({ id: "", nombre: "" });
+      setSelectedMedidas({ id: "", nombre: "", puntos: 0 });
+      setSelectedMaterialFranja({ id: "", nombre: "" });
+      setSelectedColorFranja({ id: "", nombre: "" });
+      setPuntos(0); // Restablecer puntos
+    }
   };
 
   const handleSelectMaterialChange = (event) => {
