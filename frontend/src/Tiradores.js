@@ -151,89 +151,115 @@ function Tiradores() {
   }, [selectedArticulos, backendUrl]);
 
   const handleSelectArticuloChange = async (index, event, isCerradura = false) => {
-    const updatedArticulos = [...selectedArticulos];
-    const updatedCantidades = [...cantidades];
-    const selectedIndex = event.target.selectedIndex;
-    const nombre = event.target.options[selectedIndex].text;
-    const id = event.target.value;
-    const serieId = event.target.options[selectedIndex].getAttribute('data-serie-id');
-    updatedArticulos[index] = { id, nombre, puntos: 0, serieId };
+  const updatedArticulos = [...selectedArticulos];
+  const updatedColores = [...selectedColores]; // Añadido para actualizar los colores también
+  const updatedCantidades = [...cantidades];
+  const selectedIndex = event.target.selectedIndex;
+  const nombre = event.target.options[selectedIndex].text;
+  const id = event.target.value;
+  const serieId = event.target.options[selectedIndex].getAttribute('data-serie-id');
+
+  // Si se selecciona "--Selecciona una opción--", restablecer el artículo y el color a vacío
+  if (id === "") {
+    updatedArticulos[index] = { id: "", nombre: "", puntos: 0, serieId: "" };
+    updatedColores[index] = { id: "", nombre: "" }; // Limpiar el color asociado
+    updatedCantidades[index] = 0;
     setSelectedArticulos(updatedArticulos);
-
-    // Set cantidad to 1 if an article is selected
-    if (id) {
-      updatedCantidades[index] = 1;
-    }
+    setSelectedColores(updatedColores); // Limpiar el estado del color también
     setCantidades(updatedCantidades);
+    setPuntos(prevPuntos => {
+      const newPuntos = [...prevPuntos];
+      newPuntos[index] = 0; // Restablecer los puntos a 0
+      return newPuntos;
+    });
 
-    try {
-      const materialRes = await axios.get(`${backendUrl}/materialesPorArticulo`, {
+    // Actualizar en el contexto
+    handleSelectChangeF(`articulo${index + 1}`, "", "");
+    handleSelectChangeF(`color${index + 1}`, "", ""); // Limpiar el color en el contexto también
+    return; // Salir de la función si se selecciona "--Selecciona una opción--"
+  }
+
+  // Si se selecciona un artículo válido, procesarlo normalmente
+  updatedArticulos[index] = { id, nombre, puntos: 0, serieId };
+  setSelectedArticulos(updatedArticulos);
+
+  // Set cantidad to 1 if an article is selected
+  if (id) {
+    updatedCantidades[index] = 1;
+  }
+  setCantidades(updatedCantidades);
+
+  try {
+    const materialRes = await axios.get(`${backendUrl}/materialesPorArticulo`, {
+      headers: {
+        'ngrok-skip-browser-warning': 'true'
+      },
+      params: { articuloId: id }
+    });
+    const materialId = materialRes.data.length > 0 ? materialRes.data[0].material : null;
+    if (materialId) {
+      const medidasRes = await axios.get(`${backendUrl}/medidasConPuntos`, {
         headers: {
           'ngrok-skip-browser-warning': 'true'
         },
-        params: { articuloId: id }
+        params: { articuloId: id, materialId }
       });
-      const materialId = materialRes.data.length > 0 ? materialRes.data[0].material : null;
-      if (materialId) {
-        console.log(`Material ID for articuloId ${id}: ${materialId}`);
-        const medidasRes = await axios.get(`${backendUrl}/medidasConPuntos`, {
-          headers: {
-            'ngrok-skip-browser-warning': 'true'
-          },
-          params: { articuloId: id, materialId }
+      const selectedArticulo = medidasRes.data.length > 0 ? medidasRes.data[0] : { puntos: 0 };
+      const puntos = selectedArticulo.puntos;
+
+      updatedArticulos[index].puntos = puntos; // Actualizar los puntos en el estado de selectedArticulos
+      setSelectedArticulos(updatedArticulos);
+
+      setPuntos(prevPuntos => {
+        const newPuntos = [...prevPuntos];
+        newPuntos[index] = puntos * updatedCantidades[index];
+        return newPuntos;
+      });
+
+      const coloresRes = await axios.get(`${backendUrl}/color`, {
+        headers: {
+          'ngrok-skip-browser-warning': 'true'
+        },
+        params: { materialId }
+      });
+      if (Array.isArray(coloresRes.data)) {
+        setListColor(prevListColor => {
+          const newListColor = [...prevListColor];
+          newListColor[index] = coloresRes.data; // Actualizar solo el índice correspondiente
+          return newListColor;
         });
-        const selectedArticulo = medidasRes.data.length > 0 ? medidasRes.data[0] : { puntos: 0 };
-        const puntos = selectedArticulo.puntos;
 
-        updatedArticulos[index].puntos = puntos; // Actualizar los puntos en el estado de selectedArticulos
-        setSelectedArticulos(updatedArticulos);
-
-        setPuntos(prevPuntos => {
-          const newPuntos = [...prevPuntos];
-          newPuntos[index] = puntos * updatedCantidades[index];
-          return newPuntos;
-        });
-
-        const coloresRes = await axios.get(`${backendUrl}/color`, {
-          headers: {
-            'ngrok-skip-browser-warning': 'true'
-          },
-          params: { materialId }
-        });
-        if (Array.isArray(coloresRes.data)) {
-          setListColor(prevListColor => {
-            const newListColor = [...prevListColor];
-            newListColor[index] = coloresRes.data; // Actualizar solo el índice correspondiente
-            return newListColor;
-          });
-
-          // Guardar los colores en el estado local para que se mantengan al cambiar de pestaña
-          const updatedColores = [...selectedColores];
-          if (updatedColores[index].id === "") {
-            updatedColores[index] = { id: coloresRes.data[0].color_id, nombre: coloresRes.data[0].nombre };
-            setSelectedColores(updatedColores);
-            handleSelectChangeF(`color${index + 1}`, coloresRes.data[0].color_id, coloresRes.data[0].nombre);
-          }
-        } else {
-          console.error("Error fetching colores: res.data is not an array");
+        // Guardar los colores en el estado local para que se mantengan al cambiar de pestaña
+        const updatedColores = [...selectedColores];
+        if (updatedColores[index].id === "") {
+          updatedColores[index] = { id: coloresRes.data[0].color_id, nombre: coloresRes.data[0].nombre };
+          setSelectedColores(updatedColores);
+          handleSelectChangeF(`color${index + 1}`, coloresRes.data[0].color_id, coloresRes.data[0].nombre);
         }
+      } else {
+        console.error("Error fetching colores: res.data is not an array");
       }
-    } catch (error) {
-      console.error("Error fetching puntos o colores:", error);
     }
+  } catch (error) {
+    console.error("Error fetching puntos o colores:", error);
+  }
 
-    handleSelectChangeF(`articulo${index + 1}`, id, nombre);
-  };
+  handleSelectChangeF(`articulo${index + 1}`, id, nombre);
+};
 
+
+  /**
+   * Manejar el cambio de selección de colores
+   * @param {number} index índice del color que se está modificando
+   * @param {Event} event Evento que se desencadena al cambiar la selección
+   */
   const handleSelectColorChange = (index, event) => {
     const updatedColores = [...selectedColores];
     const selectedIndex = event.target.selectedIndex;
     const nombre = event.target.options[selectedIndex].text;
     const id = event.target.value;
-
     updatedColores[index] = { id, nombre };
     setSelectedColores(updatedColores);
-
     handleSelectChangeF(`color${index + 1}`, id, nombre);
   };
 
