@@ -8,7 +8,7 @@ function Remates() {
   const { data, saveData } = useData();
   const [listArticulo, setListArticulo] = useState([]);
   const [selectedArticulos, setSelectedArticulos] = useState(Array(3).fill({ id: "", nombre: "", puntos: 0 }));
-  const [metros, setMetros] = useState(Array(3).fill(0));
+  const [metros, setMetros] = useState(Array(3).fill(2.5));
   const [listOtros, setListOtros] = useState([]);
   const [selectedOtros, setSelectedOtros] = useState(Array(3).fill({ id: "", nombre: "", puntos: 0 }));
   const [cantidadesOtros, setCantidadesOtros] = useState(Array(3).fill(0));
@@ -120,7 +120,7 @@ function Remates() {
     setSelectedArticulos(updatedArticulos);
 
     const updatedMetros = [...metros];
-    updatedMetros[index] = 0;  // Reset metros al cambiar el artículo
+    updatedMetros[index] = 2.5;  // Reset metros al cambiar el artículo
     setMetros(updatedMetros);
   };
 

@@ -73,6 +73,8 @@ const labelsMap = {
   cantidad7: "Cantidad 7",
   cantidad8: "Cantidad 8",
   cantidad9: "Cantidad 9",
+  cantidad10: "Cantidad 10",
+  cantidad11: "Cantidad 11",
   puntos4: "Puntos 4",
   puntos5: "Puntos 5",
   puntos6: "Puntos 6",
@@ -90,6 +92,8 @@ const labelsMap = {
   medidas7Nombre: "Medidas 7",
   medidas8Nombre: "Medidas 8",
   medidas9Nombre: "Medidas 9",
+  medidas10Nombre: "Medidas 10",
+  medidas11Nombre: "Medidas 11",
   puntosTotales1: "Puntos 1",
   puntosTotales2: "Puntos 2",
   puntosTotales3: "Puntos 3",
@@ -99,6 +103,8 @@ const labelsMap = {
   puntosTotales7: "Puntos 7",
   puntosTotales8: "Puntos 8",
   puntosTotales9: "Puntos 9",
+  puntosTotales10: "Puntos 10",
+  puntosTotales11: "Puntos 11",
 };
 
 // Función para generar el PDF
@@ -448,14 +454,14 @@ if (data.remates) {
   const numDesmontaje = data.instalacion?.numDesmontaje || 0;
   const numFrentesInteriores = data.instalacion?.numFrentesInteriores || 0;
   const numArmariosCompletos = data.instalacion?.numArmariosCompletos || 0;
-  let totalMontaje = (numFrentesInteriores * 110) + (numArmariosCompletos * 146) + 50;
+  let totalMontaje = (numFrentesInteriores * 110) + (numArmariosCompletos * 146) + 115;
 
   // Imprimir totales
   startY += 15;
   startY = checkPageSpace(doc, startY);
   doc.text(`Total Puntos: ${totalPuntos + (numDesmontaje * 121)}`, 12, startY);
   startY += 10;
-  doc.text(`Total Montaje e Instalación: ${totalMontaje.toFixed(2)} €`, 12, startY);
+  doc.text(`Total portes/acarreo: ${totalMontaje.toFixed(2)} €`, 12, startY);
 
   // Crear el nombre del PDF y enviarlo
   const centroAbreviado = centro.substring(0, 3).toUpperCase();
