@@ -500,7 +500,7 @@ if (data.remates) {
   const puntosFinal = await calcularPuntosTotales(centro, totalPuntos);
   startY += 15;
   startY = checkPageSpace(doc, startY);
-  doc.text(`Total Puntos: ${puntosFinal + (numDesmontaje * 121)}`, 12, startY);
+  doc.text(`Total Puntos: ${puntosFinal + (numDesmontaje * 121) + '€'}`, 12, startY);
   startY += 10;
   doc.text(`Total portes/acarreo: ${totalMontaje.toFixed(2)} €`, 12, startY);
 
