@@ -46,11 +46,11 @@
   background-color: #dce6f2;
   border-radius: 10px;
   border: 1px solid black;
-  max-width: 700px; /* Limitar el ancho total del contenedor */
+  max-width: 500px; /* Limitar el ancho total del contenedor */
 }
 
 .campos-usuario label {
-  width: 30%; /* Ajustar el ancho de los campos */
+  width: 40%; /* Ajustar el ancho de los campos */
   display: flex;
   flex-direction: column;
   font-weight: bold;

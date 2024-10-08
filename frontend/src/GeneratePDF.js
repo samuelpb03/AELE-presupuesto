@@ -106,9 +106,9 @@ const labelsMap = {
   puntosTotales10: "Puntos 10",
   puntosTotales11: "Puntos 11",
 };
-
+const valorPuntos = 1;
 // Función para generar el PDF
-export const generatePDF = (data, userInfo) => {
+export const generatePDF = async (data, userInfo) => {
   const doc = new jsPDF();
   const drawBorder = () => {
     doc.setLineWidth(0.5);
@@ -129,6 +129,7 @@ export const generatePDF = (data, userInfo) => {
   // Agregar logotipo
   const user = JSON.parse(localStorage.getItem('user'));
   const centro = user?.centro || 'Centro no especificado';
+  const idUsuario = user?.id || 'Usuario no especificado';
   let logo = 'logoAELE.png';
   if (centro === "Leroy Merlin") {
     logo = 'logoLeroy.png';
@@ -449,17 +450,57 @@ if (data.remates) {
       return subTotal;
     }, 0);
   }, 0) + puntosEspecialesTotal + puntosRematesTotal; // Añadir los puntos especiales y los puntos de remates
+  const obtenerTiendaId = async (centro) => {
+    console.log("Centro:", centro);
+    try {
+      const response = await fetch(`http://194.164.166.129:6969/getTiendaIdByName?nombreTienda=${centro}`);
+      const data = await response.json();
+      if (response.ok) {
+        return data.tiendaId;
+      } else {
+        console.error("Error al obtener el ID de la tienda:", data.message);
+        return null;
+      }
+    } catch (error) {
+      console.error("Error en la solicitud:", error);
+      return null;
+    }
+  };
+  
 
   // Cálculo de montaje e instalación
   const numDesmontaje = data.instalacion?.numDesmontaje || 0;
   const numFrentesInteriores = data.instalacion?.numFrentesInteriores || 0;
   const numArmariosCompletos = data.instalacion?.numArmariosCompletos || 0;
   let totalMontaje = (numFrentesInteriores * 110) + (numArmariosCompletos * 146) + 115;
-
+  const calcularPuntosTotales = async (nombreTienda, puntos) => {
+    try {
+      // Primero obtenemos el ID de la tienda basado en el nombre
+      const tiendaId = await obtenerTiendaId(nombreTienda);
+      if (!tiendaId) {
+        console.error("No se pudo obtener el ID de la tienda");
+        return null;
+      }
+  
+      // Usamos el ID de la tienda para calcular los puntos totales
+      const response = await fetch(`http://194.164.166.129:6969/calcularPuntosTotales?tiendaId=${tiendaId}&puntos=${puntos}`);
+      const data = await response.json();
+      if (response.ok) {
+        console.log("Puntos totales calculados:", data.puntosTotales);
+        return data.puntosTotales;
+      } else {
+        console.error("Error calculando puntos totales:", data.message);
+      }
+    } catch (error) {
+      console.error("Error en la solicitud:", error);
+    }
+    return null;
+  };
   // Imprimir totales
+  const puntosFinal = await calcularPuntosTotales(centro, totalPuntos);
   startY += 15;
   startY = checkPageSpace(doc, startY);
-  doc.text(`Total Puntos: ${totalPuntos + (numDesmontaje * 121)}`, 12, startY);
+  doc.text(`Total Puntos: ${puntosFinal + (numDesmontaje * 121)}`, 12, startY);
   startY += 10;
   doc.text(`Total portes/acarreo: ${totalMontaje.toFixed(2)} €`, 12, startY);
 

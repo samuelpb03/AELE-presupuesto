@@ -464,12 +464,12 @@ app.get("/materialesPorArticulo", (req, res) => {
   });
 });
 app.post("/presupuesto", (req, res) => {
-  const { centro, puntos, tienda, cliente } = req.body;
+  const { centro, puntos, cliente } = req.body;
 
-  if (!centro || !puntos || !tienda || !cliente) {
+  if (!centro || !puntos || !cliente) {
     return res.status(400).json({ error: "Todos los campos son requeridos" });
   }
-
+  const tienda = centro;
   // Inserción en la base de datos
   const query = `
     INSERT INTO presupuesto (Centro, Puntos, Tienda, Cliente)
@@ -493,8 +493,110 @@ app.post("/presupuesto", (req, res) => {
     });
   });
 });
+//Sacamos la tienda del usuario
+app.get("/usuarioTienda", (req, res) => {
+  const id = req.query.id;
+  const query = `
+    SELECT tienda FROM usuario WHERE usuario_id = ?;
+  `;
+  dbConnection.query(query, [articuloId], (err, data) => {
+    if (err) {
+      console.error("Error fetching materials:", err);
+      return res.status(500).json(err);
+    }
+    return res.json(data);
+  });
+});
+// Verificamos si existen promociones activas para la tienda
+app.get("/verificarPromocion", (req, res) => {
+  const idTienda = req.query.idTienda;
+  const query = `
+    SELECT COUNT(*) AS totalPromociones 
+    FROM tienda 
+    WHERE id = ? AND fechaInicio IS NOT NULL AND fechaFin IS NOT NULL;
+  `;
+  dbConnection.query(query, [idTienda], (err, data) => {
+    if (err) {
+      console.error("Error checking promotions:", err);
+      return res.status(500).json(err);
+    }
 
+    const tienePromociones = data[0].totalPromociones > 0;
+    return res.json({ tienePromociones });
+  });
+});
+// Si hay promociones activas, sacamos el valor de fechaInicio
+app.get("/hayPromocion", (req, res) => {
+  const idTienda = req.query.idTienda;
+  const query = `
+    SELECT fechaInicio 
+    FROM tienda 
+    WHERE id = ? AND fechaFin > CURDATE();
+  `;
+  dbConnection.query(query, [idTienda], (err, data) => {
+    if (err) {
+      console.error("Error fetching promotion:", err);
+      return res.status(500).json(err);
+    }
+    return res.json(data);
+  });
+});
+app.get("/calcularPuntosTotales", (req, res) => {
+  const tiendaId = req.query.tiendaId;
+  const puntos = req.query.puntos;
 
+  // Verificar si los parámetros llegaron correctamente
+  console.log("Tienda ID:", tiendaId, "Puntos:", puntos);
+
+  const query = `
+    SELECT t.id AS tiendaId, t.nombre AS tiendaNombre, t.empresa AS empresaId, e.valorPunto AS valorPuntoEmpresa
+    FROM tienda t
+    JOIN empresa e ON t.empresa = e.id
+    WHERE t.id = ?
+  `;
+
+  dbConnection.query(query, [tiendaId], (err, data) => {
+    if (err) {
+      console.error("Error fetching tienda and empresa:", err);
+      return res.status(500).json(err);
+    }
+
+    if (data.length === 0) {
+      return res.status(404).json({ message: "Tienda no encontrada" });
+    }
+
+    const valorPuntoEmpresa = data[0].valorPuntoEmpresa;
+    console.log("Valor Punto Empresa:", valorPuntoEmpresa);
+
+    const puntosTotales = puntos * valorPuntoEmpresa;
+    console.log("Puntos Totales Calculados:", puntosTotales);
+
+    return res.json({ puntosTotales });
+  });
+});
+// Ruta para obtener el ID de la tienda a partir del nombre
+app.get("/getTiendaIdByName", (req, res) => {
+  const { nombreTienda } = req.query;
+
+  if (!nombreTienda) {
+    return res.status(400).json({ error: "El nombre de la tienda es requerido" });
+  }
+
+  const query = `SELECT id FROM tienda WHERE nombre = ?`;
+
+  dbConnection.query(query, [nombreTienda], (err, data) => {
+    if (err) {
+      console.error("Error fetching tienda ID:", err);
+      return res.status(500).json({ error: "Error al obtener el ID de la tienda" });
+    }
+
+    if (data.length === 0) {
+      return res.status(404).json({ message: "Tienda no encontrada" });
+    }
+
+    return res.json({ tiendaId: data[0].id });
+  });
+});
 // Monta Express en el puerto.
 app.listen(port, () => {
   console.log(">>> SERVIDOR CORRIENDO EN: " + host + ":" + port);

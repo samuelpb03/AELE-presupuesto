@@ -33,8 +33,8 @@ function Instalacion() {
   }, [numFrentesInteriores, numArmariosCompletos, numDesmontaje, montajeAcarreo, saveData]);
 
   const handleGeneratePDF = () => {
-    if (!userInfo.tienda.trim() || !userInfo.cliente.trim() || !userInfo.telefono.trim()) {
-      alert("Por favor, rellena los campos de Tienda, Cliente y Teléfono antes de generar el presupuesto.");
+    if (!userInfo.cliente.trim() || !userInfo.telefono.trim()) {
+      alert("Por favor, rellena los campos Cliente y Teléfono antes de generar el presupuesto.");
       return;
     }
     
