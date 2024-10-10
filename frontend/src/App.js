@@ -15,6 +15,25 @@ import NavigationController from './ControlNavegacion';
 import CamposUsuario from './CamposUsuario';  // Importamos el nuevo componente
 import './App.css';
 
+/**
+ * App
+ * 
+ * Este es el componente principal de la aplicaci n, 
+ * el cual contiene todos los componentes de las diferentes secciones.
+ * 
+ * Se utiliza el contexto de DataProvider para proveer los datos
+ * de los productos y los campos de usuario a los componentes,
+ * y el contexto de TabsProvider para proveer las opciones de las secciones.
+ * 
+ * Se utiliza BrowserRouter para crear un enrutador para las diferentes secciones,
+ * y NavigationController para controlar la navegaci n entre secciones.
+ * 
+ * Se incluyen los campos de usuario en el componente CamposUsuario.
+ * 
+ * Se utilizan los componentes de las diferentes secciones que se encuentran en el directorio ./src.
+ * 
+ * @returns {React.ReactElement} El componente principal de la aplicaci n.
+ */
 function App() {
   return (
     <DataProvider>
@@ -24,8 +43,6 @@ function App() {
             <NavigationController />
             {/* Incluimos los campos de usuario */}
             <CamposUsuario />  
-            <div className="tabs">
-            </div>
             <Routes>
               <Route path='/Frentes2' element={<Frentes2 />} />
               <Route path='/Tiradores' element={<Tiradores />} />
