@@ -282,7 +282,7 @@ a:link, a:visited, a:active {
   padding: 10px 30px;
   background: linear-gradient(45deg, #b1d3eb, #dce6f2);
   color: #424242;
-  border-radius: 30px;
+  border-radius: 10px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   margin: 5px;
 }
