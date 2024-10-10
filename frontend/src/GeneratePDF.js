@@ -473,6 +473,30 @@ if (data.remates) {
   const numFrentesInteriores = data.instalacion?.numFrentesInteriores || 0;
   const numArmariosCompletos = data.instalacion?.numArmariosCompletos || 0;
   let totalMontaje = (numFrentesInteriores * 110) + (numArmariosCompletos * 146) + 115;
+  const calcularPuntosConPromociones = async (nombreTienda, puntos) => {
+    try {
+      // Obtenemos el ID de la tienda
+      const tiendaId = await obtenerTiendaId(nombreTienda);
+      if (!tiendaId) {
+        console.error("No se pudo obtener el ID de la tienda");
+        return null;
+      }
+  
+      // Consultamos el backend para calcular los puntos con las promociones
+      const response = await fetch(`http://194.164.166.129:6969/calcularPuntosConPromociones?tiendaId=${tiendaId}&puntos=${puntos}`);
+      const data = await response.json();
+      if (response.ok) {
+        return data.puntosTotales;
+      } else {
+        console.error("Error calculando puntos con promociones:", data.message);
+      }
+    } catch (error) {
+      console.error("Error en la solicitud:", error);
+    }
+    return null;
+  };
+  
+  // Luego, en el lugar donde calculas los puntos totales, llamas a esta nueva función:
   const calcularPuntosTotales = async (nombreTienda, puntos) => {
     try {
       // Primero obtenemos el ID de la tienda basado en el nombre
@@ -497,10 +521,13 @@ if (data.remates) {
     return null;
   };
   // Imprimir totales
-  const puntosFinal = await calcularPuntosTotales(centro, totalPuntos);
+  var puntosFinal = await calcularPuntosConPromociones(centro, totalPuntos);
+  if (puntosFinal === null || puntosFinal === undefined || puntosFinal === 0) {
+    puntosFinal = await calcularPuntosTotales(centro, totalPuntos);
+  }
   startY += 15;
   startY = checkPageSpace(doc, startY);
-  doc.text(`Total Puntos: ${puntosFinal + (numDesmontaje * 121) + '€'}`, 12, startY);
+  doc.text(`Total Puntos: ${(puntosFinal / 10) * 10  + (numDesmontaje * 121) + '€'}`, 12, startY);
   startY += 10;
   doc.text(`Total portes/acarreo: ${totalMontaje.toFixed(2)} €`, 12, startY);
 

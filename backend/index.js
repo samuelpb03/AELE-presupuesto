@@ -541,6 +541,48 @@ app.get("/hayPromocion", (req, res) => {
     return res.json(data);
   });
 });
+app.get("/calcularPuntosConPromociones", (req, res) => {
+  const tiendaId = req.query.tiendaId;
+  const puntos = req.query.puntos;
+
+  // Verificar promociones de tienda y empresa
+  const query = `
+    SELECT 
+      t.id AS tiendaId, t.nombre AS tiendaNombre, t.empresa AS empresaId,
+      t.valorPuntoPromo AS valorPuntosPromoTienda, t.fechaInicioPromo AS promoInicioTienda, t.fechaFinPromo AS promoFinTienda,
+      e.valorPuntosPromo AS valorPuntoPromoEmpresa, e.fechaPromoInicio AS promoInicioEmpresa, e.fechaFinPromo AS promoFinEmpresa
+    FROM tienda t
+    JOIN empresa e ON t.empresa = e.id
+    WHERE t.id = ?;
+  `;
+
+  dbConnection.query(query, [tiendaId], (err, data) => {
+    if (err) {
+      console.error("Error fetching tienda and empresa:", err);
+      return res.status(500).json(err);
+    }
+
+    if (data.length === 0) {
+      return res.status(404).json({ message: "Tienda no encontrada" });
+    }
+
+    const today = new Date();
+    const tienda = data[0];
+    let puntosCalculados = puntos;
+
+    // Verificar si la tienda tiene promoción activa
+    if (new Date(tienda.promoInicioTienda) <= today && today <= new Date(tienda.promoFinTienda)) {
+      puntosCalculados *= tienda.valorPuntosPromoTienda;
+    }
+
+    // Verificar si la empresa tiene promoción activa
+    if (new Date(tienda.promoInicioEmpresa) <= today && today <= new Date(tienda.promoFinEmpresa)) {
+      puntosCalculados *= tienda.valorPuntoPromoEmpresa;
+    }
+
+    return res.json({ puntosTotales: puntosCalculados });
+  });
+});
 app.get("/calcularPuntosTotales", (req, res) => {
   const tiendaId = req.query.tiendaId;
   const puntos = req.query.puntos;
