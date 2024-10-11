@@ -24,8 +24,8 @@ function Instalacion() {
 
   useEffect(() => {
     const formattedData = {
-      numFrentesInteriores,
-      numArmariosCompletos,
+      numFrentesInteriores: parseFloat(numFrentesInteriores).toFixed(2),
+      numArmariosCompletos: parseFloat(numArmariosCompletos).toFixed(2),
       numDesmontaje, // Guardar el número de desmontajes
       montajeAcarreo,
     };
@@ -45,7 +45,11 @@ function Instalacion() {
 
   const handleCloseModal = () => {
     setShowModal(false);
-    window.location.href = '/';// Navegar de vuelta a la página principal
+    window.location.href = '/'; // Navegar de vuelta a la página principal
+  };
+
+  const handleEditar = () => {
+    setShowModal(false); // Navegar de vuelta a la página principal
   };
 
   return (
@@ -53,23 +57,25 @@ function Instalacion() {
       <div className="container2">
         <h1>Instalación</h1>
         <div className="field-instalacion">
-          <label htmlFor="numFrentesInteriores">Número de frentes/interiores:</label>
+          <label htmlFor="numFrentesInteriores">Número de frentes/interiores por metro lineal:</label>
           <input
             type="number"
+            step="0.01" // Permitir decimales
             id="numFrentesInteriores"
             value={numFrentesInteriores}
             min={0}
-            onChange={(e) => setNumFrentesInteriores(parseInt(e.target.value, 10) || 0)}
+            onChange={(e) => setNumFrentesInteriores(parseFloat(e.target.value) || 0)}
           />
         </div>
         <div className="field-instalacion">
-          <label htmlFor="numArmariosCompletos">Armarios completos:</label>
+          <label htmlFor="numArmariosCompletos">Armarios completos por metro lineal:</label>
           <input
             type="number"
+            step="0.01" // Permitir decimales
             id="numArmariosCompletos"
             value={numArmariosCompletos}
             min={0}
-            onChange={(e) => setNumArmariosCompletos(parseInt(e.target.value, 10) || 0)}
+            onChange={(e) => setNumArmariosCompletos(parseFloat(e.target.value) || 0)}
           />
         </div>
         <div className="field-instalacion">
@@ -79,7 +85,7 @@ function Instalacion() {
             id="numDesmontaje"
             value={numDesmontaje}
             min={0}
-            onChange={(e) => setNumDesmontaje(parseInt(e.target.value, 10) || 0)}
+            onChange={(e) => setNumDesmontaje(parseFloat(e.target.value) || 0)}
           />
         </div>
         <div className="field-instalacion">
@@ -92,6 +98,7 @@ function Instalacion() {
             <h2>Su presupuesto ha sido realizado con éxito</h2>
             <p>Lo encontrará en su carpeta de descargas</p>
             <button onClick={handleCloseModal}>Cerrar</button>
+            <button onClick={handleEditar}>Editar presupuesto</button>
           </div>
         </div>
       )}
@@ -99,6 +106,4 @@ function Instalacion() {
   );
 }
 
-
 export default Instalacion;
-

@@ -112,12 +112,11 @@ function Remates() {
   const handleSelectArticuloChange = (index, event) => {
     const updatedArticulos = [...selectedArticulos];
     const selectedIndex = event.target.selectedIndex;
-    const nombre = event.target.options[selectedIndex].text;
+    const nombre = event.target.options[selectedIndex].text; // Guardamos el nombre del artículo
     const id = event.target.value;
     const puntos = parseInt(event.target.options[selectedIndex].getAttribute('data-puntos'), 10) || 0;
-
-    updatedArticulos[index] = { id, nombre, puntos };
-    setSelectedArticulos(updatedArticulos);
+    updatedArticulos[index] = { id, nombre, puntos }; // Actualizamos el artículo seleccionado
+    setSelectedArticulos(updatedArticulos); // Actualizamos el estado de los artículos seleccionados
 
     const updatedMetros = [...metros];
     updatedMetros[index] = 2.5;  // Reset metros al cambiar el artículo
@@ -146,6 +145,7 @@ function Remates() {
     const updatedCantidades = [...cantidadesOtros];
     updatedCantidades[index] = id ? 1 : 0;  // Reiniciar a 1 cuando se selecciona un nuevo artículo
     setCantidadesOtros(updatedCantidades);
+    setSelectedOtros(updatedOtros);
   };
 
   // Manejar el cambio de cantidad para otros artículos
@@ -163,7 +163,7 @@ function Remates() {
       <select
         id={`articulo${index + 1}`}
         onChange={(event) => handleSelectArticuloChange(index, event)}
-        value={selectedArticulos[index].id}
+        value={selectedArticulos[index].id || ""}
       >
         <option value="">--Selecciona una opción--</option>
         {filteredArticulos.map((articulo) => (
@@ -172,7 +172,7 @@ function Remates() {
           </option>
         ))}
       </select>
-
+  
       <label htmlFor={`metros${index + 1}`}>Metros:</label>
       <input
         type="number"
