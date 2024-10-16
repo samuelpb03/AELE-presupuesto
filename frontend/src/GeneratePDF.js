@@ -253,7 +253,7 @@ export const generatePDF = async (data, userInfo) => {
         doc.setFontSize(7);
         doc.setFont("helvetica", "bold"); // Texto en negrita
         startY = checkPageSpace(doc, startY);
-        doc.text(`${puntosSeccion}`, pageWidth - 50, startY); // Imprimir los puntos alineados a la derecha
+        doc.text(`${puntosSeccion}`, pageWidth - 40, startY); // Imprimir los puntos alineados a la derecha
         doc.setFont("helvetica", "normal");  // Volver a la fuente normal
       }
 
@@ -530,7 +530,7 @@ if (data.remates) {
   startY = checkPageSpace(doc, startY);
 
 // Calcular los puntos finales con los desmontajes
-doc.text(`Total Puntos: ${(puntosFinal / 10) * 10}€`, 12, startY);
+doc.text(`Total Puntos: ${((puntosFinal / 10) * 10).toFixed(2)}€`, 12, startY);
 startY += 10;
 
 // Verificar si numFrentesInteriores y numArmariosCompletos son 0, si es así, asignar 115 al totalMontaje
@@ -538,7 +538,7 @@ if (numFrentesInteriores < 0.01 && numArmariosCompletos < 0.01) {
   totalMontaje = 115; // Asignar 115 si ambos son 0
   doc.text(`Total portes/acarreo: ${totalMontaje.toFixed(2)}€`, 12, startY);
 } else {
-  totalMontaje = Number(totalMontaje) + (50 * (Number(numFrentesInteriores) + Number(numArmariosCompletos)));
+  totalMontaje = Number(totalMontaje) + 50;
   doc.text(`Total montaje: ${totalMontaje.toFixed(2)} €`, 12, startY); // Si no son 0, mostrar el totalMontaje actual
 }
 
@@ -546,7 +546,7 @@ startY += 10;
 
 // Calcular el precio total sumando puntosFinal y totalMontaje
 var precioTotal = Number(puntosFinal) + Number(totalMontaje) + Number(numDesmontaje * 121);
-doc.text(`Precio total: ${Number(precioTotal.toFixed(2))}€`, 12, startY);
+doc.text(`Precio total: ${Number(precioTotal.toFixed(2)).toFixed(2)}€`, 12, startY);
 
   // Crear el nombre del PDF y enviarlo
   const centroAbreviado = centro.substring(0, 3).toUpperCase();

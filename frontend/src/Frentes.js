@@ -89,7 +89,7 @@ function Frentes() {
         nombre: data.frentes.selectedEspecial2Nombre || "",
         puntos: data.frentes.selectedEspecial2Puntos || 0,
       });
-      const restoredCantidad = data.frentes.cantidad || 0;
+      const restoredCantidad = data.frentes.cantidad || 1;
       setCantidad(restoredCantidad);
 
       // Lógica para restaurar los puntos correctamente
@@ -725,7 +725,7 @@ function Frentes() {
           </div>
           <div className="field-centered">
             <label htmlFor="cantidad">Cantidad:</label>
-            <input type="number" id="cantidad" value={cantidad} onChange={handleCantidadChange} min="0" />
+            <input type="number" id="cantidad" value={cantidad} onChange={handleCantidadChange} min="1" />
           </div>
           <div className="field-centered">
             {isColorValueAdded && (

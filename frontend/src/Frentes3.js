@@ -747,7 +747,7 @@ function Frentes3() {
           </div>
           <div className="field-centered">
             <label htmlFor="cantidad">Cantidad:</label>
-            <input type="number" id="cantidad" value={cantidad} onChange={handleCantidadChange} min="0" />
+            <input type="number" id="cantidad" value={cantidad} onChange={handleCantidadChange} min="1" />
           </div>
           <div className="field-centered">
             {isColorValueAdded && (
