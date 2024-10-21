@@ -449,7 +449,7 @@ if (data.remates) {
       }
       return subTotal;
     }, 0);
-  }, 0) + puntosEspecialesTotal + puntosRematesTotal; // Añadir los puntos especiales y los puntos de remates
+  }, 0) + puntosRematesTotal; // Añadir los puntos especiales y los puntos de remates
   const obtenerTiendaId = async (centro) => {
     console.log("Centro:", centro);
     try {
@@ -538,7 +538,7 @@ if (numFrentesInteriores < 0.01 && numArmariosCompletos < 0.01) {
   totalMontaje = 115; // Asignar 115 si ambos son 0
   doc.text(`Total portes/acarreo: ${totalMontaje.toFixed(2)}€`, 12, startY);
 } else {
-  totalMontaje = Number(totalMontaje) + 50;
+  totalMontaje = Number(totalMontaje) + 50 + puntosEspecialesTotal;
   doc.text(`Total montaje: ${totalMontaje.toFixed(2)} €`, 12, startY); // Si no son 0, mostrar el totalMontaje actual
 }
 

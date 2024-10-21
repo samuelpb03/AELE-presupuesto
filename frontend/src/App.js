@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { TabsProvider } from './TabsContext';
 import Frentes from './Frentes';
@@ -6,39 +6,35 @@ import Tiradores from './Tiradores';
 import Interiores from './Interiores';
 import Equipamiento3 from './Equipamiento3';
 import Frentes2 from './Frentes2';
-import Frentes3 from './Frentes3'; 
+import Frentes3 from './Frentes3';
 import Baldas from './Baldas';
 import Remates from './Remates';
 import Instalacion from './Instalacion';
 import { DataProvider } from './context/DataContext';
 import NavigationController from './ControlNavegacion';
 import CamposUsuario from './CamposUsuario';  // Importamos el nuevo componente
+import './AELColors.css';
 import './App.css';
-
-/**
- * App
- * 
- * Este es el componente principal de la aplicaci n, 
- * el cual contiene todos los componentes de las diferentes secciones.
- * 
- * Se utiliza el contexto de DataProvider para proveer los datos
- * de los productos y los campos de usuario a los componentes,
- * y el contexto de TabsProvider para proveer las opciones de las secciones.
- * 
- * Se utiliza BrowserRouter para crear un enrutador para las diferentes secciones,
- * y NavigationController para controlar la navegaci n entre secciones.
- * 
- * Se incluyen los campos de usuario en el componente CamposUsuario.
- * 
- * Se utilizan los componentes de las diferentes secciones que se encuentran en el directorio ./src.
- * 
- * @returns {React.ReactElement} El componente principal de la aplicaci n.
- */
+import './LerColors.css';
 function App() {
+  const [styleSheet, setStyleSheet] = useState('');
+
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    const centro = user?.centro || 'Centro no especificado';
+
+    if (centro.toLowerCase().startsWith('lero')) {
+      setStyleSheet('LerColors.css');
+    } else if (centro.toLowerCase().startsWith('ael')) {
+      setStyleSheet('AELColors.css');
+    } else {
+      setStyleSheet('App.css');
+    }
+  }, []);  // Solo se ejecuta una vez cuando el componente se monta
   return (
     <DataProvider>
       <TabsProvider>
-        <div className='App'>
+      <div className={`App ${styleSheet === 'LerColors.css' ? 'ler-colors' : styleSheet === 'AELColors.css' ? 'ael-colors' : ''}`}>
           <BrowserRouter>
             <NavigationController />
             {/* Incluimos los campos de usuario */}
@@ -52,7 +48,7 @@ function App() {
               <Route path='/Frentes3' element={<Frentes3 />} />
               <Route path='/Equipamiento3' element={<Equipamiento3 />} />
               <Route path='/Remates' element={<Remates />} />
-              <Route path='Instalacion' element={<Instalacion />} />
+              <Route path='/Instalacion' element={<Instalacion />} />
             </Routes>
           </BrowserRouter>
         </div>
@@ -60,5 +56,4 @@ function App() {
     </DataProvider>
   );
 }
-
 export default App;

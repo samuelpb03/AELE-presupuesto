@@ -1,10 +1,10 @@
 @import "https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700;800;900&display=swap";
 /* Estilo para los campos de usuario */
-:root {
-  --color1: #ffffd5;
-  --color2: #eee2b4;
-  --color3: #d6d6d6;
-  --color4: #939393;
+.ler-colors {
+    --color1: #F7FEEF;
+    --color2: #CBDDB5;
+    --color3: #A8CA7E;
+    --color4: #768D4E;
 }
 .modal-overlay {
   position: fixed;

@@ -1,8 +1,6 @@
 import React, { createContext, useState, useContext } from 'react';
-
 // Crea el contexto
 const TabsContext = createContext();
-
 // Crea un componente proveedor
 export const TabsProvider = ({ children }) => {
   const [selectedOptions, setSelectedOptions] = useState({});

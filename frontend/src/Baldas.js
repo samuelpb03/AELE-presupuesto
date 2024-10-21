@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useTabs } from "./TabsContext";
 import { useData } from "./context/DataContext";
-
 function Baldas() {
   const { handleSelectChangeB } = useTabs();
   const { data, saveData } = useData();
@@ -297,15 +296,5 @@ function Baldas() {
       </div>
     </div>
   );
-  
-  
-  
 }
-
 export default Baldas;
-
-
-
-
-
-
