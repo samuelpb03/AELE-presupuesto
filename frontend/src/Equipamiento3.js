@@ -8,22 +8,22 @@ function Equipamiento3() {
   const { data, saveData } = useData();
   const [listArticuloEquipamiento, setListArticuloEquipamiento] = useState([]);
   const [listArticuloAntracita, setListArticuloAntracita] = useState([]);
-  const [listMedidas, setListMedidas] = useState(Array(9).fill([]));
-  const [cantidades, setCantidades] = useState(Array(9).fill(0));
+  const [listMedidas, setListMedidas] = useState(Array(15).fill([]));
+  const [cantidades, setCantidades] = useState(Array(15).fill(0));
   const [selectedArticulos, setSelectedArticulos] = useState(
-    Array(9).fill({
+    Array(15).fill({
       id: "",
       nombre: "",
     })
   );
   const [selectedMedidas, setSelectedMedidas] = useState(
-    Array(9).fill({
+    Array(15).fill({
       id: "",
       nombre: "",
       puntos: 0,
     })
   );
-  const [puntos, setPuntos] = useState(Array(9).fill(0));
+  const [puntos, setPuntos] = useState(Array(15).fill(0));
   const user = localStorage.getItem('user');
   const backendUrl = 'http://194.164.166.129:6969';
   if (!user) {
@@ -33,12 +33,12 @@ function Equipamiento3() {
 
   useEffect(() => {
     if (data.equipamiento3) {
-      const restoredArticulos = Array(9).fill({ id: "", nombre: "" });
-      const restoredMedidas = Array(9).fill({ id: "", nombre: "", puntos: 0 });
-      const restoredCantidades = Array(9).fill(0);
-      const restoredPuntos = Array(9).fill(0);
+      const restoredArticulos = Array(15).fill({ id: "", nombre: "" });
+      const restoredMedidas = Array(15).fill({ id: "", nombre: "", puntos: 0 });
+      const restoredCantidades = Array(15).fill(0);
+      const restoredPuntos = Array(15).fill(0);
 
-      for (let i = 0; i < 9; i++) {
+      for (let i = 0; i < 15; i++) {
         restoredArticulos[i] = {
           id: data.equipamiento3[`articulo${i + 1}Id`] || "",
           nombre: data.equipamiento3[`articulo${i + 1}Nombre`] || "",
@@ -230,7 +230,7 @@ function Equipamiento3() {
   };
 
   const renderSelectArticulo = (index, list) => (
-    <div key={index} className="field"> {/* Aplicar la clase "field" */}
+    <div key={index} className="field-special"> {/* Aplicar la clase "field" */}
       <label htmlFor={`articulo${index + 1}`}>Artículo {index + 1}:</label>
       <select
         id={`articulo${index + 1}`}
@@ -277,12 +277,17 @@ function Equipamiento3() {
         <h1>Equipamiento y Antracita</h1>
         <h2>Equipamiento</h2>
         {Array.from({ length: 3 }).map((_, i) => renderSelectArticulo(i, listArticuloEquipamiento))}
-        {Array.from({ length: 1 }).map((_, i) => renderSelectArticulo(i + 3, listArticuloEquipamiento))}
+      </div>
+      <div className="container2">
+        {Array.from({ length: 3 }).map((_, i) => renderSelectArticulo(i + 3, listArticuloEquipamiento))}
+      </div>
+      <div className="container2">
+        {Array.from({ length: 3 }).map((_, i) => renderSelectArticulo(i + 6, listArticuloEquipamiento))}
       </div>
       <div className="container3">
         <h1>Antracita</h1>
-        {Array.from({ length: 2 }).map((_, i) => renderSelectArticulo(i + 4, listArticuloAntracita))}
-        {Array.from({ length: 3 }).map((_, i) => renderSelectArticulo(i + 6, listArticuloAntracita))}
+        {Array.from({ length: 2 }).map((_, i) => renderSelectArticulo(i + 9, listArticuloAntracita))}
+        {Array.from({ length: 3 }).map((_, i) => renderSelectArticulo(i + 11, listArticuloAntracita))}
       </div>
     </div>
   );
