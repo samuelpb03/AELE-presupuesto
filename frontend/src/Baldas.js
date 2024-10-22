@@ -232,7 +232,7 @@ function Baldas() {
   };
 
   const renderSelectArticulo = (index, list, hideMedidas) => (
-    <div className="field" key={index}>
+    <div className="field-special" key={index}>
       <label className="label" htmlFor={`articulo${index + 1}`}>Artículo {index + 1}:</label>
       <select 
         id={`articulo${index + 1}`}

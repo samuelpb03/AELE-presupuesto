@@ -389,7 +389,6 @@ if (data.remates) {
       });
     }
   }
-
   // Imprimir los especiales de interiores después de procesar la sección "Interiores"
   if (lastInterioresProcessed) {
     const especialesInteriores = [
