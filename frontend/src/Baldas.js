@@ -233,7 +233,9 @@ function Baldas() {
 
   const renderSelectArticulo = (index, list, hideMedidas) => (
     <div className="field-special" key={index}>
-      <label className="label" htmlFor={`articulo${index + 1}`}>Artículo {index + 1}:</label>
+      <label className="label" htmlFor={`articulo${index + 1}`}>
+        {index <= 5 ? `Baldas y divisores ${index + 1}` : `Iluminacion ${index + 1 - 6}`}
+      </label>
       <select 
         id={`articulo${index + 1}`}
         onChange={(event) => handleSelectArticuloChange(index, event)}

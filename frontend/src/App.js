@@ -21,14 +21,13 @@ function App() {
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem('user'));
-    const centro = user?.centro || 'Centro no especificado';
-
-    if (centro.toLowerCase().startsWith('lero')) {
+    const centro = user?.codigoTienda || 'Centro no especificado';
+    const empresa = user?.empresa || 'Empresa no especificada';
+    
+    if (empresa == 5) {
       setStyleSheet('LerColors.css');
-    } else if (centro.toLowerCase().startsWith('ael')) {
-      setStyleSheet('AELColors.css');
     } else {
-      setStyleSheet('App.css');
+      setStyleSheet('AELColors.css');
     }
   }, []);  // Solo se ejecuta una vez cuando el componente se monta
   return (

@@ -128,6 +128,23 @@ const labelsMap = {
 };
 const valorPuntos = 1;
 // Función para generar el PDF
+const obtenerNombreTienda = async (tiendaId) => {
+  try {
+    const response = await fetch(`http://194.164.166.129:6969/getTiendaNombreById?tiendaId=${tiendaId}`);
+    const data = await response.json();
+    if (response.ok) {
+      return data.nombreTienda;  // Asume que la API devuelve el nombre de la tienda en `nombreTienda`
+    } else {
+      console.error("Error al obtener el nombre de la tienda:", data.message);
+      return 'Nombre no encontrado';
+    }
+  } catch (error) {
+    console.error("Error en la solicitud:", error);
+    return 'Error al obtener nombre';
+  }
+};
+
+
 export const generatePDF = async (data, userInfo) => {
   const doc = new jsPDF();
   const drawBorder = () => {
@@ -148,11 +165,17 @@ export const generatePDF = async (data, userInfo) => {
 
   // Agregar logotipo
   const user = JSON.parse(localStorage.getItem('user'));
-  const centro = user?.centro || 'Centro no especificado';
+  const centro = user?.codigoTienda || 'Centro no especificado';
+  const empresa = user?.empresa || 'Empresa no especificada';
   const idUsuario = user?.id || 'Usuario no especificado';
-  let logo = 'logoAELE.png';
-  if (centro === "Leroy Merlin") {
+  let logo = 'logoLeroy.png';
+  console.log(empresa);
+  console.log(JSON.parse(localStorage.getItem('user')));
+  if (empresa == 5) {
     logo = 'logoLeroy.png';
+  }
+  else {
+    logo = 'logoAELE.png';
   }
   doc.addImage(logo, 'PNG', 10, 10, 50, 20);
 
@@ -179,7 +202,7 @@ export const generatePDF = async (data, userInfo) => {
   doc.setFontSize(13);
   doc.text("Presupuesto", pageWidth - 90, 40);
 
-  // Configuramos las secciones
+  // Configuramos las secciones y hacemos que en baldas salga solo baldas si no hay iluminacion.
   const sections = {
     frentes: "Frentes",
     frentes2: "Frentes 2",
@@ -187,7 +210,7 @@ export const generatePDF = async (data, userInfo) => {
     tiradores: "Tiradores y cerraduras",
     interiores: "Interiores",
     equipamiento3: "Equipamiento",
-    baldas: "Baldas e iluminación", // Aquí incluimos los remates como una sección más
+    baldas: "Baldas", // Cambiar esto dependiendo de si hay artículos en iluminación o no
   };
   const isValidField = (value) => value && value !== "--Selecciona una opción--";
   let startY = 52;
@@ -345,8 +368,8 @@ if (data.remates) {
       startY = checkPageSpace(doc, startY);
     });
   }
+  
 }
-
   // Comprobación para verificar si hay datos en los especiales
   const hasEspeciales = (especiales) => {
     return especiales.some(especial => especial.nombre || especial.cantidad || especial.puntos);
@@ -469,22 +492,6 @@ if (data.remates) {
       return subTotal;
     }, 0);
   }, 0) + puntosRematesTotal; // Añadir los puntos especiales y los puntos de remates
-  const obtenerTiendaId = async (centro) => {
-    console.log("Centro:", centro);
-    try {
-      const response = await fetch(`http://194.164.166.129:6969/getTiendaIdByName?nombreTienda=${centro}`);
-      const data = await response.json();
-      if (response.ok) {
-        return data.tiendaId;
-      } else {
-        console.error("Error al obtener el ID de la tienda:", data.message);
-        return null;
-      }
-    } catch (error) {
-      console.error("Error en la solicitud:", error);
-      return null;
-    }
-  };
   
 
   // Cálculo de montaje e instalación
@@ -492,64 +499,16 @@ if (data.remates) {
   const numFrentesInteriores = data.instalacion?.numFrentesInteriores || 0;
   const numArmariosCompletos = data.instalacion?.numArmariosCompletos || 0;
   let totalMontaje = (numFrentesInteriores * 110) + (numArmariosCompletos * 146.5);
-  const calcularPuntosConPromociones = async (nombreTienda, puntos) => {
-    try {
-      // Obtenemos el ID de la tienda
-      const tiendaId = await obtenerTiendaId(nombreTienda);
-      if (!tiendaId) {
-        console.error("No se pudo obtener el ID de la tienda");
-        return null;
-      }
-  
-      // Consultamos el backend para calcular los puntos con las promociones
-      const response = await fetch(`http://194.164.166.129:6969/calcularPuntosConPromociones?tiendaId=${tiendaId}&puntos=${puntos}`);
-      const data = await response.json();
-      if (response.ok) {
-        return data.puntosTotales;
-      } else {
-        console.error("Error calculando puntos con promociones:", data.message);
-      }
-    } catch (error) {
-      console.error("Error en la solicitud:", error);
-    }
-    return null;
-  };
+
   
   // Luego, en el lugar donde calculas los puntos totales, llamas a esta nueva función:
-  const calcularPuntosTotales = async (nombreTienda, puntos) => {
-    try {
-      // Primero obtenemos el ID de la tienda basado en el nombre
-      const tiendaId = await obtenerTiendaId(nombreTienda);
-      if (!tiendaId) {
-        console.error("No se pudo obtener el ID de la tienda");
-        return null;
-      }
-  
-      // Usamos el ID de la tienda para calcular los puntos totales
-      const response = await fetch(`http://194.164.166.129:6969/calcularPuntosTotales?tiendaId=${tiendaId}&puntos=${puntos}`);
-      const data = await response.json();
-      if (response.ok) {
-        console.log("Puntos totales calculados:", data.puntosTotales);
-        return data.puntosTotales;
-      } else {
-        console.error("Error calculando puntos totales:", data.message);
-      }
-    } catch (error) {
-      console.error("Error en la solicitud:", error);
-    }
-    return null;
-  };
   // Imprimir totales
-  var puntosFinal = await calcularPuntosConPromociones(centro, totalPuntos);
-  if (puntosFinal === null || puntosFinal === undefined || puntosFinal === 0) {
-    puntosFinal = await calcularPuntosTotales(centro, totalPuntos);
-  }
   startY += 15;
 
   startY = checkPageSpace(doc, startY);
 
 // Calcular los puntos finales con los desmontajes
-doc.text(`Total Puntos: ${((puntosFinal / 10) * 10).toFixed(2)}€`, 12, startY);
+doc.text(`Total Puntos: ${((totalPuntos / 10) * 10).toFixed(2)}€`, 12, startY);
 startY += 10;
 
 // Verificar si numFrentesInteriores y numArmariosCompletos son 0, si es así, asignar 115 al totalMontaje
@@ -557,14 +516,22 @@ if (numFrentesInteriores < 0.01 && numArmariosCompletos < 0.01) {
   totalMontaje = 115; // Asignar 115 si ambos son 0
   doc.text(`Total portes/acarreo: ${totalMontaje.toFixed(2)}€`, 12, startY);
 } else {
-  totalMontaje = Number(totalMontaje) + 50 + puntosEspecialesTotal;
-  doc.text(`Total montaje: ${totalMontaje.toFixed(2)} €`, 12, startY); // Si no son 0, mostrar el totalMontaje actual
+      totalMontaje = Number(totalMontaje) + 50 + puntosEspecialesTotal;
+  doc.text(`Total montaje: ${totalMontaje.toFixed(2)} €`, 12, startY);
+
+   // Si no son 0, mostrar el totalMontaje actual
 }
 
 startY += 10;
 
 // Calcular el precio total sumando puntosFinal y totalMontaje
-var precioTotal = Number(puntosFinal) + Number(totalMontaje) + Number(numDesmontaje * 121);
+var precioTotal = Number(totalPuntos) + Number(totalMontaje) + Number(numDesmontaje * 121);
+if (numDesmontaje > 0.01) {
+  doc.text('Total desmontaje:' + Number(numDesmontaje * 121).toFixed(2) + '€', 12, startY);
+  startY += 10;
+}
+
+
 doc.text(`Precio total: ${Number(precioTotal.toFixed(2)).toFixed(2)}€`, 12, startY);
 
   // Crear el nombre del PDF y enviarlo
@@ -582,12 +549,21 @@ doc.text(`Precio total: ${Number(precioTotal.toFixed(2)).toFixed(2)}€`, 12, st
     }),
     credentials: 'include'
   })
-    .then(response => response.json())
-    .then(data => {
-      const nombrePresupuesto = `${centroAbreviado}-${data.idPresupuesto}`;
-      doc.save(`${nombrePresupuesto}.pdf`);
-    })
-    .catch(error => {
-      console.error("Error al enviar datos del presupuesto:", error);
-    });
+  .then(response => response.json())
+  .then(data => {
+    const nombrePresupuesto = `${centroAbreviado}-${data.idPresupuesto}`;
+    
+    // Generar el PDF y guardarlo en el sistema
+    const pdfBlob = doc.output('blob');  // Generar un Blob del PDF
+    
+    // Guardar el archivo en el equipo
+    doc.save(`${nombrePresupuesto}.pdf`);
+  
+    // Crear una URL temporal para el Blob y abrirla en una nueva pestaña
+    const pdfUrl = URL.createObjectURL(pdfBlob);
+    window.open(pdfUrl, '_blank');  // Abrir en una nueva pestaña
+  })
+  .catch(error => {
+    console.error("Error al enviar datos del presupuesto:", error);
+  });
 };

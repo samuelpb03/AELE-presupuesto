@@ -57,7 +57,7 @@ function Instalacion() {
       <div className="container2">
         <h1>Instalación</h1>
         <div className="field-instalacion">
-          <label htmlFor="numFrentesInteriores">Número de frentes/interiores por metro lineal:</label>
+          <label htmlFor="numFrentesInteriores">Frentes/interiores/vestidores/equipamientos por metro lineal:</label>
           <input
             type="number"
             step="0.01" // Permitir decimales

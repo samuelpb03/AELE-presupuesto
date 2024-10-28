@@ -431,7 +431,7 @@ function Interiores() {
    */
   const renderSelectArticulo = (index) => (
     <div key={index}>
-      <label htmlFor={`articulo${index + 1}`}>Artículo {index + 1}:</label>
+      <label htmlFor={`articulo${index + 1}`}>Módulo {index + 1}:</label>
       <select
         id={`articulo${index + 1}`}
         onChange={(event) => handleSelectArticuloChange(index, event)}
@@ -475,7 +475,7 @@ function Interiores() {
    */
   const renderSelectInterioresOtros = (index) => (
     <div key={index}>
-      <label htmlFor={`interioresOtros${index + 1}`}>Otros Artículo {index + 1}:</label>
+      <label htmlFor={`interioresOtros${index + 1}`}>Complementos especiales {index + 1}:</label>
       <select
         id={`interioresOtros${index + 1}`}
         onChange={(event) => handleSelectInterioresOtrosChange(index, event)}
@@ -502,7 +502,7 @@ function Interiores() {
 
   /**
    * Renderizar selectores de artículos especiales
-   * @param {number} especialIndex Indice del artículo especial que se está renderizando (1 o 2)
+   * @param {number} especialIndex Indice del Solucion especial que se está renderizando (1 o 2)
    * @returns {JSX.Element} Elemento JSX que contiene los selectores de artículos especiales, y los inputs de cantidad y puntos
    */
   const renderEspecialSelect = (especialIndex) => {
@@ -513,7 +513,7 @@ function Interiores() {
     return (
       <div>
         <div className="field-special">
-          <label htmlFor={`especial${especialIndex}`}>Artículo Especial {especialIndex}:</label>
+          <label htmlFor={`especial${especialIndex}`}>Solución especial {especialIndex}:</label>
           <select
             id={`especial${especialIndex}`}
             onChange={(event) => handleSelectEspecialChange(especialIndex, event)}
@@ -575,7 +575,7 @@ function Interiores() {
         <div className="container4">
           <h2>Especiales a Medida</h2>
           <div className="field-special">
-            <label htmlFor="especial1">Artículo Especial 1:</label>
+            <label htmlFor="especial1">Solucion especial 1:</label>
             <select
               id="especial1"
               onChange={(event) => handleSelectEspecialChange(1, event)}
@@ -606,7 +606,7 @@ function Interiores() {
             </select>
           </div>
           <div className="field-special">
-            <label htmlFor="especial2">Artículo Especial 2:</label>
+            <label htmlFor="especial2">Solucion especial 2:</label>
             <select
               id="especial2"
               onChange={(event) => handleSelectEspecialChange(2, event)}
@@ -637,7 +637,7 @@ function Interiores() {
             </select>
           </div>
           <div className="field-special">
-            <label htmlFor="especial3">Artículo Especial 3:</label>
+            <label htmlFor="especial3">Solucion especial 3:</label>
             <select
               id="especial3"
               onChange={(event) => handleSelectEspecialChange(3, event)}
@@ -668,7 +668,7 @@ function Interiores() {
             </select>
           </div>
           <div className="field-special">
-            <label htmlFor="especial4">Artículo Especial 4:</label>
+            <label htmlFor="especial4">Solucion especial 4:</label>
             <select
               id="especial4"
               onChange={(event) => handleSelectEspecialChange(4, event)}
@@ -699,7 +699,7 @@ function Interiores() {
             </select>
           </div>
           <div className="field-special">
-            <label htmlFor="especial5">Artículo Especial 5:</label>
+            <label htmlFor="especial5">Solucion especial 5:</label>
             <select
               id="especial5"
               onChange={(event) => handleSelectEspecialChange(5, event)}
@@ -732,7 +732,7 @@ function Interiores() {
         </div>
           <div className="section">
             <div className="container2">
-              <h2>Otros Artículos</h2>
+              <h2>Complementos especiales</h2>
               <div className="field">
                 {renderSelectInterioresOtros(0)}
               </div>

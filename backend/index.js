@@ -589,47 +589,22 @@ app.get("/calcularPuntosTotales", (req, res) => {
 
   // Verificar si los parámetros llegaron correctamente
   console.log("Tienda ID:", tiendaId, "Puntos:", puntos);
-
-  const query = `
-    SELECT t.id AS tiendaId, t.nombre AS tiendaNombre, t.empresa AS empresaId, e.valorPunto AS valorPuntoEmpresa
-    FROM tienda t
-    JOIN empresa e ON t.empresa = e.id
-    WHERE t.id = ?
-  `;
-
-  dbConnection.query(query, [tiendaId], (err, data) => {
-    if (err) {
-      console.error("Error fetching tienda and empresa:", err);
-      return res.status(500).json(err);
-    }
-
-    if (data.length === 0) {
-      return res.status(404).json({ message: "Tienda no encontrada" });
-    }
-
-    const valorPuntoEmpresa = data[0].valorPuntoEmpresa;
-    console.log("Valor Punto Empresa:", valorPuntoEmpresa);
-
-    const puntosTotales = puntos * valorPuntoEmpresa;
-    console.log("Puntos Totales Calculados:", puntosTotales);
-
-    return res.json({ puntosTotales });
-  });
+  return puntos;
 });
 // Ruta para obtener el ID de la tienda a partir del nombre
-app.get("/getTiendaIdByName", (req, res) => {
-  const { nombreTienda } = req.query;
+app.get("/getTiendaNameById", (req, res) => {
+  const { idTienda } = req.query;
 
-  if (!nombreTienda) {
+  if (!idTienda) {
     return res.status(400).json({ error: "El nombre de la tienda es requerido" });
   }
 
-  const query = `SELECT id FROM tienda WHERE nombre = ?`;
+  const query = `SELECT nombre FROM tienda WHERE id = ?`;
 
-  dbConnection.query(query, [nombreTienda], (err, data) => {
+  dbConnection.query(query, [idTienda], (err, data) => {
     if (err) {
-      console.error("Error fetching tienda ID:", err);
-      return res.status(500).json({ error: "Error al obtener el ID de la tienda" });
+      console.error("Error fetching tienda name:", err);
+      return res.status(500).json({ error: "Error al obtener el nombre de la tienda" });
     }
 
     if (data.length === 0) {

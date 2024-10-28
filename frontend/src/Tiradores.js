@@ -278,7 +278,7 @@ function Tiradores() {
 
   const renderSelectArticulo = (index, isCerradura = false) => (
     <div key={index}>
-      <label htmlFor={`articulo${index + 1}`}>Artículo {index + 1}:</label>
+      <label htmlFor={`articulo${index + 1}`}>Tipo {index + 1}:</label>
       <select
         id={`articulo${index + 1}`}
         onChange={(event) => handleSelectArticuloChange(index, event, isCerradura)}

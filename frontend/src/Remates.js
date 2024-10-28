@@ -160,7 +160,7 @@ const isFrentesOnly = data &&
   // Renderizar selectores de artículos
   const renderSelectArticulo = (index) => (
     <div key={index}>
-      <label htmlFor={`articulo${index + 1}`}>Artículo {index + 1}:</label>
+      <label htmlFor={`articulo${index + 1}`}>Remate {index + 1}:</label>
       <select
         id={`articulo${index + 1}`}
         onChange={(event) => handleSelectArticuloChange(index, event)}
@@ -189,7 +189,7 @@ const isFrentesOnly = data &&
 
   const renderSelectOtros = (index) => (
     <div key={index}>
-      <label htmlFor={`otros${index + 1}`}>Otros Artículo {index + 1}:</label>
+      <label htmlFor={`otros${index + 1}`}>Otros Artículos {index + 1}:</label>
       <select
         id={`otros${index + 1}`}
         onChange={(event) => handleSelectOtrosChange(index, event)}
