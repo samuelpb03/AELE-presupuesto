@@ -492,8 +492,15 @@ if (data.remates) {
       return subTotal;
     }, 0);
   }, 0) + puntosRematesTotal; // Añadir los puntos especiales y los puntos de remates
-  
+  const hayIluminacionSeleccionada = data.baldas && Object.entries(data.baldas).some(([key, value], index) => {
+    // Verifica que el índice sea 6 o mayor, que el artículo tenga un nombre válido y que el nombre no sea "-"
+    if (index >= 7 && value && value.nombre !== '-') {
+        return true;
+    }
+    return false;
+});
 
+console.log("Estructura de data.baldas:", data.baldas);
   // Cálculo de montaje e instalación
   const numDesmontaje = data.instalacion?.numDesmontaje || 0;
   const numFrentesInteriores = data.instalacion?.numFrentesInteriores || 0;
@@ -516,7 +523,11 @@ if (numFrentesInteriores < 0.01 && numArmariosCompletos < 0.01) {
   totalMontaje = 115; // Asignar 115 si ambos son 0
   doc.text(`Total portes/acarreo: ${totalMontaje.toFixed(2)}€`, 12, startY);
 } else {
-      totalMontaje = Number(totalMontaje) + 50 + puntosEspecialesTotal;
+  if (hayIluminacionSeleccionada === true) { 
+    totalMontaje = Number(totalMontaje) + 50 + puntosEspecialesTotal + 62;
+} else {
+    totalMontaje = Number(totalMontaje) + 50 + puntosEspecialesTotal;
+}
   doc.text(`Total montaje: ${totalMontaje.toFixed(2)} €`, 12, startY);
 
    // Si no son 0, mostrar el totalMontaje actual
@@ -535,7 +546,7 @@ if (numDesmontaje > 0.01) {
 doc.text(`Precio total: ${Number(precioTotal.toFixed(2)).toFixed(2)}€`, 12, startY);
 
   // Crear el nombre del PDF y enviarlo
-  const centroAbreviado = centro.substring(0, 3).toUpperCase();
+  const centroAbreviado = centro.substring(0, 6).toUpperCase();
   fetch('http://194.164.166.129:6969/presupuesto', {
     method: 'POST',
     headers: {
@@ -551,12 +562,15 @@ doc.text(`Precio total: ${Number(precioTotal.toFixed(2)).toFixed(2)}€`, 12, st
   })
   .then(response => response.json())
   .then(data => {
-    const nombrePresupuesto = `${centroAbreviado}-${data.idPresupuesto}`;
+    var nombrePresupuesto = `${centroAbreviado}-${data.idPresupuesto}`;
     
     // Generar el PDF y guardarlo en el sistema
     const pdfBlob = doc.output('blob');  // Generar un Blob del PDF
     
     // Guardar el archivo en el equipo
+    if (empresa == 5) {
+      nombrePresupuesto = `LM${centroAbreviado}-${data.idPresupuesto}`;
+    }
     doc.save(`${nombrePresupuesto}.pdf`);
   
     // Crear una URL temporal para el Blob y abrirla en una nueva pestaña
