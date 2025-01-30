@@ -21,7 +21,7 @@ function App() {
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem('user'));
-    const centro = user?.codigoTienda || 'Centro no especificado';
+    const centro = user?.tienda || 'Centro no especificado';
     const empresa = user?.empresa || 'Empresa no especificada';
     
     if (empresa == 5) {

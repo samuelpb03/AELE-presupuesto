@@ -143,6 +143,22 @@ const obtenerNombreTienda = async (tiendaId) => {
     return 'Error al obtener nombre';
   }
 };
+const obtenerValorPuntoPromo = async (tiendaId) => {
+  try {
+    const response = await fetch(`http://194.164.166.129:6969/getTiendaValorPuntoPromo.php?tiendaId=${tiendaId}`);
+    const data = await response.json();
+
+    if (response.ok && data.valorPuntoPromo) {
+      return data.valorPuntoPromo;  // Devuelve el valor obtenido
+    } else {
+      console.error("Error al obtener valorPuntoPromo:", data.message);
+      return 'No disponible';
+    }
+  } catch (error) {
+    console.error("Error en la solicitud:", error);
+    return 'Error al obtener valor';
+  }
+};
 
 
 export const generatePDF = async (data, userInfo) => {
@@ -151,7 +167,7 @@ export const generatePDF = async (data, userInfo) => {
     doc.setLineWidth(0.5);
     doc.rect(2, 2, pageWidth - 4, pageHeight - 4); // Dibujar el borde
   };
-
+  
   const checkPageSpace = (doc, startY) => {
     const marginBottom = 10;
     const pageHeight = doc.internal.pageSize.getHeight();
@@ -162,10 +178,10 @@ export const generatePDF = async (data, userInfo) => {
     }
     return startY;
   };
-
+  
   // Agregar logotipo
   const user = JSON.parse(localStorage.getItem('user'));
-  const centro = user?.codigoTienda || 'Centro no especificado';
+  const centro = user?.tienda || 'Centro no especificado';
   const empresa = user?.empresa || 'Empresa no especificada';
   const idUsuario = user?.id || 'Usuario no especificado';
   let logo = 'logoLeroy.png';
@@ -542,9 +558,9 @@ if (numDesmontaje > 0.01) {
   startY += 10;
 }
 
-
+const valorPuntoPromo = await obtenerValorPuntoPromo(centro);
 doc.text(`Precio total: ${Number(precioTotal.toFixed(2)).toFixed(2)}€`, 12, startY);
-
+doc.text(`Valor Punto Promo: ${valorPuntoPromo}`, 12, startY);
   // Crear el nombre del PDF y enviarlo
   const centroAbreviado = centro.substring(0, 6).toUpperCase();
   fetch('http://194.164.166.129:6969/presupuesto', {
