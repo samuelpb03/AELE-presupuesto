@@ -145,20 +145,31 @@ const obtenerNombreTienda = async (tiendaId) => {
 };
 const obtenerValorPuntoPromo = async (tiendaId) => {
   try {
-    const response = await fetch(`http://194.164.166.129:6969/getTiendaValorPuntoPromo.php?tiendaId=${tiendaId}`);
-    const data = await response.json();
+    // Verificar si hay promociones activas
+    const verificarResponse = await fetch(`http://194.164.166.129:6969/verificarPromocion?idTienda=${tiendaId}`);
+    const verificarData = await verificarResponse.json();
 
-    if (response.ok && data.valorPuntoPromo) {
-      return data.valorPuntoPromo;  // Devuelve el valor obtenido
+    if (!verificarResponse.ok || !verificarData.tienePromociones) {
+      console.log("No hay promociones activas.");
+      return 1; // Si no hay promoción, devolver el valor base
+    }
+
+    // Obtener el valor de la promoción
+    const promoResponse = await fetch(`http://194.164.166.129:6969/calcularPuntosConPromociones?tiendaId=${tiendaId}`);
+    const promoData = await promoResponse.json();
+
+    if (promoResponse.ok && promoData.valorPuntoPromo) {
+      return promoData.valorPuntoPromo;
     } else {
-      console.error("Error al obtener valorPuntoPromo:", data.message);
-      return 'No disponible';
+      console.error("Error al obtener valorPuntoPromo:", promoData.message);
+      return 1; // Si hay un error, devolver 1 como valor base
     }
   } catch (error) {
-    console.error("Error en la solicitud:", error);
-    return 'Error al obtener valor';
+    console.error("Error en la solicitud de promoción:", error);
+    return 1;
   }
 };
+
 
 
 export const generatePDF = async (data, userInfo) => {
@@ -557,11 +568,14 @@ if (numDesmontaje > 0.01) {
   doc.text('Total desmontaje:' + Number(numDesmontaje * 121).toFixed(2) + '€', 12, startY);
   startY += 10;
 }
+const valorPuntoPromo = await obtenerValorPuntoPromo(user?.tienda);
 
-const valorPuntoPromo = await obtenerValorPuntoPromo(centro);
-doc.text(`Precio total: ${Number(precioTotal.toFixed(2)).toFixed(2)}€`, 12, startY);
-startY += 10;
-doc.text(`Valor Punto Promo: ${valorPuntoPromo}`, 12, startY);
+if (valorPuntoPromo < 1) {
+  const descuento = (1 - valorPuntoPromo) * 100; // Calcula el porcentaje de descuento
+  doc.text(`Descuento por promoción del ${descuento.toFixed(0)}%`, 12, startY);
+  startY += 10;
+}
+doc.text('Total puntos: ' + precioTotal * valorPuntoPromo + '€', 12, startY);
   // Crear el nombre del PDF y enviarlo
   const centroAbreviado = centro.substring(0, 6).toUpperCase();
   fetch('http://194.164.166.129:6969/presupuesto', {

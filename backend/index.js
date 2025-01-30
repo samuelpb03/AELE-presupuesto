@@ -513,8 +513,9 @@ app.get("/verificarPromocion", (req, res) => {
   const query = `
     SELECT COUNT(*) AS totalPromociones 
     FROM tienda 
-    WHERE id = ? AND fechaInicio IS NOT NULL AND fechaFin IS NOT NULL;
+    WHERE id = ? AND fechaInicioPromo <= CURDATE() AND fechaFinPromo >= CURDATE();
   `;
+
   dbConnection.query(query, [idTienda], (err, data) => {
     if (err) {
       console.error("Error checking promotions:", err);
@@ -525,13 +526,14 @@ app.get("/verificarPromocion", (req, res) => {
     return res.json({ tienePromociones });
   });
 });
+
 // Si hay promociones activas, sacamos el valor de fechaInicio
 app.get("/hayPromocion", (req, res) => {
   const idTienda = req.query.idTienda;
   const query = `
-    SELECT fechaInicio 
+    SELECT fechaInicioPromo 
     FROM tienda 
-    WHERE id = ? AND fechaFin > CURDATE();
+    WHERE id = ? AND fechaFinPromo > CURDATE();
   `;
   dbConnection.query(query, [idTienda], (err, data) => {
     if (err) {
@@ -545,15 +547,13 @@ app.get("/calcularPuntosConPromociones", (req, res) => {
   const tiendaId = req.query.tiendaId;
   const puntos = req.query.puntos;
 
-  // Verificar promociones de tienda y empresa
   const query = `
     SELECT 
-      t.id AS tiendaId, t.nombre AS tiendaNombre, t.empresa AS empresaId,
-      t.valorPuntoPromo AS valorPuntosPromoTienda, t.fechaInicioPromo AS promoInicioTienda, t.fechaFinPromo AS promoFinTienda,
-      e.valorPuntosPromo AS valorPuntoPromoEmpresa, e.fechaPromoInicio AS promoInicioEmpresa, e.fechaFinPromo AS promoFinEmpresa
+      t.valorPuntoPromo AS valorPuntoPromoTienda,
+      e.valorPuntosPromo AS valorPuntoPromoEmpresa
     FROM tienda t
     JOIN empresa e ON t.empresa = e.id
-    WHERE t.id = ?;
+    WHERE t.id = ? AND t.fechaInicioPromo <= CURDATE() AND t.fechaFinPromo >= CURDATE();
   `;
 
   dbConnection.query(query, [tiendaId], (err, data) => {
@@ -563,26 +563,14 @@ app.get("/calcularPuntosConPromociones", (req, res) => {
     }
 
     if (data.length === 0) {
-      return res.status(404).json({ message: "Tienda no encontrada" });
+      return res.status(404).json({ message: "Tienda no encontrada o sin promoción activa" });
     }
 
-    const today = new Date();
-    const tienda = data[0];
-    let puntosCalculados = puntos;
-
-    // Verificar si la tienda tiene promoción activa
-    if (new Date(tienda.promoInicioTienda) <= today && today <= new Date(tienda.promoFinTienda)) {
-      puntosCalculados *= tienda.valorPuntosPromoTienda;
-    }
-
-    // Verificar si la empresa tiene promoción activa
-    if (new Date(tienda.promoInicioEmpresa) <= today && today <= new Date(tienda.promoFinEmpresa)) {
-      puntosCalculados *= tienda.valorPuntoPromoEmpresa;
-    }
-
-    return res.json({ puntosTotales: puntosCalculados });
+    const valorPuntoPromo = data[0].valorPuntoPromoTienda || data[0].valorPuntoPromoEmpresa || 1;
+    return res.json({ valorPuntoPromo });
   });
 });
+
 app.get("/calcularPuntosTotales", (req, res) => {
   const tiendaId = req.query.tiendaId;
   const puntos = req.query.puntos;
