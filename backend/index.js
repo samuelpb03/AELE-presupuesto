@@ -114,7 +114,24 @@ app.get("/color", (req, res) => {
     return res.json(data);
   });
 });
+//Funcion para sacar el código de la tienda
+app.get("/getCodigoTienda", (req, res) => {
+  const idTienda = req.query.idTienda;
+  const query = `SELECT codigo FROM tienda WHERE id = ?`;
 
+  dbConnection.query(query, [idTienda], (err, data) => {
+    if (err) {
+      console.error("Error fetching codigoTienda:", err);
+      return res.status(500).json({ error: "Error al obtener el código de la tienda" });
+    }
+
+    if (data.length === 0) {
+      return res.status(404).json({ message: "Tienda no encontrada" });
+    }
+
+    return res.json({ codigoTienda: data[0].codigo });
+  });
+});
 // Función Express GET para medidas.
 app.get("/medidas", (req, res) => {
   const articuloId = req.query.articuloId;

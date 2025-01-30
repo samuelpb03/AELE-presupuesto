@@ -189,10 +189,27 @@ export const generatePDF = async (data, userInfo) => {
     }
     return startY;
   };
+  const obtenerCodigoTienda = async (tiendaId) => {
+    try {
+      const response = await fetch(`http://194.164.166.129:6969/getCodigoTienda?idTienda=${tiendaId}`);
+      const data = await response.json();
+  
+      if (response.ok) {
+        return data.codigoTienda;  // Devolver el código de la tienda
+      } else {
+        console.error("Error al obtener el código de la tienda:", data.message);
+        return 'Código no encontrado';
+      }
+    } catch (error) {
+      console.error("Error en la solicitud:", error);
+      return 'Error al obtener código';
+    }
+  };
   
   // Agregar logotipo
   const user = JSON.parse(localStorage.getItem('user'));
-  const centro = user?.tienda || 'Centro no especificado';
+  const codigoTienda = await obtenerCodigoTienda(user?.tienda);
+  const centro = codigoTienda || 'Código no disponible';
   const empresa = user?.empresa || 'Empresa no especificada';
   const idUsuario = user?.id || 'Usuario no especificado';
   let logo = 'logoLeroy.png';
