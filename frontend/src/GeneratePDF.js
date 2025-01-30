@@ -560,6 +560,7 @@ if (numDesmontaje > 0.01) {
 
 const valorPuntoPromo = await obtenerValorPuntoPromo(centro);
 doc.text(`Precio total: ${Number(precioTotal.toFixed(2)).toFixed(2)}€`, 12, startY);
+startY += 10;
 doc.text(`Valor Punto Promo: ${valorPuntoPromo}`, 12, startY);
   // Crear el nombre del PDF y enviarlo
   const centroAbreviado = centro.substring(0, 6).toUpperCase();
