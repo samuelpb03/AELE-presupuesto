@@ -382,7 +382,27 @@ function Frentes3() {
     setCantidadEspecial2(0);
     setPuntosEspecial1(0);
     setPuntosEspecial2(0);
-
+    // 🔹 Si se selecciona "--Selecciona una opción--", desactivar todos los selectores
+    if (id === "") {
+      document.getElementById("serie").disabled = true;
+      document.getElementById("articulo").disabled = true;
+      document.getElementById("material").disabled = true;
+      document.getElementById("color").disabled = true;
+      document.getElementById("medidas").disabled = true;
+      document.getElementById("materialFranja").disabled = true;
+      document.getElementById("colorFranja").disabled = true;
+  
+      // También limpiar los valores seleccionados
+      setSelectedSerie({ id: "", nombre: "" });
+      setSelectedArticulo({ id: "", nombre: "" });
+      setSelectedMaterial({ id: "", nombre: "" });
+      setSelectedColor({ id: "", nombre: "" });
+      setSelectedMedidas({ id: "", nombre: "", puntos: 0 });
+      setSelectedMaterialFranja({ id: "", nombre: "" });
+      setSelectedColorFranja({ id: "", nombre: "" });
+      setPuntos(0);
+      return; // Salir de la función
+    }
     // Si el producto es 4 o 5, filtrar solo "Gran Altura"
     if (id === "4" || id === "5") {
       const especialGranAltura = listEspeciales.find(especial => especial.articulo_id === 195);
@@ -660,7 +680,7 @@ function Frentes3() {
           <div className="field">
             <label htmlFor="producto">Tipo de Frente:</label>
             <select id="producto" onChange={handleSelectProductChange} value={selectedProducto.id || ""}>
-              <option disabled={selectedProducto.id !== ""}>--Selecciona una opción--</option>
+             <option value="" disabled={selectedProducto.id === ""}>--Selecciona una opción--</option>
               {listProducto.map((producto) => (
                 <option key={producto.producto_id} value={producto.producto_id}>
                   {producto.nombre}
@@ -671,7 +691,7 @@ function Frentes3() {
           <div className="field">
             <label htmlFor="serie">Serie:</label>
             <select id="serie" disabled={true} onChange={handleSelectSerieChange} value={selectedSerie.id || ""}>
-              <option value="" disabled={selectedProducto.id === ""}>--Selecciona una opción--</option>
+              <option disabled={selectedProducto.id === ""}>--Selecciona una opción--</option>
               {listSerie.map((serie) => (
                 <option key={serie.serie_id} value={serie.serie_id}>
                   {serie.nombre}

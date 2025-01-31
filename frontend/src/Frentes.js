@@ -89,7 +89,7 @@ function Frentes() {
         nombre: data.frentes.selectedEspecial2Nombre || "",
         puntos: data.frentes.selectedEspecial2Puntos || 0,
       });
-      const restoredCantidad = data.frentes.cantidad || 1;
+      const restoredCantidad = data.frentes.cantidad || 0;
       setCantidad(restoredCantidad);
 
       // Lógica para restaurar los puntos correctamente
@@ -373,15 +373,36 @@ function Frentes() {
     setPuntosEspecial1(0);
     setPuntosEspecial2(0);
 
-    // Si el producto es 4 o 5, filtrar solo "Gran Altura"
+    // 🔹 Si se selecciona "--Selecciona una opción--", desactivar todos los selectores
+    if (id === "") {
+      document.getElementById("serie").disabled = true;
+      document.getElementById("articulo").disabled = true;
+      document.getElementById("material").disabled = true;
+      document.getElementById("color").disabled = true;
+      document.getElementById("medidas").disabled = true;
+      document.getElementById("materialFranja").disabled = true;
+      document.getElementById("colorFranja").disabled = true;
+
+      // También limpiar los valores seleccionados
+      setSelectedSerie({ id: "", nombre: "" });
+      setSelectedArticulo({ id: "", nombre: "" });
+      setSelectedMaterial({ id: "", nombre: "" });
+      setSelectedColor({ id: "", nombre: "" });
+      setSelectedMedidas({ id: "", nombre: "", puntos: 0 });
+      setSelectedMaterialFranja({ id: "", nombre: "" });
+      setSelectedColorFranja({ id: "", nombre: "" });
+      setPuntos(0);
+      return; // Salir de la función
+    }
+
+    // 🔹 Si se elige un producto válido, cargar las series normalmente
     if (id === "4" || id === "5") {
       const especialGranAltura = listEspeciales.find(especial => especial.articulo_id === 195);
       setListEspeciales([especialGranAltura]); // Mostrar solo "Gran Altura"
     } else {
-      // Si es otro producto, restaurar todos los especiales
       axios.get(`${backendUrl}/especialesConPuntosFrentes`).then((res) => {
         if (Array.isArray(res.data)) {
-          setListEspeciales(res.data); // Restaurar la lista de especiales
+          setListEspeciales(res.data);
         }
       }).catch(error => {
         console.error("Error fetching articulos especiales:", error);
@@ -395,8 +416,9 @@ function Frentes() {
     setSelectedMedidas({ id: "", nombre: "", puntos: 0 });
     setSelectedMaterialFranja({ id: "", nombre: "" });
     setSelectedColorFranja({ id: "", nombre: "" });
-    setPuntos(0); // Restablecer puntos
+    setPuntos(0);
   };
+
 
   const handleSelectSerieChange = (event) => {
     const index = event.target.selectedIndex;
@@ -435,7 +457,7 @@ function Frentes() {
     const index = event.target.selectedIndex;
     const nombre = event.target.options[index].text;
     const id = event.target.value;
-  
+
     if (id === "") {
       // Si se selecciona "--Selecciona una opción--", limpiar todos los campos relacionados
       setSelectedArticulo({ id: "", nombre: "" });
@@ -445,7 +467,7 @@ function Frentes() {
       setSelectedMaterialFranja({ id: "", nombre: "" });
       setSelectedColorFranja({ id: "", nombre: "" });
       setPuntos(0); // Restablecer puntos
-  
+
       // También actualizar el contexto para que no aparezcan en el PDF
       handleSelectChange("articulo", "", "");
       handleSelectChange("material", "", "");
@@ -457,7 +479,7 @@ function Frentes() {
       // Si se selecciona un artículo válido, continuar normalmente
       setSelectedArticulo({ id, nombre });
       handleSelectChange("articulo", id, nombre);
-  
+
       // Restablecer los otros campos porque el artículo ha cambiado
       setSelectedMaterial({ id: "", nombre: "" });
       setSelectedColor({ id: "", nombre: "" });
@@ -638,7 +660,7 @@ function Frentes() {
           <div className="field">
             <label htmlFor="producto">Tipo de Frente:</label>
             <select id="producto" onChange={handleSelectProductChange} value={selectedProducto.id || ""}>
-              <option value="" disabled={selectedProducto.id !== ""}>--Selecciona una opción--</option>
+              <option value="" disabled={selectedProducto.id === ""}>--Selecciona una opción--</option>
               {listProducto.map((producto) => (
                 <option key={producto.producto_id} value={producto.producto_id}>
                   {producto.nombre}
