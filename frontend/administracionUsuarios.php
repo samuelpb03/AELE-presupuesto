@@ -36,7 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['user_id'])) {
     $userId = intval($_POST['user_id']);
 
     // Consulta para obtener los datos del usuario por ID
-    $stmt = $con->prepare('SELECT id, username, email, nombrePersonal, nivel, tienda, empresa FROM usuario WHERE id = ?');
+    $stmt = $con->prepare('SELECT id, username, email, nombrePersonal, nivel, tienda, empresa, codigoTienda FROM usuario WHERE id = ?');
     $stmt->bind_param('i', $userId);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -76,13 +76,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register_user'])) {
     $username = trim($_POST['username']);
     $nombrePersonal = trim($_POST['nombrePersonal']);
     $email = trim($_POST['email']);
-    $password = trim($_POST['password']);
+    $passwordPlain = trim($_POST['password']); // Se almacena sin encriptar
     $tienda = intval($_POST['tienda']);
     $empresa = intval($_POST['empresa']);
     $nivel = intval($_POST['nivel']);
+    $codigoTienda = ''; // Por defecto NULL si no hay código asignado
+
+    // 🔹 Buscar código de tienda si existe
+    $stmtCheckCodigo = $con->prepare("SELECT codigoTienda FROM usuario WHERE tienda = ? AND codigoTienda <> '' LIMIT 1");
+    $stmtCheckCodigo->bind_param("i", $tienda);
+    $stmtCheckCodigo->execute();
+    $stmtCheckCodigo->bind_result($codigoExistente);
+
+    if ($stmtCheckCodigo->fetch()) {
+        $codigoTienda = $codigoExistente; // Asignar el código tienda existente si lo encontramos
+    }
+    $stmtCheckCodigo->close();
 
     // Validar que los campos requeridos no estén vacíos
-    if (empty($username) || empty($nombrePersonal) || empty($email) || empty($password)) {
+    if (empty($username) || empty($nombrePersonal) || empty($email) || empty($passwordPlain)) {
         $errorMsg = "Error: Todos los campos son obligatorios.";
     } else {
         // 🔹 Verificar si el usuario ya existe
@@ -94,25 +106,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register_user'])) {
         if ($checkUser->num_rows > 0) {
             $errorMsg = "El nombre de usuario ya está en uso.";
         } else {
-            // ✅ Insertar nuevo usuario
-            $passwordHash = password_hash($password, PASSWORD_DEFAULT);
-            $stmt = $con->prepare("INSERT INTO usuario (username, nombrePersonal, email, password, tienda, empresa, nivel, bloqueado) VALUES (?, ?, ?, ?, ?, ?, ?, 0)");
-            $stmt->bind_param("ssssiii", $username, $nombrePersonal, $email, $passwordHash, $tienda, $empresa, $nivel);
+            // ✅ Insertar nuevo usuario con código tienda si lo tiene
+            $stmt = $con->prepare("INSERT INTO usuario (username, nombrePersonal, email, password, tienda, empresa, nivel, bloqueado, codigoTienda) VALUES (?, ?, ?, ?, ?, ?, ?, 0, ?)");
+
+            if (!$stmt) {
+                die("Error al preparar la consulta: " . $con->error);
+            }
+
+            $stmt->bind_param("ssssiiis", $username, $nombrePersonal, $email, $passwordPlain, $tienda, $empresa, $nivel, $codigoTienda);
 
             if ($stmt->execute()) {
-                if ($stmt->affected_rows > 0) {
-                    $successMsg = "Usuario registrado correctamente.";
-                } else {
-                    $errorMsg = "Error: No se insertó ningún usuario.";
-                }
+                $successMsg = "Usuario insertado correctamente.";
             } else {
-                $errorMsg = "Error al registrar el usuario: " . $stmt->error;
+                $errorMsg = "Error en la ejecución: " . $stmt->error;
             }
+
             $stmt->close();
         }
         $checkUser->close();
     }
 }
+
 
 
 mysqli_close($con);
@@ -152,6 +166,7 @@ mysqli_close($con);
             <tr><th>Nivel</th><td><?php echo htmlspecialchars($userData['nivel']); ?></td></tr>
             <tr><th>Tienda</th><td><?php echo htmlspecialchars($userData['tienda']); ?></td></tr>
             <tr><th>Empresa</th><td><?php echo htmlspecialchars($userData['empresa']); ?></td></tr>
+            <tr><th>Código Tienda</th><td><?php echo htmlspecialchars($userData['codigoTienda']); ?></td></tr>
         </table>
     <?php endif; ?>
 
