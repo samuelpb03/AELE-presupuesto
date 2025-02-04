@@ -691,7 +691,7 @@ function Frentes3() {
           <div className="field">
             <label htmlFor="serie">Serie:</label>
             <select id="serie" disabled={true} onChange={handleSelectSerieChange} value={selectedSerie.id || ""}>
-              <option disabled={selectedProducto.id === ""}>--Selecciona una opción--</option>
+              <option value="" disabled={selectedProducto.id === ""}>--Selecciona una opción--</option>
               {listSerie.map((serie) => (
                 <option key={serie.serie_id} value={serie.serie_id}>
                   {serie.nombre}

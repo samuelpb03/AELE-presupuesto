@@ -57,17 +57,6 @@ function Instalacion() {
       <div className="container2">
         <h1>Instalación</h1>
         <div className="field-instalacion">
-          <label htmlFor="numFrentesInteriores">Frentes/interiores/vestidores/equipamientos por metro lineal:</label>
-          <input
-            type="number"
-            step="0.01" // Permitir decimales
-            id="numFrentesInteriores"
-            value={numFrentesInteriores}
-            min={0}
-            onChange={(e) => setNumFrentesInteriores(parseFloat(e.target.value) || 0)}
-          />
-        </div>
-        <div className="field-instalacion">
           <label htmlFor="numArmariosCompletos">Armarios completos por metro lineal:</label>
           <input
             type="number"
@@ -76,6 +65,17 @@ function Instalacion() {
             value={numArmariosCompletos}
             min={0}
             onChange={(e) => setNumArmariosCompletos(parseFloat(e.target.value) || 0)}
+          />
+        </div>
+        <div className="field-instalacion">
+          <label htmlFor="numFrentesInteriores">Frentes/interiores/vestidores/equipamientos por metro lineal:</label>
+          <input
+            type="number"
+            step="0.01" // Permitir decimales
+            id="numFrentesInteriores"
+            value={numFrentesInteriores}
+            min={0}
+            onChange={(e) => setNumFrentesInteriores(parseFloat(e.target.value) || 0)}
           />
         </div>
         <div className="field-instalacion">
