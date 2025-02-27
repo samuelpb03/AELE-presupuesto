@@ -497,7 +497,53 @@ function Frentes2() {
     setSelectedMedidas({ id: "", nombre: "", puntos: 0 }); // Restablecer medidas
     setSelectedMaterialFranja({ id: "", nombre: "" }); // Restablecer material franja
     setSelectedColorFranja({ id: "", nombre: "" }); // Restablecer color franja
+    setSelectedEspecial1({ id: "", nombre: "", puntos: 0 });
+    setSelectedEspecial2({ id: "", nombre: "", puntos: 0 });
+    setCantidadEspecial1(0);
+    setPuntosEspecial1(0);
+    setCantidadEspecial2(0);
+    setPuntosEspecial2(0);
     setPuntos(0); // Restablecer puntos
+  
+    // Añadir logs en la respuesta del backend
+    console.log("Selected material ID:", id);
+    if (nombre.toLowerCase() === 'melamina') {
+      axios.get(`${backendUrl}/especialesConPuntosMelamina`).then((res) => {
+        console.log("Response from /especialesConPuntosMelamina:", res.data);
+        if (Array.isArray(res.data)) {
+          // Filtrar duplicados
+          const uniqueEspeciales = res.data.filter((especial, index, self) =>
+            index === self.findIndex((e) => (
+              e.articulo_nombre === especial.articulo_nombre
+            ))
+          );
+          setListEspeciales(uniqueEspeciales);
+        } else {
+          console.error("Error fetching articulos especiales: res.data is not an array");
+        }
+      }).catch(error => {
+        console.error("Error fetching articulos especiales:", error);
+      });
+    } else {
+      axios.get(`${backendUrl}/especialesConPuntosFrentes`, {
+        params: { materialId: id } // Pasar el material seleccionado
+      }).then((res) => {
+        console.log("Response from /especialesConPuntosFrentes:", res.data);
+        if (Array.isArray(res.data)) {
+          // Filtrar duplicados
+          const uniqueEspeciales = res.data.filter((especial, index, self) =>
+            index === self.findIndex((e) => (
+              e.articulo_id === especial.articulo_id
+            ))
+          );
+          setListEspeciales(uniqueEspeciales);
+        } else {
+          console.error("Error fetching articulos especiales: res.data is not an array");
+        }
+      }).catch(error => {
+        console.error("Error fetching articulos especiales:", error);
+      });
+    }
   };
 
   const handleSelectColorChange = (event) => {
@@ -754,21 +800,6 @@ function Frentes2() {
               </label>
             )}
             <label htmlFor="puntos">Puntos: {puntos * cantidad}</label>
-          </div>
-          <div className="container">
-            {selectedProducto.id === "4" && (
-              <div className="field">
-                <label htmlFor="addBrakes" style={{ color: 'red' }}>Con freno:</label>
-                <div className="checkbox-field">
-                  <input
-                    type="checkbox"
-                    id="addBrakes"
-                    checked={brakesChecked}
-                    onChange={handleBrakesChange}
-                  />
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </div>

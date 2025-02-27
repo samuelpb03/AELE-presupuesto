@@ -218,12 +218,31 @@ app.get("/especialesConPuntos", (req, res) => {
 
 app.get("/especialesConPuntosFrentes", (req, res) => {
   const query = `
-  SELECT a.articulo_id, a.nombre AS articulo_nombre, m.puntos
+  SELECT DISTINCT a.articulo_id, a.nombre AS articulo_nombre, m.puntos
   FROM articulo a
   LEFT JOIN medidas m ON a.articulo_id = m.articulos_id
   JOIN serie s ON a.serie_id = s.serie_id
   JOIN producto p ON s.producto_id = p.producto_id
   WHERE p.producto_id = 9 AND s.serie_id = 35;
+  `;
+
+  db.query(query, (err, data) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json(err);
+    }
+    return res.json(data);
+  });
+});
+app.get("/especialesConPuntosMelamina", (req, res) => {
+  const query = `
+    SELECT DISTINCT a.articulo_id, a.nombre AS articulo_nombre, MAX(m.puntos) AS puntos
+    FROM articulo a
+    LEFT JOIN medidas m ON a.articulo_id = m.articulos_id
+    JOIN serie s ON a.serie_id = s.serie_id
+    JOIN producto p ON s.producto_id = p.producto_id
+    WHERE p.producto_id = 9 AND s.serie_id = 35 AND m.material = 3 AND (a.nombre = 'Gran Altura' OR a.nombre = 'Tirada Vertical')
+    GROUP BY a.articulo_id, a.nombre;
   `;
 
   db.query(query, (err, data) => {

@@ -500,7 +500,53 @@ function Frentes() {
     setSelectedMedidas({ id: "", nombre: "", puntos: 0 }); // Restablecer medidas
     setSelectedMaterialFranja({ id: "", nombre: "" }); // Restablecer material franja
     setSelectedColorFranja({ id: "", nombre: "" }); // Restablecer color franja
+    setSelectedEspecial1({ id: "", nombre: "", puntos: 0 });
+    setSelectedEspecial2({ id: "", nombre: "", puntos: 0 });
+    setCantidadEspecial1(0);
+    setPuntosEspecial1(0);
+    setCantidadEspecial2(0);
+    setPuntosEspecial2(0);
     setPuntos(0); // Restablecer puntos
+  
+    // Añadir logs en la respuesta del backend
+    console.log("Selected material ID:", id);
+    if (nombre.toLowerCase() === 'melamina') {
+      axios.get(`${backendUrl}/especialesConPuntosMelamina`).then((res) => {
+        console.log("Response from /especialesConPuntosMelamina:", res.data);
+        if (Array.isArray(res.data)) {
+          // Filtrar duplicados
+          const uniqueEspeciales = res.data.filter((especial, index, self) =>
+            index === self.findIndex((e) => (
+              e.articulo_nombre === especial.articulo_nombre
+            ))
+          );
+          setListEspeciales(uniqueEspeciales);
+        } else {
+          console.error("Error fetching articulos especiales: res.data is not an array");
+        }
+      }).catch(error => {
+        console.error("Error fetching articulos especiales:", error);
+      });
+    } else {
+      axios.get(`${backendUrl}/especialesConPuntosFrentes`, {
+        params: { materialId: id } // Pasar el material seleccionado
+      }).then((res) => {
+        console.log("Response from /especialesConPuntosFrentes:", res.data);
+        if (Array.isArray(res.data)) {
+          // Filtrar duplicados
+          const uniqueEspeciales = res.data.filter((especial, index, self) =>
+            index === self.findIndex((e) => (
+              e.articulo_id === especial.articulo_id
+            ))
+          );
+          setListEspeciales(uniqueEspeciales);
+        } else {
+          console.error("Error fetching articulos especiales: res.data is not an array");
+        }
+      }).catch(error => {
+        console.error("Error fetching articulos especiales:", error);
+      });
+    }
   };
 
   const handleSelectColorChange = (event) => {
@@ -568,7 +614,7 @@ function Frentes() {
     const index = event.target.selectedIndex;
     const nombre = event.target.options[index].text;
     const id = event.target.value;
-
+  
     // Verificar si es el especial "Gran Altura" y el producto es 4 o 5
     if (selectedProducto.id === "4" || selectedProducto.id === "5") {
       // Solo permitir "Gran Altura" si la serie es 195
@@ -577,13 +623,13 @@ function Frentes() {
         return; // Bloquear selección si la serie no es la correcta
       }
     }
-
+  
     // Verificar si es el especial "tirada vertical" (ID 194)
     if (id === "194" && selectedSerie.nombre.toLowerCase() !== "kanto") {
       alert("El especial 'tirada vertical' solo está disponible para la serie Kanto.");
       return; // Bloquear selección si la serie no es Kanto
     }
-
+  
     // Si el usuario selecciona la opción vacía
     if (id === "") {
       if (especialIndex === 1) {
@@ -597,9 +643,14 @@ function Frentes() {
       }
       return; // Salir de la función si se selecciona el valor vacío
     }
-
+  
     // Procesar la selección de especiales como de costumbre
     const selectedEspecial = listEspeciales.find(especial => especial.articulo_id === parseInt(id));
+    if (!selectedEspecial) {
+      console.error("Especial no encontrado:", id);
+      return;
+    }
+  
     if (especialIndex === 1) {
       setSelectedEspecial1({ id, nombre, puntos: selectedEspecial.puntos });
       setPuntosEspecial1(selectedEspecial.puntos);
@@ -756,21 +807,6 @@ function Frentes() {
               </label>
             )}
             <label htmlFor="puntos">Puntos: {puntos * cantidad}</label>
-          </div>
-          <div className="container">
-            {selectedProducto.id === "4" && (
-              <div className="field">
-                <label htmlFor="addBrakes" style={{ color: 'red' }}>Con freno:</label>
-                <div className="checkbox-field">
-                  <input
-                    type="checkbox"
-                    id="addBrakes"
-                    checked={brakesChecked}
-                    onChange={handleBrakesChange}
-                  />
-                </div>
-              </div>
-            )}
           </div>
         </div>
 
