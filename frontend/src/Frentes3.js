@@ -641,7 +641,7 @@ function Frentes3() {
   };
   const getEspecialesOptions = () => {
     if (selectedMaterial.nombre.toLowerCase() === "melamina") {
-      console.log("Especiales:", listEspeciales.slice(0, 2));
+      //console.log("Especiales:", listEspeciales.slice(0, 2));
       return listEspeciales.length >= 3 ? [listEspeciales[0], listEspeciales[2]] : listEspeciales.slice(0, 2);
        // Mostrar solo la primera y la tercera opción si hay suficientes elementos
     } else {
