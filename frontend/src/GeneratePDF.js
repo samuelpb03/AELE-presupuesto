@@ -631,6 +631,8 @@ if (valorPuntoPromo < 1) {
   startY += 10;
 }
 doc.text('Total precio: ' + precioTotal * valorPuntoPromo + '€', 12, startY);
+startY += 10;
+//doc.text('C1: '+ (precioTotal * valorPuntoPromo) * 0.58 + '€', 12, startY);
   // Crear el nombre del PDF y enviarlo
   const centroAbreviado = centro.substring(0, 6).toUpperCase();
   fetch('https://api.adpta.com/presupuesto', {
