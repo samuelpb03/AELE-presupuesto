@@ -22,6 +22,14 @@ function CamposUsuario() {
           onChange={(e) => handleUserInfoChange('telefono', e.target.value)}  // Actualizamos el contexto
         />
       </label>
+      <label>
+        Email (opcional):
+        <input
+          type="text"
+          value={userInfo.email}
+          onChange={(e) => handleUserInfoChange('email', e.target.value)}  // Actualizamos el contexto
+        />
+      </label>
     </div>
   );
 }

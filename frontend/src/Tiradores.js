@@ -11,6 +11,9 @@ function Tiradores() {
   const [listColor, setListColor] = useState(Array(6).fill([])); // Inicializar como array de arrays
   const [selectedArticulos, setSelectedArticulos] = useState(Array(6).fill({ id: "", nombre: "", puntos: 0, serieId: "" }));
   const [selectedColores, setSelectedColores] = useState(Array(6).fill({ id: "", nombre: "" }));
+  const [materialFrente1, setMaterialFrente1] = useState("");
+  const [materialFrente2, setMaterialFrente2] = useState("");
+  const [materialFrente3, setMaterialFrente3] = useState("");
   var [cantidades, setCantidades] = useState(Array(6).fill(0));
   const [puntos, setPuntos] = useState(Array(6).fill(0));
   // IDs de los tiradores que requieren la advertencia
@@ -19,16 +22,28 @@ function Tiradores() {
   // Comprobar si algún artículo seleccionado requiere advertencia
   const mostrarAdvertenciaGola = selectedArticulos.some(articulo => golaIds.includes(parseInt(articulo.id)));
   const mostrarAdvertenciaPushCajon = selectedArticulos.some(articulo => parseInt(articulo.id) === 223);
+  data.frentes = data.frentes || {};
+  //console.log("Datos en frentes: " + data.frentes.selectedMaterialNombre);
 
-  const backendUrl = 'http://194.164.166.129:6969'; //Url para el backend
-
+  const backendUrl = 'https://api.adpta.com'; //Url para el backend
+  //comprobar si son de laca
+  useEffect(() => {
+    if (data.frentes && data.frentes.selectedMaterialNombre) {
+      setMaterialFrente1(data.frentes.selectedMaterialNombre.toLowerCase());
+    }
+    if (data.frentes2 && data.frentes2.selectedMaterialNombre) {
+      setMaterialFrente2(data.frentes2.selectedMaterialNombre.toLowerCase());
+    }
+    if (data.frentes3 && data.frentes3.selectedMaterialNombre) {
+      setMaterialFrente3(data.frentes3.selectedMaterialNombre.toLowerCase());
+    }
+  }, [data.frentes, data.frentes2, data.frentes3]);
   useEffect(() => {
     const user = localStorage.getItem('user');
     if (!user) {
       window.location.href = '/login.php'; // Redirigir a login.php si no está autenticado
     }
   }, []);
-
   useEffect(() => {
     if (data.tiradores) { //Recoge los datos al volver a la pestaña
       const restoredArticulos = Array(6).fill({ id: "", nombre: "", puntos: 0, serieId: "" });
@@ -57,7 +72,14 @@ function Tiradores() {
       setPuntos(restoredPuntos);
     }
   }, []);
-
+  useEffect(() => {
+    if (data.equipamiento3) {
+      const selectedNames = Object.keys(data.equipamiento3)
+        .filter(key => key.includes('Nombre'))
+        .map(key => data.equipamiento3[key]);
+      console.log("Nombres de los artículos seleccionados en equipamientos:", selectedNames);
+    }
+  }, [data.equipamiento3]);
   useEffect(() => {
     const formattedData = selectedArticulos.reduce((acc, articulo, index) => {
       acc[`articulo${index + 1}Nombre`] = articulo.nombre;
@@ -149,103 +171,116 @@ function Tiradores() {
       }
     });
   }, [selectedArticulos, backendUrl]);
-
+  const filteredTiradores = listTiradores.filter((tirador) => {
+    const isLaca = [materialFrente1, materialFrente2, materialFrente3].some(material => material.includes("laca"));
+    const isSoft = data.equipamiento3 && Object.values(data.equipamiento3).some(value => typeof value === 'string' && value.toLowerCase().includes("soft"));
+    
+    if (!isSoft && tirador.nombre.toLowerCase().includes("push cajones")) {
+      return false; // No mostrar "Push cajones" si no hay equipamientos con "soft"
+    }
+    
+    if (isLaca) {
+      return true; // Mostrar todos los tiradores si al menos un frente es de laca, excepto "Push cajones" si no hay "soft"
+    }
+    
+    return !tirador.nombre.toLowerCase().includes("gola"); // Filtrar los tiradores que contienen "gola" en el nombre
+  });
   const handleSelectArticuloChange = async (index, event, isCerradura = false) => {
-  const updatedArticulos = [...selectedArticulos];
-  const updatedColores = [...selectedColores]; // Añadido para actualizar los colores también
-  const updatedCantidades = [...cantidades];
-  const selectedIndex = event.target.selectedIndex;
-  const nombre = event.target.options[selectedIndex].text;
-  const id = event.target.value;
-  const serieId = event.target.options[selectedIndex].getAttribute('data-serie-id');
+    const updatedArticulos = [...selectedArticulos];
+    const updatedColores = [...selectedColores]; // Añadido para actualizar los colores también
+    const updatedCantidades = [...cantidades];
+    const selectedIndex = event.target.selectedIndex;
+    const nombre = event.target.options[selectedIndex].text;
+    const id = event.target.value;
+    const serieId = event.target.options[selectedIndex].getAttribute('data-serie-id');
 
-  // Si se selecciona "--Selecciona una opción--", restablecer el artículo y el color a vacío
-  if (id === "") {
-    updatedArticulos[index] = { id: "", nombre: "", puntos: 0, serieId: "" };
-    updatedColores[index] = { id: "", nombre: "" }; // Limpiar el color asociado
-    updatedCantidades[index] = 0;
-    setSelectedArticulos(updatedArticulos);
-    setSelectedColores(updatedColores); // Limpiar el estado del color también
-    setCantidades(updatedCantidades);
-    setPuntos(prevPuntos => {
-      const newPuntos = [...prevPuntos];
-      newPuntos[index] = 0; // Restablecer los puntos a 0
-      return newPuntos;
-    });
-
-    // Actualizar en el contexto
-    handleSelectChangeF(`articulo${index + 1}`, "", "");
-    handleSelectChangeF(`color${index + 1}`, "", ""); // Limpiar el color en el contexto también
-    return; // Salir de la función si se selecciona "--Selecciona una opción--"
-  }
-
-  // Si se selecciona un artículo válido, procesarlo normalmente
-  updatedArticulos[index] = { id, nombre, puntos: 0, serieId };
-  setSelectedArticulos(updatedArticulos);
-
-  // Set cantidad to 1 if an article is selected
-  if (id) {
-    updatedCantidades[index] = 1;
-  }
-  setCantidades(updatedCantidades);
-
-  try {
-    const materialRes = await axios.get(`${backendUrl}/materialesPorArticulo`, {
-      headers: {
-        'ngrok-skip-browser-warning': 'true'
-      },
-      params: { articuloId: id }
-    });
-    const materialId = materialRes.data.length > 0 ? materialRes.data[0].material : null;
-    if (materialId) {
-      const medidasRes = await axios.get(`${backendUrl}/medidasConPuntos`, {
-        headers: {
-          'ngrok-skip-browser-warning': 'true'
-        },
-        params: { articuloId: id, materialId }
-      });
-      const selectedArticulo = medidasRes.data.length > 0 ? medidasRes.data[0] : { puntos: 0 };
-      const puntos = selectedArticulo.puntos;
-
-      updatedArticulos[index].puntos = puntos; // Actualizar los puntos en el estado de selectedArticulos
+    // Si se selecciona "--Selecciona una opción--", restablecer el artículo y el color a vacío
+    if (id === "") {
+      updatedArticulos[index] = { id: "", nombre: "", puntos: 0, serieId: "" };
+      updatedColores[index] = { id: "", nombre: "" }; // Limpiar el color asociado
+      updatedCantidades[index] = 0;
       setSelectedArticulos(updatedArticulos);
-
+      setSelectedColores(updatedColores); // Limpiar el estado del color también
+      setCantidades(updatedCantidades);
       setPuntos(prevPuntos => {
         const newPuntos = [...prevPuntos];
-        newPuntos[index] = puntos * updatedCantidades[index];
+        newPuntos[index] = 0; // Restablecer los puntos a 0
         return newPuntos;
       });
 
-      const coloresRes = await axios.get(`${backendUrl}/color`, {
+      // Actualizar en el contexto
+      handleSelectChangeF(`articulo${index + 1}`, "", "");
+      handleSelectChangeF(`color${index + 1}`, "", ""); // Limpiar el color en el contexto también
+      return; // Salir de la función si se selecciona "--Selecciona una opción--"
+    }
+
+    // Si se selecciona un artículo válido, procesarlo normalmente
+    updatedArticulos[index] = { id, nombre, puntos: 0, serieId };
+    setSelectedArticulos(updatedArticulos);
+
+    // Set cantidad to 1 if an article is selected
+    if (id) {
+      updatedCantidades[index] = 1;
+    }
+    setCantidades(updatedCantidades);
+
+    try {
+      const materialRes = await axios.get(`${backendUrl}/materialesPorArticulo`, {
         headers: {
           'ngrok-skip-browser-warning': 'true'
         },
-        params: { materialId }
+        params: { articuloId: id }
       });
-      if (Array.isArray(coloresRes.data)) {
-        setListColor(prevListColor => {
-          const newListColor = [...prevListColor];
-          newListColor[index] = coloresRes.data; // Actualizar solo el índice correspondiente
-          return newListColor;
+      const materialId = materialRes.data.length > 0 ? materialRes.data[0].material : null;
+      if (materialId) {
+        const medidasRes = await axios.get(`${backendUrl}/medidasConPuntos`, {
+          headers: {
+            'ngrok-skip-browser-warning': 'true'
+          },
+          params: { articuloId: id, materialId }
+        });
+        const selectedArticulo = medidasRes.data.length > 0 ? medidasRes.data[0] : { puntos: 0 };
+        const puntos = selectedArticulo.puntos;
+
+        updatedArticulos[index].puntos = puntos; // Actualizar los puntos en el estado de selectedArticulos
+        setSelectedArticulos(updatedArticulos);
+
+        setPuntos(prevPuntos => {
+          const newPuntos = [...prevPuntos];
+          newPuntos[index] = puntos * updatedCantidades[index];
+          return newPuntos;
         });
 
-        // Guardar los colores en el estado local para que se mantengan al cambiar de pestaña
-        const updatedColores = [...selectedColores];
-        if (updatedColores[index].id === "") {
-          updatedColores[index] = { id: coloresRes.data[0].color_id, nombre: coloresRes.data[0].nombre };
-          setSelectedColores(updatedColores);
-          handleSelectChangeF(`color${index + 1}`, coloresRes.data[0].color_id, coloresRes.data[0].nombre);
-        }
-      } else {
-        console.error("Error fetching colores: res.data is not an array");
-      }
-    }
-  } catch (error) {
-    console.error("Error fetching puntos o colores:", error);
-  }
+        const coloresRes = await axios.get(`${backendUrl}/color`, {
+          headers: {
+            'ngrok-skip-browser-warning': 'true'
+          },
+          params: { materialId }
+        });
+        if (Array.isArray(coloresRes.data)) {
+          setListColor(prevListColor => {
+            const newListColor = [...prevListColor];
+            newListColor[index] = coloresRes.data; // Actualizar solo el índice correspondiente
+            return newListColor;
+          });
 
-  handleSelectChangeF(`articulo${index + 1}`, id, nombre);
-};
+          // Guardar los colores en el estado local para que se mantengan al cambiar de pestaña
+          const updatedColores = [...selectedColores];
+          if (updatedColores[index].id === "") {
+            updatedColores[index] = { id: coloresRes.data[0].color_id, nombre: coloresRes.data[0].nombre };
+            setSelectedColores(updatedColores);
+            handleSelectChangeF(`color${index + 1}`, coloresRes.data[0].color_id, coloresRes.data[0].nombre);
+          }
+        } else {
+          console.error("Error fetching colores: res.data is not an array");
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching puntos o colores:", error);
+    }
+
+    handleSelectChangeF(`articulo${index + 1}`, id, nombre);
+  };
 
 
   /**
@@ -285,7 +320,7 @@ function Tiradores() {
         value={selectedArticulos[index].id || ""}
       >
         <option value="">--Selecciona una opción--</option>
-        {(isCerradura ? listCerraduras : listTiradores).map((articulo) => (
+        {(isCerradura ? listCerraduras : filteredTiradores).map((articulo) => (
           <option key={articulo.articulo_id} value={articulo.articulo_id} data-serie-id={articulo.serie_id}>
             {articulo.nombre}
           </option>
@@ -313,7 +348,6 @@ function Tiradores() {
         min="1"
       />
       <label htmlFor={`puntos${index + 1}`}>Puntos: {puntos[index]}</label>
-
     </div>
   );
 
@@ -335,13 +369,13 @@ function Tiradores() {
             {renderSelectArticulo(3)}
           </div>
           {selectedArticulos.some(articulo => golaIds.includes(parseInt(articulo.id))) && (
-            <div style={{ color: 'red', textAlign: 'right', marginTop: '10px', marginLeft: '480px', fontWeight: 'bold' }}>
-              Los tiradores Gola solo pueden seleccionarse con puertas Kanto en laca.
+            <div style={{ color: 'black', textAlign: 'left', marginTop: '10px', marginLeft: '10px', fontWeight: 'bold' }}>
+              Exclusivo de frentes en laca
             </div>
           )}
           {mostrarAdvertenciaPushCajon && (
-            <div style={{ color: 'red', textAlign: 'left', marginTop: '10px', marginLeft: '10px', fontWeight: 'bold' }}>
-              Push cajón solo disponible con cajones soft.
+            <div style={{ color: 'black', textAlign: 'left', marginTop: '10px', marginLeft: '10px', fontWeight: 'bold' }}>
+              Exclusivo de cajones soft.
             </div>
           )}
         </div>
@@ -358,6 +392,4 @@ function Tiradores() {
     </div>
   );
 }
-
 export default Tiradores;
-

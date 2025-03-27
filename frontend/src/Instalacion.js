@@ -7,26 +7,26 @@ import { useNavigate } from 'react-router-dom';
 function Instalacion() {
   const { userInfo } = useTabs();
   const { data, saveData } = useData();
-  const [numFrentesInteriores, setNumFrentesInteriores] = useState(0);
-  const [numArmariosCompletos, setNumArmariosCompletos] = useState(0);
-  const [numDesmontaje, setNumDesmontaje] = useState(0); // Nuevo estado para el número de desmontajes
+  const [numFrentesInteriores, setNumFrentesInteriores] = useState("");
+  const [numArmariosCompletos, setNumArmariosCompletos] = useState("");
+  const [numDesmontaje, setNumDesmontaje] = useState(""); // Nuevo estado para el número de desmontajes
   const [montajeAcarreo, setMontajeAcarreo] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     if (data.instalacion) {
-      setNumFrentesInteriores(data.instalacion.numFrentesInteriores || 0);
-      setNumArmariosCompletos(data.instalacion.numArmariosCompletos || 0);
-      setNumDesmontaje(data.instalacion.numDesmontaje || 0); // Restaurar estado de desmontajes
+      setNumFrentesInteriores(data.instalacion.numFrentesInteriores || "");
+      setNumArmariosCompletos(data.instalacion.numArmariosCompletos || "");
+      setNumDesmontaje(data.instalacion.numDesmontaje || ""); // Restaurar estado de desmontajes
     }
   }, []);
 
   useEffect(() => {
     const formattedData = {
-      numFrentesInteriores: parseFloat(numFrentesInteriores).toFixed(2),
-      numArmariosCompletos: parseFloat(numArmariosCompletos).toFixed(2),
-      numDesmontaje, // Guardar el número de desmontajes
+      numFrentesInteriores: numFrentesInteriores === "" ? 0 : parseFloat(numFrentesInteriores).toFixed(2),
+      numArmariosCompletos: numArmariosCompletos === "" ? 0 : parseFloat(numArmariosCompletos).toFixed(2),
+      numDesmontaje: numDesmontaje === "" ? 0 : parseFloat(numDesmontaje), // Guardar el número de desmontajes
       montajeAcarreo,
     };
     saveData("instalacion", formattedData);
@@ -52,6 +52,21 @@ function Instalacion() {
     setShowModal(false); // Navegar de vuelta a la página principal
   };
 
+  const handleNumArmariosCompletosChange = (e) => {
+    const value = e.target.value;
+    setNumArmariosCompletos(value === "" ? "" : parseFloat(value));
+  };
+
+  const handleNumFrentesInterioresChange = (e) => {
+    const value = e.target.value;
+    setNumFrentesInteriores(value === "" ? "" : parseFloat(value));
+  };
+
+  const handleNumDesmontajeChange = (e) => {
+    const value = e.target.value;
+    setNumDesmontaje(value === "" ? "" : parseFloat(value));
+  };
+
   return (
     <div className="container">
       <div className="container2">
@@ -64,7 +79,7 @@ function Instalacion() {
             id="numArmariosCompletos"
             value={numArmariosCompletos}
             min={0}
-            onChange={(e) => setNumArmariosCompletos(parseFloat(e.target.value) || 0)}
+            onChange={handleNumArmariosCompletosChange}
           />
         </div>
         <div className="field-instalacion">
@@ -75,7 +90,7 @@ function Instalacion() {
             id="numFrentesInteriores"
             value={numFrentesInteriores}
             min={0}
-            onChange={(e) => setNumFrentesInteriores(parseFloat(e.target.value) || 0)}
+            onChange={handleNumFrentesInterioresChange}
           />
         </div>
         <div className="field-instalacion">
@@ -85,7 +100,7 @@ function Instalacion() {
             id="numDesmontaje"
             value={numDesmontaje}
             min={0}
-            onChange={(e) => setNumDesmontaje(parseFloat(e.target.value) || 0)}
+            onChange={handleNumDesmontajeChange}
           />
         </div>
         <div className="field-instalacion">

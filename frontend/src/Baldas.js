@@ -5,10 +5,12 @@ import { useData } from "./context/DataContext";
 function Baldas() {
   const { handleSelectChangeB } = useTabs();
   const { data, saveData } = useData();
+  const [listSensores, setListSensores] = useState([]); // Nueva lista para los sensores
   const [listArticulo, setListArticulo] = useState([]);
   const [listArticuloIluminacion, setListArticuloIluminacion] = useState([]);
   const [listMedidas, setListMedidas] = useState(Array(12).fill([]));
   const [cantidades, setCantidades] = useState(Array(12).fill(0));
+  const [selectedColorIluminacion, setSelectedColorIluminacion] = useState("");
   const [selectedArticulos, setSelectedArticulos] = useState(
     Array(12).fill({
       id: "",
@@ -25,71 +27,83 @@ function Baldas() {
   const [puntosTotales, setPuntosTotales] = useState(Array(12).fill(0));
   const user = localStorage.getItem('user');
 
-  const backendUrl = 'http://194.164.166.129:6969'; // URL de ngrok para el backend
+  const backendUrl = 'https://api.adpta.com'; // URL de ngrok para el backend
   if (!user) {
     //Redirigir a login.php si no está autenticado
     window.location.href = '/login.php';
-}
+  }
 
 
   useEffect(() => {
-    // Restore data from context when component mounts
-    const restoredArticulos = Array(12).fill({ id: "", nombre: "" });
-    const restoredMedidas = Array(12).fill({ id: "", nombre: "", puntos: 0 });
-    const restoredCantidades = Array(12).fill(0);
-    const restoredPuntosTotales = Array(12).fill(0);
+  // Restore data from context when component mounts
+  const restoredArticulos = Array(12).fill({ id: "", nombre: "" });
+  const restoredMedidas = Array(12).fill({ id: "", nombre: "", puntos: 0 });
+  const restoredCantidades = Array(12).fill(0);
+  const restoredPuntosTotales = Array(12).fill(0);
 
-    for (let i = 0; i < 12; i++) {
-      restoredArticulos[i] = {
-        id: data.baldas?.[`articulo${i + 1}Id`] || "",
-        nombre: data.baldas?.[`articulo${i + 1}Nombre`] || "",
-      };
-      restoredMedidas[i] = {
-        id: data.baldas?.[`medidas${i + 1}Id`] || "",
-        nombre: data.baldas?.[`medidas${i + 1}Nombre`] || "",
-        puntos: data.baldas?.[`medidas${i + 1}Puntos`] || 0,
-      };
-      restoredCantidades[i] = data.baldas?.[`cantidad${i + 1}`] || 0;
-      restoredPuntosTotales[i] = data.baldas?.[`puntosTotales${i + 1}`] || 0;
-    }
-
-    setSelectedArticulos(restoredArticulos);
-    setSelectedMedidas(restoredMedidas);
-    setCantidades(restoredCantidades);
-    setPuntosTotales(restoredPuntosTotales);
-  }, []);
-
-  useEffect(() => {
-    const fetchArticulos = async () => {
-      try {
-        const baldasRes = await axios.get(`${backendUrl}/articulo/baldas`, {
-          headers: {
-            'ngrok-skip-browser-warning': 'true'
-          }
-        });
-        if (Array.isArray(baldasRes.data)) {
-          setListArticulo(baldasRes.data);
-        } else {
-          console.error("Error fetching articulos: res.data is not an array");
-        }
-
-        const iluminacionRes = await axios.get(`${backendUrl}/articulo/iluminacion`, {
-          headers: {
-            'ngrok-skip-browser-warning': 'true'
-          }
-        });
-        if (Array.isArray(iluminacionRes.data)) {
-          setListArticuloIluminacion(iluminacionRes.data);
-        } else {
-          console.error("Error fetching articulos: res.data is not an array");
-        }
-      } catch (error) {
-        console.error("Error fetching articulos:", error);
-      }
+  for (let i = 0; i < 12; i++) {
+    restoredArticulos[i] = {
+      id: data.baldas?.[`articulo${i + 1}Id`] || "",
+      nombre: data.baldas?.[`articulo${i + 1}Nombre`] || "",
     };
+    restoredMedidas[i] = {
+      id: data.baldas?.[`medidas${i + 1}Id`] || "",
+      nombre: data.baldas?.[`medidas${i + 1}Nombre`] || "",
+      puntos: data.baldas?.[`medidas${i + 1}Puntos`] || 0,
+    };
+    restoredCantidades[i] = data.baldas?.[`cantidad${i + 1}`] || 0;
+    restoredPuntosTotales[i] = data.baldas?.[`puntosTotales${i + 1}`] || 0;
+  }
 
-    fetchArticulos();
-  }, [backendUrl]);
+  setSelectedArticulos(restoredArticulos);
+  setSelectedMedidas(restoredMedidas);
+  setCantidades(restoredCantidades);
+  setPuntosTotales(restoredPuntosTotales);
+  setSelectedColorIluminacion(data.baldas?.colorIluminacion || ""); // Restaurar el color de iluminación
+}, []);
+
+useEffect(() => {
+  const fetchArticulos = async () => {
+    try {
+      const baldasRes = await axios.get(`${backendUrl}/articulo/baldas`, {
+        headers: {
+          'ngrok-skip-browser-warning': 'true'
+        }
+      });
+      if (Array.isArray(baldasRes.data)) {
+        setListArticulo(baldasRes.data);
+      } else {
+        console.error("Error fetching articulos: res.data is not an array");
+      }
+
+      const iluminacionRes = await axios.get(`${backendUrl}/articulo/iluminacion`, {
+        headers: {
+          'ngrok-skip-browser-warning': 'true'
+        }
+      });
+      if (Array.isArray(iluminacionRes.data)) {
+        setListArticuloIluminacion(iluminacionRes.data);
+      } else {
+        console.error("Error fetching articulos: res.data is not an array");
+      }
+
+      const sensoresRes = await axios.get(`${backendUrl}/articulo/sensores`, {
+        headers: {
+          'ngrok-skip-browser-warning': 'true'
+        }
+      });
+      if (Array.isArray(sensoresRes.data)) {
+        setListSensores(sensoresRes.data);
+      } else {
+        console.error("Error fetching sensores: res.data is not an array");
+      }
+    } catch (error) {
+      console.error("Error fetching articulos:", error);
+    }
+  };
+
+  fetchArticulos();
+}, [backendUrl]);
 
   useEffect(() => {
     // Fetch medidas for restored articulos
@@ -132,8 +146,9 @@ function Baldas() {
       acc[`puntosTotales${index + 1}`] = puntosTotales[index];
       return acc;
     }, {});
+    formattedData["colorIluminacion"] = selectedColorIluminacion; // Guardar el color de iluminación
     saveData("baldas", formattedData);
-  }, [selectedArticulos, selectedMedidas, cantidades, puntosTotales, saveData]);
+  }, [selectedArticulos, selectedMedidas, cantidades, puntosTotales, selectedColorIluminacion, saveData]);
 
   const handleSelectArticuloChange = async (index, event) => {
     const updatedArticulos = [...selectedArticulos];
@@ -231,12 +246,12 @@ function Baldas() {
     handleSelectChangeB(`cantidad${index + 1}`, value);
   };
 
-  const renderSelectArticulo = (index, list, hideMedidas) => (
+  const renderSelectArticulo = (index, list, hideMedidas, isSensor = false) => (
     <div className="field-special" key={index}>
       <label className="label" htmlFor={`articulo${index + 1}`}>
-        {index <= 5 ? `Baldas y divisores ${index + 1}` : `Iluminacion ${index + 1 - 6}`}
+        {index <= 5 ? `Baldas y divisores ${index + 1}` : isSensor ? "Sensores" : `Iluminacion ${index + 1 - 6}`}
       </label>
-      <select 
+      <select
         id={`articulo${index + 1}`}
         onChange={(event) => handleSelectArticuloChange(index, event)}
         value={selectedArticulos[index].id || ""}
@@ -278,7 +293,7 @@ function Baldas() {
       />
     </div>
   );
-  
+
   return (
     <div className="container">
       <div className="section">
@@ -291,9 +306,27 @@ function Baldas() {
           {Array.from({ length: 3 }).map((_, i) => renderSelectArticulo(i + 3, listArticulo, false))}
         </div>
         <div className="container4">
-          <h1 style={{marginTop:"40px"}}>Iluminación</h1>
+          <h1 style={{ marginTop: "40px" }}>Iluminación</h1>
+          <div className="field-special">
+            <label htmlFor="colorIluminacion">Color de iluminación:</label>
+            <select
+              id="colorIluminacion"
+              onChange={(event) => {
+                const colorIluminacion = event.target.value;
+                setSelectedColorIluminacion(colorIluminacion);
+                handleSelectChangeB("colorIluminacion", colorIluminacion, colorIluminacion);
+              }}
+              value={selectedColorIluminacion}
+            >
+              <option value="">--Selecciona una opción--</option>
+              <option value="Fria">Fría</option>
+              <option value="Calida">Cálida</option>
+              <option value="Media">Media</option>
+            </select>
+          </div>
           {Array.from({ length: 3 }).map((_, i) => renderSelectArticulo(i + 6, listArticuloIluminacion, true))}
-          {Array.from({ length: 2 }).map((_, i) => renderSelectArticulo(i + 9, listArticuloIluminacion, true))}
+          {Array.from({ length: 1 }).map((_, i) => renderSelectArticulo(i + 9, listArticuloIluminacion, true))}
+          {renderSelectArticulo(10, listSensores, true, true)}
         </div>
       </div>
     </div>

@@ -2,18 +2,23 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useTabs } from "./TabsContext";
 import { useData } from './context/DataContext';
+import { useNavigate } from 'react-router-dom';
 
 function Remates() {
   const { handleSelectChangeZ } = useTabs();
   const { data, saveData } = useData();
+  const [tipoApertura, setTipoApertura] = useState("");
+  const [tipoRemate, setTipoRemate] = useState("");
   const [listArticulo, setListArticulo] = useState([]);
   const [selectedArticulos, setSelectedArticulos] = useState(Array(3).fill({ id: "", nombre: "", puntosOriginal: 0, puntos: 0 }));
   const [metros, setMetros] = useState(Array(3).fill(2.5));
   const [listOtros, setListOtros] = useState([]);
   const [selectedOtros, setSelectedOtros] = useState(Array(3).fill({ id: "", nombre: "", puntosOriginal: 0, puntos: 0 }));
   const [cantidadesOtros, setCantidadesOtros] = useState(Array(3).fill(0));
-  const backendUrl = 'http://194.164.166.129:6969';
+  const backendUrl = 'https://api.adpta.com';
   const user = localStorage.getItem('user');
+  const [forceUpdate, setForceUpdate] = useState(false);
+  const navigate = useNavigate();
   
   if (!user) {
     window.location.href = '/login.php';
@@ -64,16 +69,51 @@ function Remates() {
       console.error("Error fetching otros articulos:", error);
     });
   }, []);
-const isFrentesOnly = data && 
-    (data.frentes || data.frentes2 || data.frentes3) && // Hay datos en frentes, frentes 2 o frentes 3
-    !data.interiores && // No hay datos en interiores
-    !data.equipamiento3 && // No hay datos en otras secciones
-    !data.baldas;
+  
+  const isFrentesOnly = data && 
+  (data.frentes || data.frentes2 || data.frentes3) && // Hay datos en frentes, frentes 2 o frentes 3
+  !data.interiores && // No hay datos en interiores
+  !data.equipamiento3 && // No hay datos en otras secciones
+  !data.baldas;
+  useEffect(() => {
+    if (tipoApertura) {
+      axios.get(`${backendUrl}/articulo/remates`, {
+        headers: { 'ngrok-skip-browser-warning': 'true' }
+      })
+      .then((res) => {
+        if (Array.isArray(res.data)) {
+          const formattedArticulos = res.data.map((articulo) => ({
+            id: articulo.articulo_id,
+            nombre: `${articulo.articulo_nombre} - ${articulo.material_nombre}`,
+            puntosOriginal: articulo.puntos, // Guardar el valor original de los puntos
+            puntos: articulo.puntos // Inicialmente, los puntos son los originales
+          }));
+          // Filtrar los artículos que coinciden con el tipo de apertura seleccionado
+          let filteredArticulos = formattedArticulos.filter((articulo) => 
+            articulo.nombre.includes(tipoApertura)
+          );
+          // Filtrar los remates a premarco si solo se han elegido frentes
+          if (isFrentesOnly) {
+            filteredArticulos = filteredArticulos.filter((articulo) => 
+              articulo.nombre.toLowerCase().includes("premarco")
+            );
+          }
+          setListArticulo(filteredArticulos);
+        } else {
+          console.error("Error fetching articulos: res.data is not an array");
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching articulos:", error);
+      });
+    }
+  }, [tipoApertura, forceUpdate, isFrentesOnly]);
 
   // Filtrar artículos si es solo frentes
-  const filteredArticulos = isFrentesOnly 
-    ? listArticulo.filter((articulo) => [205, 209].includes(parseInt(articulo.id))) 
-    : listArticulo;
+  const filteredArticulos = listArticulo.filter((articulo) => {
+    const matchesTipoApertura = tipoApertura ? articulo.nombre.includes(tipoApertura) : true;
+    return matchesTipoApertura;
+  });
 
   // Cargar los datos iniciales desde el estado global
   useEffect(() => {
@@ -82,18 +122,23 @@ const isFrentesOnly = data &&
       setMetros(data.remates.metros || Array(3).fill(0));
       setSelectedOtros(data.remates.selectedOtros || Array(3).fill({ id: "", nombre: "", puntos: 0 }));
       setCantidadesOtros(data.remates.cantidadesOtros || Array(3).fill(1));
+      setTipoApertura(data.remates.tipoApertura || ""); // Restaurar el tipo de apertura
+      setTipoRemate(data.remates.tipoRemate || ""); // Restaurar el tipo de remate
     }
   }, []); 
+
   // Guardar los datos de remates cuando cambian
   useEffect(() => {
     const rematesData = {
       selectedArticulos,
       metros,
       selectedOtros,
-      cantidadesOtros
+      cantidadesOtros,
+      tipoApertura,
+      tipoRemate
     };
     saveData("remates", rematesData);
-  }, [selectedArticulos, metros, selectedOtros, cantidadesOtros, saveData]);
+  }, [selectedArticulos, metros, selectedOtros, cantidadesOtros, tipoApertura, tipoRemate, saveData]);
 
   // Función para calcular puntos
   const calculatePuntos = (articulo, metros) => {
@@ -114,10 +159,14 @@ const isFrentesOnly = data &&
 
     updatedArticulos[index] = { id, nombre, puntosOriginal, puntos: puntosOriginal }; // Guardar los puntos originales y puntos actuales
     setSelectedArticulos(updatedArticulos);
+    setForceUpdate((prev) => !prev); // Forzar la actualización del componente
 
     const updatedMetros = [...metros];
     updatedMetros[index] = 2.5;  // Reset metros al cambiar el artículo
     setMetros(updatedMetros);
+    setTimeout(() => {
+        navigate('/Remates');
+      }, 10); // Navegar de vuelta a Remates después de 10ms // Retraso de 300ms antes de la navegación rápida
   };
 
   // Manejar el cambio en metros
@@ -157,6 +206,38 @@ const isFrentesOnly = data &&
     setCantidadesOtros(newCantidades);
   };
 
+  const handleTipoAperturaChange = (event) => {
+    const value = event.target.value;
+    setTipoApertura(value);
+    handleSelectChangeZ("tipoApertura", value, value);
+    setForceUpdate((prev) => !prev); // Forzar la actualización del componente
+  
+    setTimeout(() => {
+      navigate('/Frentes');
+      setTimeout(() => {
+        navigate('/Remates');
+      }, 10); // Navegar de vuelta a Remates después de 10ms
+    }, 30); // Retraso de 300ms antes de la navegación rápida
+  };
+
+  const handleTipoRemateChange = (event) => {
+    const value = event.target.value;
+    setTipoRemate(value);
+    handleSelectChangeZ("tipoRemate", value, value);
+    if (tipoApertura) {
+      setForceUpdate((prev) => !prev); // Forzar la actualización del componente
+    }
+  };
+
+  const mapAbbreviationToFull = (value) => {
+    switch (value) {
+      case "pared a costado v.":
+        return "pared a costado visto";
+      default:
+        return value;
+    }
+  };
+
   // Renderizar selectores de artículos
   const renderSelectArticulo = (index) => (
     <div key={index}>
@@ -165,11 +246,12 @@ const isFrentesOnly = data &&
         id={`articulo${index + 1}`}
         onChange={(event) => handleSelectArticuloChange(index, event)}
         value={selectedArticulos[index].id}
+        disabled={!tipoApertura} // Deshabilitar si no se ha seleccionado tipoApertura
       >
         <option value="">--Selecciona una opción--</option>
         {filteredArticulos.map((articulo) => (
           <option key={articulo.id} value={articulo.nombre} data-puntos={articulo.puntos}>
-            {articulo.nombre} {/* Mostrar nombre completo del artículo y material */}
+            {articulo.nombre}
           </option>
         ))}
       </select>
@@ -182,6 +264,7 @@ const isFrentesOnly = data &&
         value={metros[index]}
         onChange={(event) => handleMetrosChange(index, event)}
         min="0"
+        disabled={!tipoApertura} // Deshabilitar si no se ha seleccionado tipoApertura
       />
       <label htmlFor={`puntos${index + 1}`}>Puntos: {selectedArticulos[index].puntos.toFixed(2)}</label>
     </div>
@@ -197,7 +280,7 @@ const isFrentesOnly = data &&
       >
         <option value="">--Selecciona una opción--</option>
         {listOtros.map((otro) => (
-          <option key={otro.id} value={otro.nombre} data-puntos={otro.puntosOriginal}>
+          <option key={otro.id} value={otro.id} data-puntos={otro.puntosOriginal}>
             {otro.nombre}
           </option>
         ))}
@@ -217,7 +300,22 @@ const isFrentesOnly = data &&
   );
 
   return (
-    <div className="container">
+    <div key={forceUpdate} className="container">
+      <div className="container2">
+        <h1>Configuración de Remates</h1>
+        <div className="field-special">
+          <label htmlFor="tipoApertura">Tipo de apertura:</label>
+          <select
+            id="tipoApertura"
+            onChange={handleTipoAperturaChange}
+            value={tipoApertura}
+          >
+            <option value="">--Selecciona una opción--</option>
+            <option value="abat.">Abatible</option>
+            <option value="corre.">Corredero</option>
+          </select>
+        </div>
+      </div>
       <div className="container2">
         <h1>Remates</h1>
         <div className="field-special">

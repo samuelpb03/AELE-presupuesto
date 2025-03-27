@@ -9,6 +9,8 @@ function Frentes() {
   const [listProducto, setListProducto] = useState([]);
   const [listSerie, setListSerie] = useState([]);
   const [listArticulo, setListArticulo] = useState([]);
+  const [selectedColorPerfil, setSelectedColorPerfil] = useState("");
+  const [showColorPerfil, setShowColorPerfil] = useState(false);
   const [listMaterial, setListMaterial] = useState([]);
   const [listColor, setListColor] = useState([]);
   const [listMedidas, setListMedidas] = useState([]);
@@ -36,7 +38,11 @@ function Frentes() {
   const [brakesChecked, setBrakesChecked] = useState(false);
   const [brakesPointsApplied, setBrakesPointsApplied] = useState(false);
   const [shouldApplyColorIncrement, setShouldApplyColorIncrement] = useState(false);
-  const backendUrl = 'http://194.164.166.129:6969'; //URL a la que se está conectando esta clase
+  // Conectar con el backend en localhost para hacer pruebas
+  //const backendUrl = "http://localhost:3306";
+  //Backend real
+  const backendUrl = "https://api.adpta.com";
+  //URL a la que se está conectando esta clase
   // Verificación del usuario, si no ha iniciado sesión, no puede entrar directamente a esta clase
   const user = localStorage.getItem('user');
   if (!user) {
@@ -45,46 +51,46 @@ function Frentes() {
   }
   // Este código devuelve los valores a los campos al cambiar de pestaña y volver, o, en su defecto, los mantiene vacíos
   useEffect(() => {
-    if (data.frentes) { //ID y nombre del producto
+    if (data.frentes) {
       setSelectedProducto({
         id: data.frentes.selectedProductoId || "",
         nombre: data.frentes.selectedProductoNombre || "",
       });
-      setSelectedSerie({ //ID y nombre de la serie
+      setSelectedSerie({
         id: data.frentes.selectedSerieId || "",
         nombre: data.frentes.selectedSerieNombre || "",
       });
-      setSelectedArticulo({ //ID y nombre del artículo
+      setSelectedArticulo({
         id: data.frentes.selectedArticuloId || "",
         nombre: data.frentes.selectedArticuloNombre || "",
       });
-      setSelectedMaterial({ //ID y nombre del material
+      setSelectedMaterial({
         id: data.frentes.selectedMaterialId || "",
         nombre: data.frentes.selectedMaterialNombre || "",
       });
-      setSelectedColor({ //ID y nombre del color
+      setSelectedColor({
         id: data.frentes.selectedColorId || "",
         nombre: data.frentes.selectedColorNombre || "",
       });
-      setSelectedMedidas({ //ID y nombre de las medidas
+      setSelectedMedidas({
         id: data.frentes.selectedMedidasId || "",
         nombre: data.frentes.selectedMedidasNombre || "",
         puntos: data.frentes.selectedMedidasPuntos || 0,
       });
-      setSelectedMaterialFranja({ //ID y nombre del material de la franja
+      setSelectedMaterialFranja({
         id: data.frentes.selectedMaterialFranjaId || "",
         nombre: data.frentes.selectedMaterialFranjaNombre || "",
       });
-      setSelectedColorFranja({ //ID y nombre del color de la franja
+      setSelectedColorFranja({
         id: data.frentes.selectedColorFranjaId || "",
         nombre: data.frentes.selectedColorFranjaNombre || "",
       });
-      setSelectedEspecial1({ //ID, nombre y puntos del primer especial a medida
+      setSelectedEspecial1({
         id: data.frentes.selectedEspecial1Id || "",
         nombre: data.frentes.selectedEspecial1Nombre || "",
         puntos: data.frentes.selectedEspecial1Puntos || 0,
       });
-      setSelectedEspecial2({ //ID, nombre y puntos del segundo especial a medida
+      setSelectedEspecial2({
         id: data.frentes.selectedEspecial2Id || "",
         nombre: data.frentes.selectedEspecial2Nombre || "",
         puntos: data.frentes.selectedEspecial2Puntos || 0,
@@ -106,6 +112,14 @@ function Frentes() {
       setBrakesChecked(data.frentes.brakesChecked || false);
       if (data.frentes.brakesChecked) {
         setPuntos((prevPuntos) => prevPuntos - 73); // Restar 73 puntos si los frenos estaban activados
+      }
+      //console.log("Id producto:", data.frentes.selectedProductoId);
+      if (data.frentes.selectedProductoId === "4" || data.frentes.selectedProductoId === "5" || data.frentes.selectedSerieId === "1") {
+        setShowColorPerfil(true); // Mostrar el selector de color del perfil si el producto es 4 o 5
+        setSelectedColorPerfil(data.frentes.selectedColorPerfil || ""); // Restaurar el color del perfil
+      } else {
+        setShowColorPerfil(false); // Ocultar el selector de color del perfil si no es 4 o 5
+        setSelectedColorPerfil(""); // Restablecer el color del
       }
     }
   }, []);
@@ -144,6 +158,7 @@ function Frentes() {
       cantidadEspecial2,
       puntosEspecial1: selectedEspecial1.puntos * cantidadEspecial1,
       puntosEspecial2: selectedEspecial2.puntos * cantidadEspecial2,
+      selectedColorPerfil, // Guardar el color del perfil
     };
     saveData("frentes", formattedData);
     //Lista de dependencias de estos datos
@@ -165,12 +180,13 @@ function Frentes() {
     isColorValueAdded,
     saveData,
     brakesChecked,
+    selectedColorPerfil, // Añadir el color del perfil a las dependencias
   ]);
 
   // Fragmento que recoge del backend los datos del producto (la tabla Producto de la base de datos)
   useEffect(() => {
     axios.get(`${backendUrl}/producto`).then((res) => {
-      console.log('Full response:', res); // Muestra en la consola la respuesta completa
+      //console.log('Full response:', res); // Muestra en la consola la respuesta completa
       if (Array.isArray(res.data)) {
         const filteredProducts = res.data.filter((producto) => [1, 4, 5].includes(producto.producto_id));
         const sortedProducts = filteredProducts.sort((a, b) => a.nombre.localeCompare(b.nombre));
@@ -183,7 +199,7 @@ function Frentes() {
     });
     // Este fragmento recoge del backend los datos de los especiales para frentes
     axios.get(`${backendUrl}/especialesConPuntosFrentes`).then((res) => {
-      console.log('Full response:', res); // Muestra en la consola la respuesta completa
+      //console.log('Full response:', res); // Muestra en la consola la respuesta completa
       if (Array.isArray(res.data)) {
         setListEspeciales(res.data);
       } else { // En caso de error, también se muestra en la consola
@@ -234,6 +250,7 @@ function Frentes() {
           setListArticulo(res.data);
           const franja = res.data.some((articulo) => articulo.franja === 1);
           setFranjaActiva(franja);
+          console.log("Franja activa:", franja);
           document.getElementById("articulo").disabled = false;
           document.getElementById("material").disabled = false;
           document.getElementById("color").disabled = false;
@@ -392,6 +409,8 @@ function Frentes() {
       setSelectedMaterialFranja({ id: "", nombre: "" });
       setSelectedColorFranja({ id: "", nombre: "" });
       setPuntos(0);
+      setShowColorPerfil(false); // Ocultar el selector de color del perfil
+      setSelectedColorPerfil(""); // Restablecer el color del perfil
       return; // Salir de la función
     }
 
@@ -399,6 +418,7 @@ function Frentes() {
     if (id === "4" || id === "5") {
       const especialGranAltura = listEspeciales.find(especial => especial.articulo_id === 195);
       setListEspeciales([especialGranAltura]); // Mostrar solo "Gran Altura"
+      setShowColorPerfil(true); // Mostrar el selector de color del perfil
     } else {
       axios.get(`${backendUrl}/especialesConPuntosFrentes`).then((res) => {
         if (Array.isArray(res.data)) {
@@ -407,6 +427,8 @@ function Frentes() {
       }).catch(error => {
         console.error("Error fetching articulos especiales:", error);
       });
+      setShowColorPerfil(false); // Ocultar el selector de color del perfil
+      setSelectedColorPerfil(""); // Restablecer el color del perfil
     }
 
     // Resetear los demás campos relacionados con puntos
@@ -435,7 +457,14 @@ function Frentes() {
     }).catch(error => {
       console.error("Error fetching articulos especiales:", error);
     });
-
+    if (id === "1") {
+      setShowColorPerfil(true); // Mostrar el selector de color del perfil si la serie es 1
+    } else if (selectedProducto.id === "4" || selectedProducto.id === "5") {
+      setShowColorPerfil(true); // Mostrar el selector de color del perfil si el producto es 4 o 5
+    } else {
+      setShowColorPerfil(false); // Ocultar el selector de color del perfil si no es 4 o 5
+      setSelectedColorPerfil(""); // Restablecer el color del perfil
+    }
     // Restablecer los campos siguientes y los puntos al cambiar la serie
     setSelectedArticulo({ id: "", nombre: "" }); // Restablecer artículo
     setSelectedMaterial({ id: "", nombre: "" }); // Restablecer material
@@ -509,10 +538,10 @@ function Frentes() {
     setPuntos(0); // Restablecer puntos
   
     // Añadir logs en la respuesta del backend
-    console.log("Selected material ID:", id);
+    //console.log("Selected material ID:", id);
     if (nombre.toLowerCase() === 'melamina') {
       axios.get(`${backendUrl}/especialesConPuntosMelamina`).then((res) => {
-        console.log("Response from /especialesConPuntosMelamina:", res.data);
+        //console.log("Response from /especialesConPuntosMelamina:", res.data);
         if (Array.isArray(res.data)) {
           // Filtrar duplicados
           const uniqueEspeciales = res.data.filter((especial, index, self) =>
@@ -531,7 +560,7 @@ function Frentes() {
       axios.get(`${backendUrl}/especialesConPuntosFrentes`, {
         params: { materialId: id } // Pasar el material seleccionado
       }).then((res) => {
-        console.log("Response from /especialesConPuntosFrentes:", res.data);
+        //console.log("Response from /especialesConPuntosFrentes:", res.data);
         if (Array.isArray(res.data)) {
           // Filtrar duplicados
           const uniqueEspeciales = res.data.filter((especial, index, self) =>
@@ -548,7 +577,6 @@ function Frentes() {
       });
     }
   };
-
   const handleSelectColorChange = (event) => {
     const index = event.target.selectedIndex;
     const nombre = event.target.options[index].text;
@@ -614,7 +642,7 @@ function Frentes() {
     const index = event.target.selectedIndex;
     const nombre = event.target.options[index].text;
     const id = event.target.value;
-  
+
     // Verificar si es el especial "Gran Altura" y el producto es 4 o 5
     if (selectedProducto.id === "4" || selectedProducto.id === "5") {
       // Solo permitir "Gran Altura" si la serie es 195
@@ -623,13 +651,13 @@ function Frentes() {
         return; // Bloquear selección si la serie no es la correcta
       }
     }
-  
+
     // Verificar si es el especial "tirada vertical" (ID 194)
     if (id === "194" && selectedSerie.nombre.toLowerCase() !== "kanto") {
       alert("El especial 'tirada vertical' solo está disponible para la serie Kanto.");
       return; // Bloquear selección si la serie no es Kanto
     }
-  
+
     // Si el usuario selecciona la opción vacía
     if (id === "") {
       if (especialIndex === 1) {
@@ -643,14 +671,14 @@ function Frentes() {
       }
       return; // Salir de la función si se selecciona el valor vacío
     }
-  
+
     // Procesar la selección de especiales como de costumbre
     const selectedEspecial = listEspeciales.find(especial => especial.articulo_id === parseInt(id));
     if (!selectedEspecial) {
       console.error("Especial no encontrado:", id);
       return;
     }
-  
+
     if (especialIndex === 1) {
       setSelectedEspecial1({ id, nombre, puntos: selectedEspecial.puntos });
       setPuntosEspecial1(selectedEspecial.puntos);
@@ -673,7 +701,15 @@ function Frentes() {
       setPuntosEspecial2(selectedEspecial2.puntos * (isNaN(value) ? 1 : value));
     }
   };
-
+  const getEspecialesOptions = () => {
+    if (selectedMaterial.nombre.toLowerCase() === "melamina") {
+      //console.log("Especiales:", listEspeciales.slice(0, 2));
+      return listEspeciales.length >= 3 ? [listEspeciales[0], listEspeciales[2]] : listEspeciales.slice(0, 2);
+       // Mostrar solo la primera y la tercera opción si hay suficientes elementos
+    } else {
+      return listEspeciales.slice(0, 2); // Mostrar solo la primera y la segunda opción
+    }
+  };
   const handleCantidadChange = (event) => {
     const newCantidad = parseInt(event.target.value, 10);
     setCantidad(newCantidad);
@@ -707,7 +743,7 @@ function Frentes() {
     <div className="container">
       <div className="section">
         <div className="container2">
-          <h1>Frentes</h1>
+          <h1>Puertas</h1>
           <div className="field">
             <label htmlFor="producto">Tipo de Frente:</label>
             <select id="producto" onChange={handleSelectProductChange} value={selectedProducto.id || ""}>
@@ -796,16 +832,31 @@ function Frentes() {
               ))}
             </select>
           </div>
+          {showColorPerfil && (
+            <div className="field-centered">
+              <label htmlFor="colorPerfil">Color del perfil:</label>
+              <select
+                id="colorPerfil"
+                onChange={(event) => {
+                  const colorPerfil = event.target.value;
+                  setSelectedColorPerfil(colorPerfil);
+                  handleSelectChange("colorPerfil", colorPerfil, colorPerfil);
+                }}
+                value={selectedColorPerfil}
+              >
+                <option value="">--Selecciona una opción--</option>
+                <option value="blanco">Blanco</option>
+                <option value="plata">Plata</option>
+                <option value="negro">Negro</option>
+              </select>
+            </div>
+          )}
           <div className="field-centered">
             <label htmlFor="cantidad">Cantidad:</label>
             <input type="number" id="cantidad" value={cantidad} onChange={handleCantidadChange} min="1" />
           </div>
           <div className="field-centered">
-            {isColorValueAdded && (
-              <label style={{ color: 'red', fontWeight: 'bold' }}>
-                El color según muestra tiene un valor añadido del 20%
-              </label>
-            )}
+
             <label htmlFor="puntos">Puntos: {puntos * cantidad}</label>
           </div>
         </div>
@@ -821,7 +872,7 @@ function Frentes() {
                 value={selectedEspecial1.id || ""}
               >
                 <option value="">--Selecciona una opción--</option>
-                {listEspeciales.map((especial) => (
+                {getEspecialesOptions().map((especial) => (
                   <option key={especial.articulo_id} value={especial.articulo_id}>
                     {especial.articulo_nombre}
                   </option>
@@ -842,9 +893,8 @@ function Frentes() {
             <div className="fake-field-special">
               <label htmlFor="especial2">Puntos:</label>
               <select disabled>
-                <option value="" >{puntosEspecial1}</option>
+                <option value="">{puntosEspecial1}</option>
               </select>
-
             </div>
             <div className="field-special">
               <label htmlFor="especial2">Artículo Especial 2:</label>
@@ -854,7 +904,7 @@ function Frentes() {
                 value={selectedEspecial2.id || ""}
               >
                 <option value="">--Selecciona una opción--</option>
-                {listEspeciales.map((especial) => (
+                {getEspecialesOptions().map((especial) => (
                   <option key={especial.articulo_id} value={especial.articulo_id}>
                     {especial.articulo_nombre}
                   </option>
@@ -877,20 +927,12 @@ function Frentes() {
               <select disabled>
                 <option value="">{puntosEspecial2}</option>
               </select>
-
             </div>
           </div>
         </div>
       </div>
     </div>
   );
-
-
-
-
-
 }
 
 export default Frentes;
-
-

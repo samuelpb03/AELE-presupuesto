@@ -62,7 +62,7 @@ button {
   padding: 10px;
   background: linear-gradient(135deg, var(--color2) 0%, var(--color3) 100%);
   border-radius: 10px;
-  max-width: 500px; /* Limitar el ancho total del contenedor */
+  max-width: 750px; /* Limitar el ancho total del contenedor */
 }
 
 .campos-usuario label {

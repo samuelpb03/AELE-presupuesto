@@ -124,13 +124,14 @@ const labelsMap = {
   puntosTotales12: "Puntos 12",
   puntosTotales13: "Puntos 13",
   puntosTotales14: "Puntos 14",
+  selectedColorPerfil: "Color del perfil",
   puntosTotales15: "Puntos 15",
 };
 const valorPuntos = 1;
 // Función para generar el PDF
 const obtenerNombreTienda = async (tiendaId) => {
   try {
-    const response = await fetch(`http://194.164.166.129:6969/getTiendaNombreById?tiendaId=${tiendaId}`);
+    const response = await fetch(`https://api.adpta.com/getTiendaNombreById?tiendaId=${tiendaId}`);
     const data = await response.json();
     if (response.ok) {
       return data.nombreTienda;  // Asume que la API devuelve el nombre de la tienda en `nombreTienda`
@@ -146,7 +147,7 @@ const obtenerNombreTienda = async (tiendaId) => {
 const obtenerValorPuntoPromo = async (tiendaId) => {
   try {
     // Verificar si hay promociones activas
-    const verificarResponse = await fetch(`http://194.164.166.129:6969/verificarPromocion?idTienda=${tiendaId}`);
+    const verificarResponse = await fetch(`https://api.adpta.com/verificarPromocion?idTienda=${tiendaId}`);
     const verificarData = await verificarResponse.json();
 
     if (!verificarResponse.ok || !verificarData.tienePromociones) {
@@ -155,7 +156,7 @@ const obtenerValorPuntoPromo = async (tiendaId) => {
     }
 
     // Obtener el valor de la promoción
-    const promoResponse = await fetch(`http://194.164.166.129:6969/calcularPuntosConPromociones?tiendaId=${tiendaId}`);
+    const promoResponse = await fetch(`https://api.adpta.com/calcularPuntosConPromociones?tiendaId=${tiendaId}`);
     const promoData = await promoResponse.json();
 
     if (promoResponse.ok && promoData.valorPuntoPromo) {
@@ -170,15 +171,12 @@ const obtenerValorPuntoPromo = async (tiendaId) => {
   }
 };
 
-
-
 export const generatePDF = async (data, userInfo) => {
   const doc = new jsPDF();
   const drawBorder = () => {
     doc.setLineWidth(0.5);
     doc.rect(2, 2, pageWidth - 4, pageHeight - 4); // Dibujar el borde
   };
-  
   const checkPageSpace = (doc, startY) => {
     const marginBottom = 10;
     const pageHeight = doc.internal.pageSize.getHeight();
@@ -191,7 +189,7 @@ export const generatePDF = async (data, userInfo) => {
   };
   const obtenerCodigoTienda = async (tiendaId) => {
     try {
-      const response = await fetch(`http://194.164.166.129:6969/getCodigoTienda?idTienda=${tiendaId}`);
+      const response = await fetch(`https://api.adpta.com/getCodigoTienda?idTienda=${tiendaId}`);
       const data = await response.json();
   
       if (response.ok) {
@@ -233,6 +231,7 @@ export const generatePDF = async (data, userInfo) => {
     `Centro: ${centro}`,
     `Cliente: ${userInfo.cliente}`,
     `Teléfono: ${userInfo.telefono}`,
+    `Email: ${userInfo.email || 'No especificado'}`, // Agregar el email aquí
   ];
   // Añadiendo la fecha al PDF
   const today = new Date();
@@ -240,8 +239,11 @@ export const generatePDF = async (data, userInfo) => {
   doc.text(`Fecha: ${dateStr}`, pageWidth - 90, 45);
 
   companyDetails.forEach((line, index) => {
-    doc.text(line, pageWidth - 90, 15 + (index * 7));
+    doc.text(line, pageWidth - 90, 15 + (index * 6));
   });
+  const marginAfterEmail = 10; // Margen de 10 unidades
+  const lastDetailY = 15 + (companyDetails.length * 7); // Posición Y después del último detalle
+  doc.text('', pageWidth - 90, lastDetailY + marginAfterEmail); // Crear el margen
 
   doc.setFontSize(13);
   doc.text("Presupuesto", pageWidth - 90, 40);
@@ -264,99 +266,135 @@ export const generatePDF = async (data, userInfo) => {
   let totalEspecialesInteriores = 0;
 
   // Procesar y agregar datos de la sección, incluyendo los remates
-  Object.entries(sections).forEach(([section, title]) => {
-    const hasData = Object.entries(data[section] || {}).some(([key, value]) => value && labelsMap[key]);
+Object.entries(sections).forEach(([section, title]) => {
+  const hasData = Object.entries(data[section] || {}).some(([key, value]) => value && labelsMap[key]);
 
+  if (!hasData) {
+    return;  // Saltar esta sección si no tiene datos
+  }
 
-    if (!hasData) {
-      return;  // Saltar esta sección si no tiene datos
-    }
-    
+  if (data[section]) {
+    let sectionData = [];
+    let puntosSeccion = 0; // Inicializar acumulador de puntos
 
-    if (data[section]) {
-      let sectionData = [];
-      let puntosSeccion = 0; // Inicializar acumulador de puntos
+    Object.entries(data[section]).forEach(([key, value]) => {
+      if (
+        key.startsWith('selectedEspecial') ||
+        key.startsWith('cantidadEspecial') ||
+        key.startsWith('puntosEspecial') ||
+        key.startsWith('interioresOtros') ||
+        key.startsWith('puntosInterioresOtros') ||
+        key.startsWith('cantidadInterioresOtros') ||
+        key === 'selectedColorPerfil'
+      ) {
+        return; // Omitir los especiales
+      }
 
-      Object.entries(data[section]).forEach(([key, value]) => {
-        if (
-          key.startsWith('selectedEspecial') ||
-          key.startsWith('cantidadEspecial') ||
-          key.startsWith('puntosEspecial') ||
-          key.startsWith('interioresOtros') ||
-          key.startsWith('puntosInterioresOtros') ||
-          key.startsWith('cantidadInterioresOtros')
-        ) {
-          return; // Omitir los especiales
-        }
-
-        if (key.toLowerCase().includes('puntos') && value) {
-          if (section === 'frentes' || section === 'frentes2' || section === 'frentes3') {
-            const cantidad = data[section]?.cantidad || 1;
-            if (cantidad > 1) {
+      if (key.toLowerCase().includes('puntos') && value) {
+        if (section === 'frentes' || section === 'frentes2' || section === 'frentes3') {
+          const cantidad = data[section]?.cantidad || 1;
+          if (cantidad > 1) {
             puntosSeccion = Number(value); // Multiplica por la cantidad cuando es mayor a 1
           } else {
             puntosSeccion = Number(value) * 1; // No hacer ninguna operación extra si la cantidad es 1
           }
-          }
-           // Asume que la cantidad es 1 si no está definida
-        
-          // Calcular los puntos basado en la cantidad
-          
         }
-        if (isValidField(value) && labelsMap[key]) {
-          sectionData.push(`${value}`);
-          startY = checkPageSpace(doc, startY);
-        }
-      });
+      }
 
-      // Imprimir el título de la sección
+      if (isValidField(value) && labelsMap[key]) {
+        sectionData.push(`${value}`);
+        startY = checkPageSpace(doc, startY);
+      }
+    });
+
+    // Incluir el campo "Color del perfil" si tiene un valor y no se ha agregado ya
+    if (section === 'frentes' && data.frentes.selectedColorPerfil && !sectionData.includes(`Color del perfil: ${data.frentes.selectedColorPerfil}`)) {
+      sectionData.push(`Color del perfil: ${data.frentes.selectedColorPerfil}`);
+    }
+    if (section === 'frentes2' && data.frentes2.selectedColorPerfil && !sectionData.includes(`Color del perfil: ${data.frentes2.selectedColorPerfil}`)) {
+      sectionData.push(`Color del perfil: ${data.frentes2.selectedColorPerfil}`);
+    }
+    if (section === 'frentes3' && data.frentes3.selectedColorPerfil && !sectionData.includes(`Color del perfil: ${data.frentes3.selectedColorPerfil}`)) {
+      sectionData.push(`Color del perfil: ${data.frentes3.selectedColorPerfil}`);
+    }
+    if (data.equipamiento3 && data.equipamiento3.cantidadFronteraLacadaCajon > 0) {
       doc.setFontSize(10);
       doc.setFillColor(220, 220, 220);
       startY = checkPageSpace(doc, startY);
       doc.rect(10, startY - 4, pageWidth - 20, 5, 'F');
-      doc.text(title, 12, startY);
-      startY += 5;
+      doc.text("Frontera lacada cajón", 12, startY);
+      startY += 6;
+    
       doc.setFontSize(7);
-      // Imprimir los datos de la sección en filas de 4 elementos
-      sectionData.forEach((line, index) => {
-        let xPosition;
-        if (line.toLowerCase().includes('cantidad') || line.toLowerCase().includes('puntos')) {
-          xPosition = pageWidth - 20;
-        } else {
-          xPosition = 12 + (index % 4) * (pageWidth / 4);
-        }
-
-        doc.text(line, xPosition, startY);
-
-        if ((index + 1) % 4 === 0) {
-          startY += 6; // Avanza a la siguiente fila después de 4 elementos
-        }
-        startY = checkPageSpace(doc, startY);
-      });
-
-      // Imprimir los puntos de la sección (si hay puntos)
-      puntosSeccion = Math.round(puntosSeccion);
-      if (puntosSeccion > 0) {
-        doc.setFontSize(7);
-        doc.setFont("helvetica", "bold"); // Texto en negrita
-        startY = checkPageSpace(doc, startY);
-        doc.text(`${puntosSeccion}`, pageWidth - 40, startY); // Imprimir los puntos alineados a la derecha
-        doc.setFont("helvetica", "normal");  // Volver a la fuente normal
-      }
-
-      startY += 10;
-
-      // Verificar si es el último frente (frentes3 o el último de los frentes) y agregar los especiales a medida después
-      if (section === 'frentes' || section === 'frentes2' || section === 'frentes3') {
-        lastFrenteProcessed = section;
-      }
-
-      // Verificar si es "Interiores" y guardar la referencia
-      if (section === 'interiores') {
-        lastInterioresProcessed = section;
-      }
+      doc.text(`${data.equipamiento3.fronteraLacadaCajonNombre}`, 12, startY);
+      doc.text(`Cantidad: ${data.equipamiento3.cantidadFronteraLacadaCajon}`, pageWidth - 50, startY);
+      startY += 6;
+      startY = checkPageSpace(doc, startY);
     }
-  });
+    // Imprimir el título de la sección
+    doc.setFontSize(10);
+    doc.setFillColor(220, 220, 220);
+    startY = checkPageSpace(doc, startY);
+    doc.rect(10, startY - 4, pageWidth - 20, 5, 'F');
+    doc.text(title, 12, startY);
+    startY += 5;
+    doc.setFontSize(7);
+
+    // Imprimir los datos de la sección en filas de 4 elementos
+    sectionData.forEach((line, index) => {
+      let xPosition;
+      if (line.toLowerCase().includes('cantidad') || line.toLowerCase().includes('puntos')) {
+        xPosition = pageWidth - 20;
+      } else {
+        xPosition = 12 + (index % 4) * (pageWidth / 4);
+      }
+
+      doc.text(line, xPosition, startY);
+
+      if ((index + 1) % 4 === 0) {
+        startY += 6; // Avanza a la siguiente fila después de 4 elementos
+      }
+      startY = checkPageSpace(doc, startY);
+    });
+
+    // Imprimir los puntos de la sección (si hay puntos)
+    puntosSeccion = Math.round(puntosSeccion);
+    if (puntosSeccion > 0) {
+      doc.setFontSize(7);
+      doc.setFont("helvetica", "bold"); // Texto en negrita
+      startY = checkPageSpace(doc, startY);
+      doc.text(`${puntosSeccion}`, pageWidth - 40, startY); // Imprimir los puntos alineados a la derecha
+      doc.setFont("helvetica", "normal");  // Volver a la fuente normal
+    }
+
+    startY += 10;
+
+    // Verificar si es el último frente (frentes3 o el último de los frentes) y agregar los especiales a medida después
+    if (section === 'frentes' || section === 'frentes2' || section === 'frentes3') {
+      lastFrenteProcessed = section;
+    }
+
+    // Verificar si es "Interiores" y guardar la referencia
+    if (section === 'interiores') {
+      lastInterioresProcessed = section;
+    }
+    
+  }
+});
+if (data.baldas && data.baldas.colorIluminacion) {
+      doc.setFontSize(10);
+      doc.setFillColor(220, 220, 220);
+      startY = checkPageSpace(doc, startY);
+      doc.rect(10, startY - 4, pageWidth - 20, 5, 'F');
+      doc.text("Tipo de iluminación", 12, startY);
+      startY += 6;
+    
+      doc.setFontSize(7);
+      doc.text(`${data.baldas.colorIluminacion}`, 12, startY);
+      startY += 6;
+      startY = checkPageSpace(doc, startY);
+    }
+    startY += 6;
   // Procesar remates a medida
 let puntosRematesTotal = 0; // Inicializar los puntos de los remates
 if (data.remates) {
@@ -559,7 +597,7 @@ console.log("Estructura de data.baldas:", data.baldas);
   startY = checkPageSpace(doc, startY);
 
 // Calcular los puntos finales con los desmontajes
-doc.text(`Total Puntos: ${((totalPuntos / 10) * 10).toFixed(2)}€`, 12, startY);
+doc.text(`Precio total: ${((totalPuntos / 10) * 10).toFixed(2)}€`, 12, startY);
 startY += 10;
 
 // Verificar si numFrentesInteriores y numArmariosCompletos son 0, si es así, asignar 115 al totalMontaje
@@ -592,10 +630,10 @@ if (valorPuntoPromo < 1) {
   doc.text(`Descuento por promoción del ${descuento.toFixed(0)}%`, 12, startY);
   startY += 10;
 }
-doc.text('Total puntos: ' + precioTotal * valorPuntoPromo + '€', 12, startY);
+doc.text('Total precio: ' + precioTotal * valorPuntoPromo + '€', 12, startY);
   // Crear el nombre del PDF y enviarlo
   const centroAbreviado = centro.substring(0, 6).toUpperCase();
-  fetch('http://194.164.166.129:6969/presupuesto', {
+  fetch('https://api.adpta.com/presupuesto', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -628,4 +666,4 @@ doc.text('Total puntos: ' + precioTotal * valorPuntoPromo + '€', 12, startY);
   .catch(error => {
     console.error("Error al enviar datos del presupuesto:", error);
   });
-};
+}; 

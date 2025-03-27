@@ -7,6 +7,9 @@ function Equipamiento3() {
   const { handleSelectChangeE3 } = useTabs();
   const { data, saveData } = useData();
   const [listArticuloEquipamiento, setListArticuloEquipamiento] = useState([]);
+  const [fronteraLacadaCajon, setFronteraLacadaCajon] = useState({ id: "", nombre: "" });
+const [cantidadFronteraLacadaCajon, setCantidadFronteraLacadaCajon] = useState(0);
+const [puntosFronteraLacadaCajon, setPuntosFronteraLacadaCajon] = useState(0);
   const [listArticuloAntracita, setListArticuloAntracita] = useState([]);
   const [listMedidas, setListMedidas] = useState(Array(15).fill([]));
   const [cantidades, setCantidades] = useState(Array(15).fill(0));
@@ -25,7 +28,7 @@ function Equipamiento3() {
   );
   const [puntos, setPuntos] = useState(Array(15).fill(0));
   const user = localStorage.getItem('user');
-  const backendUrl = 'http://194.164.166.129:6969';
+  const backendUrl = 'https://api.adpta.com';
   if (!user) {
     // Redirigir a login.php si no está autenticado
     window.location.href = '/login.php';
@@ -37,7 +40,7 @@ function Equipamiento3() {
       const restoredMedidas = Array(15).fill({ id: "", nombre: "", puntos: 0 });
       const restoredCantidades = Array(15).fill(0);
       const restoredPuntos = Array(15).fill(0);
-
+  
       for (let i = 0; i < 15; i++) {
         restoredArticulos[i] = {
           id: data.equipamiento3[`articulo${i + 1}Id`] || "",
@@ -51,11 +54,16 @@ function Equipamiento3() {
         restoredCantidades[i] = data.equipamiento3[`cantidad${i + 1}`] || 0;
         restoredPuntos[i] = data.equipamiento3[`puntos${i + 1}`] || 0;
       }
-
+  
       setSelectedArticulos(restoredArticulos);
       setSelectedMedidas(restoredMedidas);
       setCantidades(restoredCantidades);
       setPuntos(restoredPuntos);
+      setFronteraLacadaCajon({
+        id: data.equipamiento3.fronteraLacadaCajonId || "",
+        nombre: data.equipamiento3.fronteraLacadaCajonNombre || "",
+      });
+      setCantidadFronteraLacadaCajon(data.equipamiento3.cantidadFronteraLacadaCajon || 0);
     }
   }, []);
 
@@ -70,8 +78,12 @@ function Equipamiento3() {
       acc[`puntos${index + 1}`] = puntos[index];
       return acc;
     }, {});
+    formattedData["fronteraLacadaCajonNombre"] = fronteraLacadaCajon.nombre;
+    formattedData["fronteraLacadaCajonId"] = fronteraLacadaCajon.id;
+    formattedData["cantidadFronteraLacadaCajon"] = cantidadFronteraLacadaCajon;
+    formattedData["puntosFronteraLacadaCajon"] = puntosFronteraLacadaCajon; // Añadir los puntos de la frontera lacada del cajón
     saveData("equipamiento3", formattedData);
-  }, [selectedArticulos, selectedMedidas, cantidades, puntos, saveData]);
+  }, [selectedArticulos, selectedMedidas, cantidades, puntos, fronteraLacadaCajon, cantidadFronteraLacadaCajon, puntosFronteraLacadaCajon, saveData]);
 
   useEffect(() => {
     axios
@@ -82,7 +94,8 @@ function Equipamiento3() {
       })
       .then((res) => {
         if (Array.isArray(res.data)) {
-          setListArticuloEquipamiento(res.data);
+          const sortedArticulos = res.data.sort((a, b) => a.nombre.localeCompare(b.nombre));
+          setListArticuloEquipamiento(sortedArticulos);
         } else {
           console.error("Error fetching articulos: res.data is not an array");
         }
@@ -90,7 +103,7 @@ function Equipamiento3() {
       .catch((error) => {
         console.error("Error fetching articulos:", error);
       });
-
+  
     axios
       .get(`${backendUrl}/articulo/antracita`, {
         headers: {
@@ -99,7 +112,8 @@ function Equipamiento3() {
       })
       .then((res) => {
         if (Array.isArray(res.data)) {
-          setListArticuloAntracita(res.data);
+          const sortedArticulos = res.data.sort((a, b) => a.nombre.localeCompare(b.nombre));
+          setListArticuloAntracita(sortedArticulos);
         } else {
           console.error("Error fetching articulos: res.data is not an array");
         }
@@ -217,7 +231,11 @@ function Equipamiento3() {
 
     handleSelectChangeE3(`medidas${index + 1}`, id, nombre, selectedMedida.puntos || 0);
   };
-
+  const handleCantidadFronteraLacadaCajonChange = (event) => {
+    const cantidad = parseInt(event.target.value, 10);
+    setCantidadFronteraLacadaCajon(cantidad);
+    setPuntosFronteraLacadaCajon(cantidad * 118); // Sumar 118 puntos por unidad
+  };
   const handleCantidadChange = (index, event) => {
     const updatedCantidades = [...cantidades];
     const updatedPuntos = [...puntos];
@@ -228,6 +246,20 @@ function Equipamiento3() {
 
     handleSelectChangeE3(`cantidad${index + 1}`, updatedCantidades[index]);
   };
+  
+  const renderFronteraLacadaCajon = () => (
+    <div className="field-special">
+      <label htmlFor="fronteraLacadaCajon">Frontera lacada cajón:</label>
+      <label htmlFor="cantidadFronteraLacadaCajon">Cantidad:</label>
+      <input
+        type="number"
+        id="cantidadFronteraLacadaCajon"
+        value={cantidadFronteraLacadaCajon}
+        onChange={handleCantidadFronteraLacadaCajonChange} // Utilizar el manejador aquí
+        min="0"
+      />
+    </div>
+  );
 
   const renderSelectArticulo = (index, list) => (
     <div key={index} className="field-special"> {/* Aplicar la clase "field" */}
@@ -269,6 +301,7 @@ function Equipamiento3() {
       />
       <label>Puntos: {puntos[index]}</label>
     </div>
+    
   );
 
   return (
@@ -283,9 +316,11 @@ function Equipamiento3() {
       </div>
       <div className="container2">
         {Array.from({ length: 3 }).map((_, i) => renderSelectArticulo(i + 6, listArticuloEquipamiento))}
+        {renderFronteraLacadaCajon()}
       </div>
       <div className="container3">
         <h1>Antracita</h1>
+        
         {Array.from({ length: 2 }).map((_, i) => renderSelectArticulo(i + 9, listArticuloAntracita))}
         {Array.from({ length: 3 }).map((_, i) => renderSelectArticulo(i + 11, listArticuloAntracita))}
       </div>

@@ -7,7 +7,7 @@ app.use(express.json());
 
 const corsOptions = {
   origin: function (origin, callback) {
-    const allowedOrigins = ['http://adpta.com', 'http://www.adpta.com'];
+    const allowedOrigins = ['http://adpta.com', 'http://www.adpta.com', 'http://localhost:3000', 'https://www.adpta.com','https://adpta.com','https://api.adpta.com'];
     if (!origin || allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
@@ -69,6 +69,19 @@ app.get("/producto", (req, res) => {
   const query = "SELECT producto_id, nombre FROM producto";
   db.query(query, (err, data) => {
     if (err) return res.json(err);
+    return res.json(data);
+  });
+});
+app.get("/articulo/sensores", (req, res) => {
+  const query = `
+    SELECT * FROM articulo
+    WHERE serie_id = 41
+  `;
+  db.query(query, (err, data) => {
+    if (err) {
+      console.error("Error fetching sensores:", err);
+      return res.status(500).json(err);
+    }
     return res.json(data);
   });
 });

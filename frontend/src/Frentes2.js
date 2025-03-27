@@ -10,6 +10,8 @@ function Frentes2() {
   const [listSerie, setListSerie] = useState([]);
   const [listArticulo, setListArticulo] = useState([]);
   const [listMaterial, setListMaterial] = useState([]);
+  const [selectedColorPerfil, setSelectedColorPerfil] = useState("");
+  const [showColorPerfil, setShowColorPerfil] = useState(false);
   const [listColor, setListColor] = useState([]);
   const [listMedidas, setListMedidas] = useState([]);
   const [listMaterialFranja, setListMaterialFranja] = useState([]);
@@ -39,7 +41,7 @@ function Frentes2() {
   const [cantidadEspecial2, setCantidadEspecial2] = useState(0);
   const [franjaActiva, setFranjaActiva] = useState(false);
 
-  const backendUrl = 'http://194.164.166.129:6969'; // URL de ngrok para el backend
+  const backendUrl = 'https://api.adpta.com'; // URL de ngrok para el backend
   useEffect(() => {
     const user = localStorage.getItem('user');
     if (!user) {
@@ -112,6 +114,13 @@ function Frentes2() {
       if (data.frentes2.brakesChecked) {
         setPuntos((prevPuntos) => prevPuntos - 73); // Restar 73 puntos si los frenos estaban activados
       }
+      if (data.frentes2.selectedProductoId === "4" || data.frentes2.selectedProductoId === "5" || data.frentes2.selectedSerieId === "1") {
+        setShowColorPerfil(true); // Mostrar el selector de color del perfil si el producto es 4 o 5
+        setSelectedColorPerfil(data.frentes2.selectedColorPerfil || ""); // Restaurar el color del perfil
+      } else {
+        setShowColorPerfil(false); // Ocultar el selector de color del perfil si no es 4 o 5
+        setSelectedColorPerfil(""); // Restablecer el color del
+      }
     }
   }, []);
 
@@ -151,8 +160,9 @@ function Frentes2() {
       cantidadEspecial2,
       puntosEspecial1: selectedEspecial1.puntos * cantidadEspecial1,
       puntosEspecial2: selectedEspecial2.puntos * cantidadEspecial2,
+      selectedColorPerfil, // Guardar el color del perfil
     };
-    console.log('formattedData:', formattedData); // Añadir log para verificar datos
+    //console.log('formattedData:', formattedData); // Añadir log para verificar datos
     saveData("frentes2", formattedData);
   }, [
     selectedProducto,
@@ -172,7 +182,7 @@ function Frentes2() {
     puntos,  // Incluye puntos en la lista de dependencias
     isColorValueAdded,  // Asegura que se guarde el estado del incremento
     saveData,
-
+    selectedColorPerfil, // Añadir el color del perfil a las dependencias
   ]);
 
 
@@ -398,6 +408,8 @@ function Frentes2() {
       setSelectedMedidas({ id: "", nombre: "", puntos: 0 });
       setSelectedMaterialFranja({ id: "", nombre: "" });
       setSelectedColorFranja({ id: "", nombre: "" });
+      setShowColorPerfil(false); // Ocultar el selector de color del perfil
+      setSelectedColorPerfil(""); // Restablecer el color del perfil
       setPuntos(0);
       return; // Salir de la función
     }
@@ -405,15 +417,17 @@ function Frentes2() {
     if (id === "4" || id === "5") {
       const especialGranAltura = listEspeciales.find(especial => especial.articulo_id === 195);
       setListEspeciales([especialGranAltura]); // Mostrar solo "Gran Altura"
+      setShowColorPerfil(true); // Mostrar el selector de color del perfil
     } else {
-      // Si es otro producto, restaurar todos los especiales
       axios.get(`${backendUrl}/especialesConPuntosFrentes`).then((res) => {
         if (Array.isArray(res.data)) {
-          setListEspeciales(res.data); // Restaurar la lista de especiales
+          setListEspeciales(res.data);
         }
       }).catch(error => {
         console.error("Error fetching articulos especiales:", error);
       });
+      setShowColorPerfil(false); // Ocultar el selector de color del perfil
+      setSelectedColorPerfil(""); // Restablecer el color del perfil
     }
 
     // Resetear los demás campos relacionados con puntos
@@ -433,7 +447,14 @@ function Frentes2() {
 
     setSelectedSerie({ id, nombre });
     handleSelectChange("serie", id, nombre);
-
+    if (id === "1") {
+      setShowColorPerfil(true); // Mostrar el selector de color del perfil si la serie es 1
+    } else if (selectedProducto.id === "4" || selectedProducto.id === "5") {
+      setShowColorPerfil(true); // Mostrar el selector de color del perfil si el producto es 4 o 5
+    } else {
+      setShowColorPerfil(false); // Ocultar el selector de color del perfil si no es 1, 4 o 5
+      setSelectedColorPerfil(""); // Restablecer el color del perfil
+    }
     // Restablecer los campos siguientes y los puntos al cambiar la serie
     setSelectedArticulo({ id: "", nombre: "" }); // Restablecer artículo
     setSelectedMaterial({ id: "", nombre: "" }); // Restablecer material
@@ -568,7 +589,15 @@ function Frentes2() {
       setPuntos(selectedMedidas.puntos);  // Restablecer los puntos originales si no aplica
     }
   };
-
+  const getEspecialesOptions = () => {
+    if (selectedMaterial.nombre.toLowerCase() === "melamina") {
+      console.log("Especiales:", listEspeciales.slice(0, 2));
+      return listEspeciales.length >= 3 ? [listEspeciales[0], listEspeciales[2]] : listEspeciales.slice(0, 2);
+       // Mostrar solo la primera y la tercera opción si hay suficientes elementos
+    } else {
+      return listEspeciales.slice(0, 2); // Mostrar solo la primera y la segunda opción
+    }
+  };
   const handleSelectMedidasChange = (event) => {
     const index = event.target.selectedIndex;
     const nombre = event.target.options[index].text;
@@ -612,7 +641,7 @@ function Frentes2() {
     const index = event.target.selectedIndex;
     const nombre = event.target.options[index].text;
     const id = event.target.value;
-  
+
     // Verificar si es el especial "Gran Altura" y el producto es 4 o 5
     if (selectedProducto.id === "4" || selectedProducto.id === "5") {
       // Solo permitir "Gran Altura" si la serie es 195
@@ -621,13 +650,13 @@ function Frentes2() {
         return; // Bloquear selección si la serie no es la correcta
       }
     }
-  
+
     // Verificar si es el especial "tirada vertical" (ID 194)
     if (id === "194" && selectedSerie.nombre.toLowerCase() !== "kanto") {
       alert("El especial 'tirada vertical' solo está disponible para la serie Kanto.");
       return; // Bloquear selección si la serie no es Kanto
     }
-  
+
     // Si el usuario selecciona la opción vacía
     if (id === "") {
       if (especialIndex === 1) {
@@ -641,9 +670,14 @@ function Frentes2() {
       }
       return; // Salir de la función si se selecciona el valor vacío
     }
-  
+
     // Procesar la selección de especiales como de costumbre
     const selectedEspecial = listEspeciales.find(especial => especial.articulo_id === parseInt(id));
+    if (!selectedEspecial) {
+      console.error("Especial no encontrado:", id);
+      return;
+    }
+
     if (especialIndex === 1) {
       setSelectedEspecial1({ id, nombre, puntos: selectedEspecial.puntos });
       setPuntosEspecial1(selectedEspecial.puntos);
@@ -700,7 +734,7 @@ function Frentes2() {
     <div className="container">
       <div className="section">
         <div className="container2">
-          <h1>Frentes 2</h1>
+          <h1>Puertas 2</h1>
           <div className="field">
             <label htmlFor="producto">Tipo de Frente:</label>
             <select id="producto" onChange={handleSelectProductChange} value={selectedProducto.id || ""}>
@@ -789,16 +823,30 @@ function Frentes2() {
               ))}
             </select>
           </div>
+          {showColorPerfil && (
+            <div className="field-centered">
+              <label htmlFor="colorPerfil">Color del perfil:</label>
+              <select
+                id="colorPerfil"
+                onChange={(event) => {
+                  const colorPerfil = event.target.value;
+                  setSelectedColorPerfil(colorPerfil);
+                  handleSelectChange("colorPerfil", colorPerfil, colorPerfil);
+                }}
+                value={selectedColorPerfil}
+              >
+                <option value="">--Selecciona una opción--</option>
+                <option value="blanco">Blanco</option>
+                <option value="plata">Plata</option>
+                <option value="negro">Negro</option>
+              </select>
+            </div>
+          )}
           <div className="field-centered">
             <label htmlFor="cantidad">Cantidad:</label>
             <input type="number" id="cantidad" value={cantidad} onChange={handleCantidadChange} min="1" />
           </div>
           <div className="field-centered">
-            {isColorValueAdded && (
-              <label style={{ color: 'red', fontWeight: 'bold' }}>
-                El color según muestra tiene un valor añadido del 20%
-              </label>
-            )}
             <label htmlFor="puntos">Puntos: {puntos * cantidad}</label>
           </div>
         </div>
@@ -806,55 +854,54 @@ function Frentes2() {
 
       <div className="section">
         <div className="container4">
-          <h2>Especiales a Medida</h2>
-          <div className="field-special">
-            <label htmlFor="especial1">Artículo Especial 1:</label>
-            <select
-              id="especial1"
-              onChange={(event) => handleSelectEspecialChange(1, event)}
-              value={selectedEspecial1.id || ""}
-            >
-              <option value="">--Selecciona una opción--</option>
-              {listEspeciales.map((especial) => (
-                <option key={especial.articulo_id} value={especial.articulo_id}>
-                  {especial.articulo_nombre}
-                </option>
-              ))}
-            </select>
-          </div>
+        <h2>Especiales a Medida</h2>
+            <div className="field-special">
+              <label htmlFor="especial1">Artículo Especial 1:</label>
+              <select
+                id="especial1"
+                onChange={(event) => handleSelectEspecialChange(1, event)}
+                value={selectedEspecial1.id || ""}
+              >
+                <option value="">--Selecciona una opción--</option>
+                {getEspecialesOptions().map((especial) => (
+                  <option key={especial.articulo_id} value={especial.articulo_id}>
+                    {especial.articulo_nombre}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-          <div className="field-special">
-            <label htmlFor="cantidadEspecial1">Cantidad:</label>
-            <input
-              type="number"
-              id="cantidadEspecial1"
-              value={cantidadEspecial1}
-              onChange={(event) => handleCantidadEspecialChange(1, event)}
-              min="0"
-            />
-          </div>
-          <div className="fake-field-special">
-            <label htmlFor="especial2">Puntos:</label>
-            <select disabled>
-              <option value="" >{puntosEspecial1}</option>
-            </select>
-
-          </div>
-          <div className="field-special">
-            <label htmlFor="especial2">Artículo Especial 2:</label>
-            <select
-              id="especial2"
-              onChange={(event) => handleSelectEspecialChange(2, event)}
-              value={selectedEspecial2.id || ""}
-            >
-              <option value="">--Selecciona una opción--</option>
-              {listEspeciales.map((especial) => (
-                <option key={especial.articulo_id} value={especial.articulo_id}>
-                  {especial.articulo_nombre}
-                </option>
-              ))}
-            </select>
-          </div>
+            <div className="field-special">
+              <label htmlFor="cantidadEspecial1">Cantidad:</label>
+              <input
+                type="number"
+                id="cantidadEspecial1"
+                value={cantidadEspecial1}
+                onChange={(event) => handleCantidadEspecialChange(1, event)}
+                min="0"
+              />
+            </div>
+            <div className="fake-field-special">
+              <label htmlFor="especial2">Puntos:</label>
+              <select disabled>
+                <option value="">{puntosEspecial1}</option>
+              </select>
+            </div>
+            <div className="field-special">
+              <label htmlFor="especial2">Artículo Especial 2:</label>
+              <select
+                id="especial2"
+                onChange={(event) => handleSelectEspecialChange(2, event)}
+                value={selectedEspecial2.id || ""}
+              >
+                <option value="">--Selecciona una opción--</option>
+                {getEspecialesOptions().map((especial) => (
+                  <option key={especial.articulo_id} value={especial.articulo_id}>
+                    {especial.articulo_nombre}
+                  </option>
+                ))}
+              </select>
+            </div>
 
           <div className="field-special">
             <label htmlFor="cantidadEspecial2">Cantidad:</label>
