@@ -85,7 +85,25 @@ app.get("/articulo/sensores", (req, res) => {
     return res.json(data);
   });
 });
+// Ruta para obtener un presupuesto por ID
+app.get("/presupuesto/:id", (req, res) => {
+  const presupuestoId = req.params.id;
 
+  const query = `SELECT * FROM presupuesto WHERE id = ?`;
+
+  db.query(query, [presupuestoId], (err, data) => {
+    if (err) {
+      console.error("Error fetching presupuesto:", err);
+      return res.status(500).json({ error: "Error al obtener el presupuesto" });
+    }
+
+    if (data.length === 0) {
+      return res.status(404).json({ message: "Presupuesto no encontrado" });
+    }
+
+    return res.json(data[0]); // Devuelve el presupuesto encontrado
+  });
+});
 // Función Express GET para serie.
 app.get("/serie", (req, res) => {
   const productoId = req.query.productoId;
