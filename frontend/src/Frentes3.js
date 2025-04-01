@@ -48,6 +48,7 @@ function Frentes3() {
     window.location.href = '/login.php';
   }
   useEffect(() => {
+    console.log("Datos restaurados en Frentes3:", data.frentes3); // Añadir log para verificar datos
     if (data.frentes3) {
       setSelectedProducto({
         id: data.frentes3.selectedProductoId || "",
@@ -212,7 +213,7 @@ function Frentes3() {
       console.error("Error fetching articulos especiales:", error);
     });
   }, [backendUrl]);
-
+  //Aquí seguramente se pueda eliminar el browser warning de ngrok
   useEffect(() => {
     if (selectedProducto.id) {
       axios.get(`${backendUrl}/serie`, {

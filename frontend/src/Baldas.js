@@ -35,32 +35,65 @@ function Baldas() {
 
 
   useEffect(() => {
-  // Restore data from context when component mounts
-  const restoredArticulos = Array(12).fill({ id: "", nombre: "" });
-  const restoredMedidas = Array(12).fill({ id: "", nombre: "", puntos: 0 });
-  const restoredCantidades = Array(12).fill(0);
-  const restoredPuntosTotales = Array(12).fill(0);
-
-  for (let i = 0; i < 12; i++) {
-    restoredArticulos[i] = {
-      id: data.baldas?.[`articulo${i + 1}Id`] || "",
-      nombre: data.baldas?.[`articulo${i + 1}Nombre`] || "",
-    };
-    restoredMedidas[i] = {
-      id: data.baldas?.[`medidas${i + 1}Id`] || "",
-      nombre: data.baldas?.[`medidas${i + 1}Nombre`] || "",
-      puntos: data.baldas?.[`medidas${i + 1}Puntos`] || 0,
-    };
-    restoredCantidades[i] = data.baldas?.[`cantidad${i + 1}`] || 0;
-    restoredPuntosTotales[i] = data.baldas?.[`puntosTotales${i + 1}`] || 0;
-  }
-
-  setSelectedArticulos(restoredArticulos);
-  setSelectedMedidas(restoredMedidas);
-  setCantidades(restoredCantidades);
-  setPuntosTotales(restoredPuntosTotales);
-  setSelectedColorIluminacion(data.baldas?.colorIluminacion || ""); // Restaurar el color de iluminación
-}, []);
+    if (data && data.baldas) {
+      console.log("Datos restaurados en Baldas:", data.baldas);
+  
+      const restoredArticulos = Array(12).fill({ id: "", nombre: "" });
+      const restoredMedidas = Array(12).fill({ id: "", nombre: "", puntos: 0 });
+      const restoredCantidades = Array(12).fill(0);
+      const restoredPuntosTotales = Array(12).fill(0);
+      let restoredColorIluminacion = "";
+  
+      // Detectar el formato de los datos
+      if (Array.isArray(data.baldas.selectedArticulos)) {
+        // Formato de arrays (restaurado desde la base de datos)
+        for (let i = 0; i < 12; i++) {
+          const articulo = data.baldas.selectedArticulos[i] || {};
+          restoredArticulos[i] = {
+            id: articulo.id || "",
+            nombre: articulo.nombre || "",
+          };
+  
+          const medida = data.baldas.selectedMedidas?.[i] || {};
+          restoredMedidas[i] = {
+            id: medida.id || "",
+            nombre: medida.nombre || "",
+            puntos: medida.puntos || 0,
+          };
+  
+          restoredCantidades[i] = data.baldas.cantidades?.[i] || 0;
+          restoredPuntosTotales[i] = data.baldas.puntosTotales?.[i] || 0;
+        }
+  
+        restoredColorIluminacion = data.baldas.colorIluminacion || "";
+      } else {
+        // Formato de objetos (estado actual)
+        for (let i = 0; i < 12; i++) {
+          restoredArticulos[i] = {
+            id: data.baldas[`articulo${i + 1}Id`] || "",
+            nombre: data.baldas[`articulo${i + 1}Nombre`] || "",
+          };
+  
+          restoredMedidas[i] = {
+            id: data.baldas[`medidas${i + 1}Id`] || "",
+            nombre: data.baldas[`medidas${i + 1}Nombre`] || "",
+            puntos: data.baldas[`medidas${i + 1}Puntos`] || 0,
+          };
+  
+          restoredCantidades[i] = data.baldas[`cantidad${i + 1}`] || 0;
+          restoredPuntosTotales[i] = data.baldas[`puntosTotales${i + 1}`] || 0;
+        }
+  
+        restoredColorIluminacion = data.baldas.colorIluminacion || "";
+      }
+  
+      setSelectedArticulos(restoredArticulos);
+      setSelectedMedidas(restoredMedidas);
+      setCantidades(restoredCantidades);
+      setPuntosTotales(restoredPuntosTotales);
+      setSelectedColorIluminacion(restoredColorIluminacion);
+    }
+  }, []);
 
 useEffect(() => {
   const fetchArticulos = async () => {

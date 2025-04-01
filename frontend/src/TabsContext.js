@@ -3,6 +3,7 @@ import React, { createContext, useState, useContext } from 'react';
 const TabsContext = createContext();
 // Crea un componente proveedor
 export const TabsProvider = ({ children }) => {
+  const [activeTab, setActiveTab] = useState('/Frentes'); // Ruta inicial
   const [selectedOptions, setSelectedOptions] = useState({});
   const [selectedOptionsE, setSelectedOptionsE] = useState({});
   const [selectedOptionsF, setSelectedOptionsF] = useState({});
@@ -24,7 +25,13 @@ export const TabsProvider = ({ children }) => {
     isAdjusted: false,
     adjustedPoints: 0,
   });
-  
+  const restoreUserInfo = (cliente, telefono, email) => {
+    setUserInfo({
+      cliente: cliente || "",
+      telefono: telefono || "",
+      email: email || "", // Aseguramos que email sea opcional
+    });
+  };
   const handleUserInfoChange = (field, value) => {
     setUserInfo(prev => ({ ...prev, [field]: value }));
   };
@@ -80,6 +87,8 @@ export const TabsProvider = ({ children }) => {
   };
   return (
     <TabsContext.Provider value={{
+      activeTab,
+      setActiveTab,
       selectedOptions,
       handleSelectChange,
       selectedOptionsE,
@@ -106,6 +115,7 @@ export const TabsProvider = ({ children }) => {
       handleSelectChangeInstalacion,
       userInfo,
       handleUserInfoChange,
+      restoreUserInfo,
       colorAdjustment,
       handleColorAdjustment,
     }}>

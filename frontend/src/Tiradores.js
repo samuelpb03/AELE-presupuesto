@@ -45,27 +45,52 @@ function Tiradores() {
     }
   }, []);
   useEffect(() => {
-    if (data.tiradores) { //Recoge los datos al volver a la pestaña
+    if (data.tiradores) { // Verificar si data.tiradores está definido
       const restoredArticulos = Array(6).fill({ id: "", nombre: "", puntos: 0, serieId: "" });
       const restoredColores = Array(6).fill({ id: "", nombre: "" });
       const restoredCantidades = Array(6).fill(1);
       const restoredPuntos = Array(6).fill(0);
-
-      for (let i = 0; i < 6; i++) { // Bucle que accede a los datos de cada artículo de tiradores. 
-        restoredArticulos[i] = {
-          id: data.tiradores[`articulo${i + 1}Id`] || "",
-          nombre: data.tiradores[`articulo${i + 1}Nombre`] || "",
-          puntos: data.tiradores[`articulo${i + 1}Puntos`] || 0,
-          serieId: data.tiradores[`articulo${i + 1}SerieId`] || "",
-        };
-        restoredColores[i] = {
-          id: data.tiradores[`color${i + 1}Id`] || "",
-          nombre: data.tiradores[`color${i + 1}Nombre`] || "",
-        };
-        restoredCantidades[i] = data.tiradores[`cantidad${i + 1}`] || 0;
-        restoredPuntos[i] = data.tiradores[`puntos${i + 1}`] || 0;
+  
+      for (let i = 0; i < 6; i++) {
+        // Verificar si los datos están en el formato `selectedArticulos` y `selectedColores`
+        if (data.tiradores.selectedArticulos && data.tiradores.selectedColores) {
+          const articulo = data.tiradores.selectedArticulos?.[i] || {};
+          restoredArticulos[i] = {
+            id: articulo.id || (articulo.articuloId ? String(articulo.articuloId) : ""),
+            nombre: articulo.nombre || "",
+            puntos: articulo.puntos || 0,
+            serieId: articulo.serieId || "",
+          };
+  
+          const color = data.tiradores.selectedColores?.[i] || {};
+          restoredColores[i] = {
+            id: color.id || "",
+            nombre: color.nombre || "",
+          };
+  
+          restoredCantidades[i] = data.tiradores.cantidades?.[i] ? parseInt(data.tiradores.cantidades[i], 10) : 0;
+          restoredPuntos[i] = data.tiradores.puntos?.[i] ? parseInt(data.tiradores.puntos[i], 10) : 0;
+        } else {
+          // Si no están en el formato `selectedArticulos`, usar el formato `articulo${i + 1}Id`
+          restoredArticulos[i] = {
+            id: data.tiradores[`articulo${i + 1}Id`] || "",
+            nombre: data.tiradores[`articulo${i + 1}Nombre`] || "",
+            puntos: data.tiradores[`articulo${i + 1}Puntos`] || 0,
+            serieId: data.tiradores[`articulo${i + 1}SerieId`] || "",
+          };
+  
+          restoredColores[i] = {
+            id: data.tiradores[`color${i + 1}Id`] || "",
+            nombre: data.tiradores[`color${i + 1}Nombre`] || "",
+          };
+  
+          restoredCantidades[i] = data.tiradores[`cantidad${i + 1}`] || 0;
+          restoredPuntos[i] = data.tiradores[`puntos${i + 1}`] || 0;
+        }
       }
-
+  
+      console.log("Artículos restaurados (transformados):", restoredArticulos);
+  
       setSelectedArticulos(restoredArticulos);
       setSelectedColores(restoredColores);
       setCantidades(restoredCantidades);
@@ -174,15 +199,15 @@ function Tiradores() {
   const filteredTiradores = listTiradores.filter((tirador) => {
     const isLaca = [materialFrente1, materialFrente2, materialFrente3].some(material => material.includes("laca"));
     const isSoft = data.equipamiento3 && Object.values(data.equipamiento3).some(value => typeof value === 'string' && value.toLowerCase().includes("soft"));
-    
+
     if (!isSoft && tirador.nombre.toLowerCase().includes("push cajones")) {
       return false; // No mostrar "Push cajones" si no hay equipamientos con "soft"
     }
-    
+
     if (isLaca) {
       return true; // Mostrar todos los tiradores si al menos un frente es de laca, excepto "Push cajones" si no hay "soft"
     }
-    
+
     return !tirador.nombre.toLowerCase().includes("gola"); // Filtrar los tiradores que contienen "gola" en el nombre
   });
   const handleSelectArticuloChange = async (index, event, isCerradura = false) => {
@@ -223,7 +248,10 @@ function Tiradores() {
       updatedCantidades[index] = 1;
     }
     setCantidades(updatedCantidades);
-
+    console.log("Lista de tiradores:", listTiradores);
+    console.log("Artículos restaurados:", selectedArticulos);
+    console.log("Lista de colores:", listColor);
+    console.log("Colores restaurados:", selectedColores);
     try {
       const materialRes = await axios.get(`${backendUrl}/materialesPorArticulo`, {
         headers: {
@@ -310,18 +338,17 @@ function Tiradores() {
       return newPuntos;
     });
   };
-
   const renderSelectArticulo = (index, isCerradura = false) => (
     <div key={index}>
       <label htmlFor={`articulo${index + 1}`}>Tipo {index + 1}:</label>
       <select
         id={`articulo${index + 1}`}
         onChange={(event) => handleSelectArticuloChange(index, event, isCerradura)}
-        value={selectedArticulos[index].id || ""}
+        value={String(selectedArticulos[index].id) || ""}
       >
         <option value="">--Selecciona una opción--</option>
         {(isCerradura ? listCerraduras : filteredTiradores).map((articulo) => (
-          <option key={articulo.articulo_id} value={articulo.articulo_id} data-serie-id={articulo.serie_id}>
+          <option key={articulo.articulo_id} value={String(articulo.articulo_id)}>
             {articulo.nombre}
           </option>
         ))}
@@ -350,7 +377,6 @@ function Tiradores() {
       <label htmlFor={`puntos${index + 1}`}>Puntos: {puntos[index]}</label>
     </div>
   );
-
   return (
     <div className="container">
       <div className="section">

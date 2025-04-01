@@ -52,6 +52,31 @@ button {
 .modal-content button:hover {
   background-color: #855e26;
 }
+#restoreButton {
+  opacity: 1; /* Hacer el botón visible */
+  position: fixed; /* Fijar el botón en la pantalla */
+  bottom: 20px; /* Separación desde la parte inferior */
+  right: 20px; /* Separación desde la parte derecha */
+  width: 50px; /* Ancho del botón */
+  height: 50px; /* Altura del botón */
+  background-color: var(--color4); /* Color de fondo */
+  color: white; /* Color del texto */
+  border: none; /* Sin bordes */
+  border-radius: 50%; /* Botón redondo */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Sombra */
+  cursor: pointer; /* Cambiar el cursor al pasar sobre el botón */
+  z-index: 1000; /* Asegurar que esté por encima de otros elementos */
+  display: flex; /* Centrar el contenido dentro del botón */
+  align-items: center; /* Centrar verticalmente */
+  justify-content: center; /* Centrar horizontalmente */
+  font-size: 18px; /* Tamaño del texto */
+  transition: transform 0.3s ease, background-color 0.3s ease; /* Animación */
+}
+
+#restoreButton:hover {
+  background-color: #855e26; /* Cambiar el color al pasar el ratón */
+  transform: scale(1.1); /* Aumentar ligeramente el tamaño */
+}
 .campos-usuario {
   display: flex;
   justify-content: space-between; /* Distribuir espacio entre los campos */

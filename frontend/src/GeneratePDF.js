@@ -634,6 +634,7 @@ doc.text('Total precio: ' + precioTotal * valorPuntoPromo + '€', 12, startY);
 startY += 10;
 //doc.text('C1: '+ (precioTotal * valorPuntoPromo) * 0.58 + '€', 12, startY);
   // Crear el nombre del PDF y enviarlo
+  
   const centroAbreviado = centro.substring(0, 6).toUpperCase();
   fetch('https://api.adpta.com/presupuesto', {
     method: 'POST',
@@ -644,28 +645,38 @@ startY += 10;
       centro: centro,
       puntos: totalPuntos,
       cliente: userInfo.cliente,
-      tienda: userInfo.tienda
+      telefono: userInfo.telefono, // Añadir el teléfono
+      email: userInfo.email || null, // Añadir el email (opcional)
+      tienda: userInfo.tienda,
+      frentes3: data.frentes3,
+      frentes: data.frentes,
+      frentes2: data.frentes2,
+      tiradores: data.tiradores,
+      interiores: data.interiores,
+      equipamiento3: data.equipamiento3,
+      baldas: data.baldas,
+      remates: data.remates,
     }),
     credentials: 'include'
   })
-  .then(response => response.json())
-  .then(data => {
-    var nombrePresupuesto = `${centroAbreviado}-${data.idPresupuesto}`;
+    .then(response => response.json())
+    .then(data => {
+      var nombrePresupuesto = `${centroAbreviado}-${data.idPresupuesto}`;
+      
+      // Generar el PDF y guardarlo en el sistema
+      const pdfBlob = doc.output('blob');  // Generar un Blob del PDF
+      
+      // Guardar el archivo en el equipo
+      if (empresa == 5) {
+        nombrePresupuesto = `LM${centroAbreviado}-${data.idPresupuesto}`;
+      }
+      doc.save(`${nombrePresupuesto}.pdf`);
     
-    // Generar el PDF y guardarlo en el sistema
-    const pdfBlob = doc.output('blob');  // Generar un Blob del PDF
-    
-    // Guardar el archivo en el equipo
-    if (empresa == 5) {
-      nombrePresupuesto = `LM${centroAbreviado}-${data.idPresupuesto}`;
-    }
-    doc.save(`${nombrePresupuesto}.pdf`);
-  
-    // Crear una URL temporal para el Blob y abrirla en una nueva pestaña
-    const pdfUrl = URL.createObjectURL(pdfBlob);
-    window.open(pdfUrl, '_blank');  // Abrir en una nueva pestaña
-  })
-  .catch(error => {
-    console.error("Error al enviar datos del presupuesto:", error);
-  });
+      // Crear una URL temporal para el Blob y abrirla en una nueva pestaña
+      const pdfUrl = URL.createObjectURL(pdfBlob);
+      window.open(pdfUrl, '_blank');  // Abrir en una nueva pestaña
+    })
+    .catch(error => {
+      console.error("Error al enviar datos del presupuesto:", error);
+    });
 }; 

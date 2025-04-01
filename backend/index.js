@@ -89,7 +89,7 @@ app.get("/articulo/sensores", (req, res) => {
 app.get("/presupuesto/:id", (req, res) => {
   const presupuestoId = req.params.id;
 
-  const query = `SELECT * FROM presupuesto WHERE id = ?`;
+  const query = `SELECT * FROM presupuesto WHERE idPresupuestos = ?`;
 
   db.query(query, [presupuestoId], (err, data) => {
     if (err) {
@@ -533,34 +533,53 @@ app.get("/materialesPorArticulo", (req, res) => {
   });
 });
 app.post("/presupuesto", (req, res) => {
-  const { centro, puntos, cliente } = req.body;
+  const { centro, puntos, cliente, telefono, email, frentes3, frentes, frentes2, tiradores, interiores, equipamiento3, baldas, remates } = req.body;
 
+  // Verificar solo los campos obligatorios
   if (!centro || !puntos || !cliente) {
-    return res.status(400).json({ error: "Todos los campos son requeridos" });
+    return res.status(400).json({ error: "Los campos 'centro', 'puntos' y 'cliente' son obligatorios" });
   }
+
   const tienda = centro;
+
   // Inserción en la base de datos
   const query = `
-    INSERT INTO presupuesto (Centro, Puntos, Tienda, Cliente)
-    VALUES (?, ?, ?, ?)
-  `;
+  INSERT INTO presupuesto (
+    Centro, Puntos, Tienda, Cliente, Telefono, Email, frentes3, frentes, frentes2, tiradores, interiores, equipamiento, baldas, remates
+  )
+  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+`;
 
-  db.query(query, [centro, puntos, tienda, cliente], (err, result) => {
-    if (err) {
-      console.error("Error al insertar el presupuesto:", err);
-      return res.status(500).json({ error: "Error al crear el presupuesto" });
-    }
+db.query(query, [
+  centro,
+  puntos,
+  tienda,
+  cliente,
+  telefono,
+  email || null, // Si no se proporciona email, se guarda como NULL
+  frentes3 ? JSON.stringify(frentes3) : null,
+  frentes ? JSON.stringify(frentes) : null,
+  frentes2 ? JSON.stringify(frentes2) : null,
+  tiradores ? JSON.stringify(tiradores) : null,
+  interiores ? JSON.stringify(interiores) : null,
+  equipamiento3 ? JSON.stringify(equipamiento3) : null,
+  baldas ? JSON.stringify(baldas) : null,
+  remates ? JSON.stringify(remates) : null,
+], (err, result) => {
+  if (err) {
+    console.error("Error al insertar el presupuesto:", err);
+    return res.status(500).json({ error: "Error al crear el presupuesto" });
+  }
 
-    const idPresupuesto = result.insertId;
-    const nombrePresupuesto = `${centro.substring(0, 3).toUpperCase()}-${idPresupuesto}`;
+  const idPresupuesto = result.insertId;
+  const nombrePresupuesto = `${centro.substring(0, 3).toUpperCase()}-${idPresupuesto}`;
 
-    // Devolver el nombre generado del presupuesto junto con el ID
-    res.json({ 
-      message: "Presupuesto creado exitosamente", 
-      idPresupuesto, 
-      nombrePresupuesto, 
-    });
+  res.json({
+    message: "Presupuesto creado exitosamente",
+    idPresupuesto,
+    nombrePresupuesto,
   });
+});
 });
 //Sacamos la tienda del usuario
 app.get("/usuarioTienda", (req, res) => {

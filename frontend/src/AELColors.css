@@ -50,6 +50,9 @@ button {
   border: none;
   cursor: pointer;
 }
+#restoreButton {
+  display: none;
+}
 
 .modal-content button:hover {
   background-color: #855e26;

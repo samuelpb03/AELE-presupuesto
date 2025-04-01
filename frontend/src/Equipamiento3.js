@@ -36,34 +36,73 @@ const [puntosFronteraLacadaCajon, setPuntosFronteraLacadaCajon] = useState(0);
 
   useEffect(() => {
     if (data.equipamiento3) {
+      console.log("Datos restaurados en Equipamiento3:", data.equipamiento3);
+  
       const restoredArticulos = Array(15).fill({ id: "", nombre: "" });
       const restoredMedidas = Array(15).fill({ id: "", nombre: "", puntos: 0 });
       const restoredCantidades = Array(15).fill(0);
       const restoredPuntos = Array(15).fill(0);
+      let restoredFronteraLacadaCajon = { id: "", nombre: "" };
+      let restoredCantidadFronteraLacadaCajon = 0;
+      let restoredPuntosFronteraLacadaCajon = 0;
   
-      for (let i = 0; i < 15; i++) {
-        restoredArticulos[i] = {
-          id: data.equipamiento3[`articulo${i + 1}Id`] || "",
-          nombre: data.equipamiento3[`articulo${i + 1}Nombre`] || "",
+      // Detectar el formato de los datos
+      if (Array.isArray(data.equipamiento3.selectedArticulos)) {
+        // Formato de arrays (restaurado desde la base de datos)
+        for (let i = 0; i < 15; i++) {
+          const articulo = data.equipamiento3.selectedArticulos[i] || {};
+          restoredArticulos[i] = {
+            id: articulo.id || "",
+            nombre: articulo.nombre || "",
+          };
+  
+          const medida = data.equipamiento3.selectedMedidas?.[i] || {};
+          restoredMedidas[i] = {
+            id: medida.id || "",
+            nombre: medida.nombre || "",
+            puntos: medida.puntos || 0,
+          };
+  
+          restoredCantidades[i] = data.equipamiento3.cantidades?.[i] || 0;
+          restoredPuntos[i] = data.equipamiento3.puntos?.[i] || 0;
+        }
+  
+        restoredFronteraLacadaCajon = data.equipamiento3.fronteraLacadaCajon || { id: "", nombre: "" };
+        restoredCantidadFronteraLacadaCajon = data.equipamiento3.cantidadFronteraLacadaCajon || 0;
+        restoredPuntosFronteraLacadaCajon = data.equipamiento3.puntosFronteraLacadaCajon || 0;
+      } else {
+        // Formato de objetos (estado actual)
+        for (let i = 0; i < 15; i++) {
+          restoredArticulos[i] = {
+            id: data.equipamiento3[`articulo${i + 1}Id`] || "",
+            nombre: data.equipamiento3[`articulo${i + 1}Nombre`] || "",
+          };
+  
+          restoredMedidas[i] = {
+            id: data.equipamiento3[`medidas${i + 1}Id`] || "",
+            nombre: data.equipamiento3[`medidas${i + 1}Nombre`] || "",
+            puntos: data.equipamiento3[`medidas${i + 1}Puntos`] || 0,
+          };
+  
+          restoredCantidades[i] = data.equipamiento3[`cantidad${i + 1}`] || 0;
+          restoredPuntos[i] = data.equipamiento3[`puntos${i + 1}`] || 0;
+        }
+  
+        restoredFronteraLacadaCajon = {
+          id: data.equipamiento3.fronteraLacadaCajonId || "",
+          nombre: data.equipamiento3.fronteraLacadaCajonNombre || "",
         };
-        restoredMedidas[i] = {
-          id: data.equipamiento3[`medidas${i + 1}Id`] || "",
-          nombre: data.equipamiento3[`medidas${i + 1}Nombre`] || "",
-          puntos: data.equipamiento3[`medidas${i + 1}Puntos`] || 0,
-        };
-        restoredCantidades[i] = data.equipamiento3[`cantidad${i + 1}`] || 0;
-        restoredPuntos[i] = data.equipamiento3[`puntos${i + 1}`] || 0;
+        restoredCantidadFronteraLacadaCajon = data.equipamiento3.cantidadFronteraLacadaCajon || 0;
+        restoredPuntosFronteraLacadaCajon = data.equipamiento3.puntosFronteraLacadaCajon || 0;
       }
   
       setSelectedArticulos(restoredArticulos);
       setSelectedMedidas(restoredMedidas);
       setCantidades(restoredCantidades);
       setPuntos(restoredPuntos);
-      setFronteraLacadaCajon({
-        id: data.equipamiento3.fronteraLacadaCajonId || "",
-        nombre: data.equipamiento3.fronteraLacadaCajonNombre || "",
-      });
-      setCantidadFronteraLacadaCajon(data.equipamiento3.cantidadFronteraLacadaCajon || 0);
+      setFronteraLacadaCajon(restoredFronteraLacadaCajon);
+      setCantidadFronteraLacadaCajon(restoredCantidadFronteraLacadaCajon);
+      setPuntosFronteraLacadaCajon(restoredPuntosFronteraLacadaCajon);
     }
   }, []);
 

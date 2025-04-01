@@ -114,86 +114,138 @@ function Interiores() {
   }, [backendUrl]);
   useEffect(() => {
     if (data && data.interiores) {
+      console.log("Datos restaurados en Interiores:", data.interiores);
+  
       const restoredArticulos = Array(6).fill({ id: "", nombre: "", puntos: 0 });
       const restoredColores = Array(6).fill({ id: "", nombre: "" });
       const restoredCantidades = Array(6).fill(0);
       const restoredPuntos = Array(6).fill(0);
-      
+  
       const restoredInterioresOtros = Array(4).fill({ id: "", nombre: "", puntos: 0 });
       const restoredCantidadesOtros = Array(4).fill(0);
       const restoredPuntosOtros = Array(4).fill(0);
   
-      for (let i = 0; i < 6; i++) {
-        restoredArticulos[i] = {
-          id: data.interiores[`articulo${i + 1}Id`] || "",
-          nombre: data.interiores[`articulo${i + 1}Nombre`] || "",
-          puntos: data.interiores[`articulo${i + 1}Puntos`] || 0,
-        };
-        restoredColores[i] = {
-          id: data.interiores[`color${i + 1}Id`] || "",
-          nombre: data.interiores[`color${i + 1}Nombre`] || "",
-        };
-        restoredCantidades[i] = data.interiores[`cantidad${i + 1}`] || 0;
-        restoredPuntos[i] = (data.interiores[`articulo${i + 1}Puntos`] || 0) * (data.interiores[`cantidad${i + 1}`] || 0);
-      }
+      let restoredEspecial1, restoredEspecial2, restoredEspecial3, restoredEspecial4, restoredEspecial5;
   
-      for (let i = 0; i < 4; i++) {
-        restoredInterioresOtros[i] = {
-          id: data.interiores[`interioresOtros${i + 1}Id`] || "",
-          nombre: data.interiores[`interioresOtros${i + 1}Nombre`] || "",
-          puntos: data.interiores[`interioresOtros${i + 1}Puntos`] || 0,
+      // Detectar el formato de los datos
+      if (Array.isArray(data.interiores.selectedArticulos)) {
+        // Formato de arrays (restaurado desde la base de datos)
+        for (let i = 0; i < 6; i++) {
+          const articulo = data.interiores.selectedArticulos[i] || {};
+          restoredArticulos[i] = {
+            id: articulo.id || "",
+            nombre: articulo.nombre || "",
+            puntos: articulo.puntos || 0,
+          };
+  
+          const color = data.interiores.selectedColores?.[i] || {};
+          restoredColores[i] = {
+            id: color.id || "",
+            nombre: color.nombre || "",
+          };
+  
+          restoredCantidades[i] = data.interiores.cantidades?.[i] || 0;
+          restoredPuntos[i] = data.interiores.puntos?.[i] || 0;
+        }
+  
+        for (let i = 0; i < 4; i++) {
+          const interioresOtros = data.interiores.selectedInterioresOtros?.[i] || {};
+          restoredInterioresOtros[i] = {
+            id: interioresOtros.id || "",
+            nombre: interioresOtros.nombre || "",
+            puntos: interioresOtros.puntos || 0,
+          };
+  
+          restoredCantidadesOtros[i] = data.interiores.cantidadesInterioresOtros?.[i] || 0;
+          restoredPuntosOtros[i] = data.interiores.puntosInterioresOtros?.[i] || 0;
+        }
+  
+        restoredEspecial1 = data.interiores.selectedEspecial1 || { id: "", nombre: "", puntos: 0 };
+        restoredEspecial2 = data.interiores.selectedEspecial2 || { id: "", nombre: "", puntos: 0 };
+        restoredEspecial3 = data.interiores.selectedEspecial3 || { id: "", nombre: "", puntos: 0 };
+        restoredEspecial4 = data.interiores.selectedEspecial4 || { id: "", nombre: "", puntos: 0 };
+        restoredEspecial5 = data.interiores.selectedEspecial5 || { id: "", nombre: "", puntos: 0 };
+      } else {
+        // Formato de objetos (estado actual)
+        for (let i = 0; i < 6; i++) {
+          restoredArticulos[i] = {
+            id: data.interiores[`articulo${i + 1}Id`] || "",
+            nombre: data.interiores[`articulo${i + 1}Nombre`] || "",
+            puntos: data.interiores[`articulo${i + 1}Puntos`] || 0,
+          };
+          restoredColores[i] = {
+            id: data.interiores[`color${i + 1}Id`] || "",
+            nombre: data.interiores[`color${i + 1}Nombre`] || "",
+          };
+          restoredCantidades[i] = data.interiores[`cantidad${i + 1}`] || 0;
+          restoredPuntos[i] = data.interiores[`puntos${i + 1}`] || 0;
+        }
+  
+        for (let i = 0; i < 4; i++) {
+          restoredInterioresOtros[i] = {
+            id: data.interiores[`interioresOtros${i + 1}Id`] || "",
+            nombre: data.interiores[`interioresOtros${i + 1}Nombre`] || "",
+            puntos: data.interiores[`interioresOtros${i + 1}Puntos`] || 0,
+          };
+          restoredCantidadesOtros[i] = data.interiores[`cantidadInterioresOtros${i + 1}`] || 0;
+          restoredPuntosOtros[i] = data.interiores[`puntosInterioresOtros${i + 1}`] || 0;
+        }
+  
+        restoredEspecial1 = {
+          id: data.interiores.selectedEspecial1Id || "",
+          nombre: data.interiores.selectedEspecial1Nombre || "",
+          puntos: data.interiores.selectedEspecial1Puntos || 0,
         };
-        restoredCantidadesOtros[i] = data.interiores[`cantidadInterioresOtros${i + 1}`] || 0;
-        restoredPuntosOtros[i] = data.interiores[`puntosInterioresOtros${i + 1}`] || 0;
+        restoredEspecial2 = {
+          id: data.interiores.selectedEspecial2Id || "",
+          nombre: data.interiores.selectedEspecial2Nombre || "",
+          puntos: data.interiores.selectedEspecial2Puntos || 0,
+        };
+        restoredEspecial3 = {
+          id: data.interiores.selectedEspecial3Id || "",
+          nombre: data.interiores.selectedEspecial3Nombre || "",
+          puntos: data.interiores.selectedEspecial3Puntos || 0,
+        };
+        restoredEspecial4 = {
+          id: data.interiores.selectedEspecial4Id || "",
+          nombre: data.interiores.selectedEspecial4Nombre || "",
+          puntos: data.interiores.selectedEspecial4Puntos || 0,
+        };
+        restoredEspecial5 = {
+          id: data.interiores.selectedEspecial5Id || "",
+          nombre: data.interiores.selectedEspecial5Nombre || "",
+          puntos: data.interiores.selectedEspecial5Puntos || 0,
+        };
       }
   
       setSelectedArticulos(restoredArticulos);
       setSelectedColores(restoredColores);
       setCantidades(restoredCantidades);
       setPuntos(restoredPuntos);
-      
+  
       setSelectedInterioresOtros(restoredInterioresOtros);
       setCantidadesInterioresOtros(restoredCantidadesOtros);
       setPuntosInterioresOtros(restoredPuntosOtros);
-
-      setSelectedEspecial1({
-        id: data.interiores.selectedEspecial1Id || "",
-        nombre: data.interiores.selectedEspecial1Nombre || "",
-        puntos: data.interiores.selectedEspecial1Puntos || 0,
-      });
-      setSelectedEspecial2({
-        id: data.interiores.selectedEspecial2Id || "",
-        nombre: data.interiores.selectedEspecial2Nombre || "",
-        puntos: data.interiores.selectedEspecial2Puntos || 0,
-      });
-      setSelectedEspecial3({
-        id: data.interiores.selectedEspecial3Id || "",
-        nombre: data.interiores.selectedEspecial3Nombre || "",
-        puntos: data.interiores.selectedEspecial3Puntos || 0,
-      });
-      setSelectedEspecial4({
-        id: data.interiores.selectedEspecial4Id || "",
-        nombre: data.interiores.selectedEspecial4Nombre || "",
-        puntos: data.interiores.selectedEspecial4Puntos || 0,
-      });
-      setSelectedEspecial5({
-        id: data.interiores.selectedEspecial5Id || "",
-        nombre: data.interiores.selectedEspecial5Nombre || "",
-        puntos: data.interiores.selectedEspecial5Puntos || 0,
-      });
+  
+      setSelectedEspecial1(restoredEspecial1);
+      setSelectedEspecial2(restoredEspecial2);
+      setSelectedEspecial3(restoredEspecial3);
+      setSelectedEspecial4(restoredEspecial4);
+      setSelectedEspecial5(restoredEspecial5);
+  
+      setCantidadEspecial1(data.interiores.cantidadEspecial1 || 0);
+      setCantidadEspecial2(data.interiores.cantidadEspecial2 || 0);
       setCantidadEspecial3(data.interiores.cantidadEspecial3 || 0);
       setCantidadEspecial4(data.interiores.cantidadEspecial4 || 0);
       setCantidadEspecial5(data.interiores.cantidadEspecial5 || 0);
-      setPuntosEspecial3((data.interiores.selectedEspecial3Puntos || 0) * (data.interiores.cantidadEspecial3 || 0));
-      setPuntosEspecial4((data.interiores.selectedEspecial4Puntos || 0) * (data.interiores.cantidadEspecial4 || 0));
-      setPuntosEspecial5((data.interiores.selectedEspecial5Puntos || 0) * (data.interiores.cantidadEspecial5 || 0));
-      setCantidadEspecial1(data.interiores.cantidadEspecial1 || 0);
-      setCantidadEspecial2(data.interiores.cantidadEspecial2 || 0);
-      setPuntosEspecial1((data.interiores.selectedEspecial1Puntos || 0) * (data.interiores.cantidadEspecial1 || 0));
-      setPuntosEspecial2((data.interiores.selectedEspecial2Puntos || 0) * (data.interiores.cantidadEspecial2 || 0));
+  
+      setPuntosEspecial1((restoredEspecial1.puntos || 0) * (data.interiores.cantidadEspecial1 || 0));
+      setPuntosEspecial2((restoredEspecial2.puntos || 0) * (data.interiores.cantidadEspecial2 || 0));
+      setPuntosEspecial3((restoredEspecial3.puntos || 0) * (data.interiores.cantidadEspecial3 || 0));
+      setPuntosEspecial4((restoredEspecial4.puntos || 0) * (data.interiores.cantidadEspecial4 || 0));
+      setPuntosEspecial5((restoredEspecial5.puntos || 0) * (data.interiores.cantidadEspecial5 || 0));
     }
   }, []);
-
   useEffect(() => {
     const formattedData = selectedArticulos.reduce((acc, articulo, index) => {
       acc[`articulo${index + 1}Nombre`] = articulo.nombre;
