@@ -57,12 +57,12 @@ button {
   position: fixed; /* Fijar el botón en la pantalla */
   bottom: 20px; /* Separación desde la parte inferior */
   right: 20px; /* Separación desde la parte derecha */
-  width: 50px; /* Ancho del botón */
+  width: 200px; /* Ancho del botón */
   height: 50px; /* Altura del botón */
   background-color: var(--color4); /* Color de fondo */
   color: white; /* Color del texto */
   border: none; /* Sin bordes */
-  border-radius: 50%; /* Botón redondo */
+  border-radius: 20%; /* Botón redondo */
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Sombra */
   cursor: pointer; /* Cambiar el cursor al pasar sobre el botón */
   z-index: 1000; /* Asegurar que esté por encima de otros elementos */

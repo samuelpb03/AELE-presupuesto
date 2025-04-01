@@ -9,13 +9,25 @@ function Instalacion() {
   const { data, saveData } = useData();
   const [numFrentesInteriores, setNumFrentesInteriores] = useState("");
   const [numArmariosCompletos, setNumArmariosCompletos] = useState("");
+  const [isFinished, setIsFinished] = useState(false); // Estado para la ventana de finalización
   const [showRestoreModal, setShowRestoreModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [presupuestoId, setPresupuestoId] = useState("");
   const [numDesmontaje, setNumDesmontaje] = useState(""); // Nuevo estado para el número de desmontajes
   const [montajeAcarreo, setMontajeAcarreo] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const navigate = useNavigate();
-
+  const tabs = [
+    "/Frentes",
+    "/Frentes2",
+    "/Frentes3",
+    "/Interiores",
+    "/Baldas",
+    "/Equipamiento3",
+    "/Tiradores",
+    "/Remates",
+    "/Instalacion",
+  ];
   useEffect(() => {
     if (data.instalacion) {
       setNumFrentesInteriores(data.instalacion.numFrentesInteriores || "");
@@ -73,13 +85,14 @@ function Instalacion() {
       alert("Por favor, introduce un ID de presupuesto válido.");
       return;
     }
-  
+    setIsLoading(true); // Mostrar la ventana de carga
+
     try {
       const response = await fetch(`https://api.adpta.com/presupuesto/${presupuestoId}`);
       if (!response.ok) {
         throw new Error("No se pudo encontrar el presupuesto con el ID proporcionado.");
       }
-  
+
       const presupuesto = await response.json();
       console.log("Respuesta del backend:", presupuesto); // Verifica la respuesta completa
       if (presupuesto.cliente) {
@@ -99,10 +112,10 @@ function Instalacion() {
       restoreUserInfo(presupuesto.cliente, presupuesto.telefono, presupuesto.email);
       // Procesar datos de frentes3
       if (presupuesto.frentes3) {
-        const frentes3Data = typeof presupuesto.frentes3 === "string" 
-          ? JSON.parse(presupuesto.frentes3) 
+        const frentes3Data = typeof presupuesto.frentes3 === "string"
+          ? JSON.parse(presupuesto.frentes3)
           : presupuesto.frentes3;
-  
+
         const formattedFrentes3 = {
           selectedProductoId: frentes3Data.selectedProductoId || "",
           selectedProductoNombre: frentes3Data.selectedProductoNombre || "",
@@ -138,17 +151,17 @@ function Instalacion() {
           isColorValueAdded: frentes3Data.isColorValueAdded || false,
           shouldApplyColorIncrement: frentes3Data.shouldApplyColorIncrement || false,
         };
-  
+
         saveData("frentes3", formattedFrentes3);
         console.log("Datos guardados en frentes3:", formattedFrentes3);
       }
-  
+
       // Procesar datos de frentes
       if (presupuesto.frentes) {
-        const frentesData = typeof presupuesto.frentes === "string" 
-          ? JSON.parse(presupuesto.frentes) 
+        const frentesData = typeof presupuesto.frentes === "string"
+          ? JSON.parse(presupuesto.frentes)
           : presupuesto.frentes;
-  
+
         const formattedFrentes = {
           selectedProductoId: frentesData.selectedProductoId || "",
           selectedProductoNombre: frentesData.selectedProductoNombre || "",
@@ -184,17 +197,17 @@ function Instalacion() {
           isColorValueAdded: frentesData.isColorValueAdded || false,
           shouldApplyColorIncrement: frentesData.shouldApplyColorIncrement || false,
         };
-  
+
         saveData("frentes", formattedFrentes);
         console.log("Datos guardados en frentes:", formattedFrentes);
       }
-  
+
       // Procesar datos de frentes2
       if (presupuesto.frentes2) {
-        const frentes2Data = typeof presupuesto.frentes2 === "string" 
-          ? JSON.parse(presupuesto.frentes2) 
+        const frentes2Data = typeof presupuesto.frentes2 === "string"
+          ? JSON.parse(presupuesto.frentes2)
           : presupuesto.frentes2;
-  
+
         const formattedFrentes2 = {
           selectedProductoId: frentes2Data.selectedProductoId || "",
           selectedProductoNombre: frentes2Data.selectedProductoNombre || "",
@@ -230,98 +243,98 @@ function Instalacion() {
           isColorValueAdded: frentes2Data.isColorValueAdded || false,
           shouldApplyColorIncrement: frentes2Data.shouldApplyColorIncrement || false,
         };
-        
-  
+
+
         saveData("frentes2", formattedFrentes2);
         console.log("Datos guardados en frentes2:", formattedFrentes2);
       }
       // Procesar datos de remates
-    if (presupuesto.remates) {
-      const rematesData = typeof presupuesto.remates === "string" 
-        ? JSON.parse(presupuesto.remates) 
-        : presupuesto.remates;
+      if (presupuesto.remates) {
+        const rematesData = typeof presupuesto.remates === "string"
+          ? JSON.parse(presupuesto.remates)
+          : presupuesto.remates;
 
-      const formattedRemates = {
-        selectedArticulos: rematesData.selectedArticulos || Array(3).fill({ id: "", nombre: "", puntos: 0 }),
-        metros: rematesData.metros || Array(3).fill(0),
-        selectedOtros: rematesData.selectedOtros || Array(3).fill({ id: "", nombre: "", puntos: 0 }),
-        cantidadesOtros: rematesData.cantidadesOtros || Array(3).fill(1),
-        tipoApertura: rematesData.tipoApertura || "",
-        tipoRemate: rematesData.tipoRemate || "",
-      };
+        const formattedRemates = {
+          selectedArticulos: rematesData.selectedArticulos || Array(3).fill({ id: "", nombre: "", puntos: 0 }),
+          metros: rematesData.metros || Array(3).fill(0),
+          selectedOtros: rematesData.selectedOtros || Array(3).fill({ id: "", nombre: "", puntos: 0 }),
+          cantidadesOtros: rematesData.cantidadesOtros || Array(3).fill(1),
+          tipoApertura: rematesData.tipoApertura || "",
+          tipoRemate: rematesData.tipoRemate || "",
+        };
 
-      saveData("remates", formattedRemates);
-      console.log("Datos guardados en remates:", formattedRemates);
-    }
-    if (presupuesto.interiores) {
-      const interioresData = typeof presupuesto.interiores === "string" 
-        ? JSON.parse(presupuesto.interiores) 
-        : presupuesto.interiores;
+        saveData("remates", formattedRemates);
+        console.log("Datos guardados en remates:", formattedRemates);
+      }
+      if (presupuesto.interiores) {
+        const interioresData = typeof presupuesto.interiores === "string"
+          ? JSON.parse(presupuesto.interiores)
+          : presupuesto.interiores;
 
-      const formattedInteriores = {
-        selectedArticulos: Array(6).fill({}).map((_, i) => ({
-          id: interioresData[`articulo${i + 1}Id`] || "",
-          nombre: interioresData[`articulo${i + 1}Nombre`] || "",
-          puntos: interioresData[`articulo${i + 1}Puntos`] || 0,
-        })),
-        selectedColores: Array(6).fill({}).map((_, i) => ({
-          id: interioresData[`color${i + 1}Id`] || "",
-          nombre: interioresData[`color${i + 1}Nombre`] || "",
-        })),
-        cantidades: Array(6).fill(0).map((_, i) => interioresData[`cantidad${i + 1}`] || 0),
-        puntos: Array(6).fill(0).map((_, i) => interioresData[`puntos${i + 1}`] || 0),
-        selectedInterioresOtros: Array(4).fill({}).map((_, i) => ({
-          id: interioresData[`interioresOtros${i + 1}Id`] || "",
-          nombre: interioresData[`interioresOtros${i + 1}Nombre`] || "",
-          puntos: interioresData[`interioresOtros${i + 1}Puntos`] || 0,
-        })),
-        cantidadesInterioresOtros: Array(4).fill(0).map((_, i) => interioresData[`cantidadInterioresOtros${i + 1}`] || 0),
-        puntosInterioresOtros: Array(4).fill(0).map((_, i) => interioresData[`puntosInterioresOtros${i + 1}`] || 0),
-        selectedEspecial1: {
-          id: interioresData.selectedEspecial1Id || "",
-          nombre: interioresData.selectedEspecial1Nombre || "",
-          puntos: interioresData.selectedEspecial1Puntos || 0,
-        },
-        selectedEspecial2: {
-          id: interioresData.selectedEspecial2Id || "",
-          nombre: interioresData.selectedEspecial2Nombre || "",
-          puntos: interioresData.selectedEspecial2Puntos || 0,
-        },
-        selectedEspecial3: {
-          id: interioresData.selectedEspecial3Id || "",
-          nombre: interioresData.selectedEspecial3Nombre || "",
-          puntos: interioresData.selectedEspecial3Puntos || 0,
-        },
-        selectedEspecial4: {
-          id: interioresData.selectedEspecial4Id || "",
-          nombre: interioresData.selectedEspecial4Nombre || "",
-          puntos: interioresData.selectedEspecial4Puntos || 0,
-        },
-        selectedEspecial5: {
-          id: interioresData.selectedEspecial5Id || "",
-          nombre: interioresData.selectedEspecial5Nombre || "",
-          puntos: interioresData.selectedEspecial5Puntos || 0,
-        },
-        cantidadEspecial1: interioresData.cantidadEspecial1 || 0,
-        cantidadEspecial2: interioresData.cantidadEspecial2 || 0,
-        cantidadEspecial3: interioresData.cantidadEspecial3 || 0,
-        cantidadEspecial4: interioresData.cantidadEspecial4 || 0,
-        cantidadEspecial5: interioresData.cantidadEspecial5 || 0,
-        puntosEspecial1: interioresData.puntosEspecial1 || 0,
-        puntosEspecial2: interioresData.puntosEspecial2 || 0,
-        puntosEspecial3: interioresData.puntosEspecial3 || 0,
-        puntosEspecial4: interioresData.puntosEspecial4 || 0,
-        puntosEspecial5: interioresData.puntosEspecial5 || 0,
-      };
+        const formattedInteriores = {
+          selectedArticulos: Array(6).fill({}).map((_, i) => ({
+            id: interioresData[`articulo${i + 1}Id`] || "",
+            nombre: interioresData[`articulo${i + 1}Nombre`] || "",
+            puntos: interioresData[`articulo${i + 1}Puntos`] || 0,
+          })),
+          selectedColores: Array(6).fill({}).map((_, i) => ({
+            id: interioresData[`color${i + 1}Id`] || "",
+            nombre: interioresData[`color${i + 1}Nombre`] || "",
+          })),
+          cantidades: Array(6).fill(0).map((_, i) => interioresData[`cantidad${i + 1}`] || 0),
+          puntos: Array(6).fill(0).map((_, i) => interioresData[`puntos${i + 1}`] || 0),
+          selectedInterioresOtros: Array(4).fill({}).map((_, i) => ({
+            id: interioresData[`interioresOtros${i + 1}Id`] || "",
+            nombre: interioresData[`interioresOtros${i + 1}Nombre`] || "",
+            puntos: interioresData[`interioresOtros${i + 1}Puntos`] || 0,
+          })),
+          cantidadesInterioresOtros: Array(4).fill(0).map((_, i) => interioresData[`cantidadInterioresOtros${i + 1}`] || 0),
+          puntosInterioresOtros: Array(4).fill(0).map((_, i) => interioresData[`puntosInterioresOtros${i + 1}`] || 0),
+          selectedEspecial1: {
+            id: interioresData.selectedEspecial1Id || "",
+            nombre: interioresData.selectedEspecial1Nombre || "",
+            puntos: interioresData.selectedEspecial1Puntos || 0,
+          },
+          selectedEspecial2: {
+            id: interioresData.selectedEspecial2Id || "",
+            nombre: interioresData.selectedEspecial2Nombre || "",
+            puntos: interioresData.selectedEspecial2Puntos || 0,
+          },
+          selectedEspecial3: {
+            id: interioresData.selectedEspecial3Id || "",
+            nombre: interioresData.selectedEspecial3Nombre || "",
+            puntos: interioresData.selectedEspecial3Puntos || 0,
+          },
+          selectedEspecial4: {
+            id: interioresData.selectedEspecial4Id || "",
+            nombre: interioresData.selectedEspecial4Nombre || "",
+            puntos: interioresData.selectedEspecial4Puntos || 0,
+          },
+          selectedEspecial5: {
+            id: interioresData.selectedEspecial5Id || "",
+            nombre: interioresData.selectedEspecial5Nombre || "",
+            puntos: interioresData.selectedEspecial5Puntos || 0,
+          },
+          cantidadEspecial1: interioresData.cantidadEspecial1 || 0,
+          cantidadEspecial2: interioresData.cantidadEspecial2 || 0,
+          cantidadEspecial3: interioresData.cantidadEspecial3 || 0,
+          cantidadEspecial4: interioresData.cantidadEspecial4 || 0,
+          cantidadEspecial5: interioresData.cantidadEspecial5 || 0,
+          puntosEspecial1: interioresData.puntosEspecial1 || 0,
+          puntosEspecial2: interioresData.puntosEspecial2 || 0,
+          puntosEspecial3: interioresData.puntosEspecial3 || 0,
+          puntosEspecial4: interioresData.puntosEspecial4 || 0,
+          puntosEspecial5: interioresData.puntosEspecial5 || 0,
+        };
 
-      saveData("interiores", formattedInteriores);
-      console.log("Datos guardados en interiores:", formattedInteriores);
-    }
-    if (presupuesto.tiradores) {
-      const tiradoresData = typeof presupuesto.tiradores === "string" 
-        ? JSON.parse(presupuesto.tiradores) 
-        : presupuesto.tiradores;
-    
+        saveData("interiores", formattedInteriores);
+        console.log("Datos guardados en interiores:", formattedInteriores);
+      }
+      if (presupuesto.tiradores) {
+        const tiradoresData = typeof presupuesto.tiradores === "string"
+          ? JSON.parse(presupuesto.tiradores)
+          : presupuesto.tiradores;
+
         const formattedTiradores = {
           selectedArticulos: Array(6).fill({}).map((_, i) => ({
             articuloId: tiradoresData[`articulo${i + 1}Id`] ? String(tiradoresData[`articulo${i + 1}Id`]) : "",
@@ -336,64 +349,74 @@ function Instalacion() {
           cantidades: Array(6).fill(0).map((_, i) => tiradoresData[`cantidad${i + 1}`] ? parseInt(tiradoresData[`cantidad${i + 1}`], 10) : 0),
           puntos: Array(6).fill(0).map((_, i) => tiradoresData[`puntos${i + 1}`] ? parseInt(tiradoresData[`puntos${i + 1}`], 10) : 0),
         };
-    
-      saveData("tiradores", formattedTiradores);
-      console.log("Datos guardados en tiradores:", formattedTiradores);
-    }
-    if (presupuesto.baldas) {
-      const baldasData = typeof presupuesto.baldas === "string" 
-        ? JSON.parse(presupuesto.baldas) 
-        : presupuesto.baldas;
 
-      const formattedBaldas = {
-        selectedArticulos: Array(12).fill({}).map((_, i) => ({
-          id: baldasData[`articulo${i + 1}Id`] || "",
-          nombre: baldasData[`articulo${i + 1}Nombre`] || "",
-        })),
-        selectedMedidas: Array(12).fill({}).map((_, i) => ({
-          id: baldasData[`medidas${i + 1}Id`] || "",
-          nombre: baldasData[`medidas${i + 1}Nombre`] || "",
-          puntos: baldasData[`medidas${i + 1}Puntos`] || 0,
-        })),
-        cantidades: Array(12).fill(0).map((_, i) => baldasData[`cantidad${i + 1}`] || 0),
-        puntosTotales: Array(12).fill(0).map((_, i) => baldasData[`puntosTotales${i + 1}`] || 0),
-        colorIluminacion: baldasData.colorIluminacion || "",
-      };
+        saveData("tiradores", formattedTiradores);
+        console.log("Datos guardados en tiradores:", formattedTiradores);
+      }
+      if (presupuesto.baldas) {
+        const baldasData = typeof presupuesto.baldas === "string"
+          ? JSON.parse(presupuesto.baldas)
+          : presupuesto.baldas;
 
-      saveData("baldas", formattedBaldas);
-      console.log("Datos guardados en baldas:", formattedBaldas);
-    }
-    if (presupuesto.equipamiento) {
-      const equipamiento3Data = typeof presupuesto.equipamiento === "string" 
-        ? JSON.parse(presupuesto.equipamiento) 
-        : presupuesto.equipamiento;
+        const formattedBaldas = {
+          selectedArticulos: Array(12).fill({}).map((_, i) => ({
+            id: baldasData[`articulo${i + 1}Id`] || "",
+            nombre: baldasData[`articulo${i + 1}Nombre`] || "",
+          })),
+          selectedMedidas: Array(12).fill({}).map((_, i) => ({
+            id: baldasData[`medidas${i + 1}Id`] || "",
+            nombre: baldasData[`medidas${i + 1}Nombre`] || "",
+            puntos: baldasData[`medidas${i + 1}Puntos`] || 0,
+          })),
+          cantidades: Array(12).fill(0).map((_, i) => baldasData[`cantidad${i + 1}`] || 0),
+          puntosTotales: Array(12).fill(0).map((_, i) => baldasData[`puntosTotales${i + 1}`] || 0),
+          colorIluminacion: baldasData.colorIluminacion || "",
+        };
 
-      const formattedEquipamiento3 = {
-        selectedArticulos: Array(15).fill({}).map((_, i) => ({
-          id: equipamiento3Data[`articulo${i + 1}Id`] || "",
-          nombre: equipamiento3Data[`articulo${i + 1}Nombre`] || "",
-        })),
-        selectedMedidas: Array(15).fill({}).map((_, i) => ({
-          id: equipamiento3Data[`medidas${i + 1}Id`] || "",
-          nombre: equipamiento3Data[`medidas${i + 1}Nombre`] || "",
-          puntos: equipamiento3Data[`medidas${i + 1}Puntos`] || 0,
-        })),
-        cantidades: Array(15).fill(0).map((_, i) => equipamiento3Data[`cantidad${i + 1}`] || 0),
-        puntos: Array(15).fill(0).map((_, i) => equipamiento3Data[`puntos${i + 1}`] || 0),
-        fronteraLacadaCajon: {
-          id: equipamiento3Data.fronteraLacadaCajonId || "",
-          nombre: equipamiento3Data.fronteraLacadaCajonNombre || "",
-        },
-        cantidadFronteraLacadaCajon: equipamiento3Data.cantidadFronteraLacadaCajon || 0,
-        puntosFronteraLacadaCajon: equipamiento3Data.puntosFronteraLacadaCajon || 0,
-      };
+        saveData("baldas", formattedBaldas);
+        console.log("Datos guardados en baldas:", formattedBaldas);
+      }
+      if (presupuesto.equipamiento) {
+        const equipamiento3Data = typeof presupuesto.equipamiento === "string"
+          ? JSON.parse(presupuesto.equipamiento)
+          : presupuesto.equipamiento;
 
-      saveData("equipamiento3", formattedEquipamiento3);
-      console.log("Datos guardados en equipamiento3:", formattedEquipamiento3);
-    }
-  
+        const formattedEquipamiento3 = {
+          selectedArticulos: Array(15).fill({}).map((_, i) => ({
+            id: equipamiento3Data[`articulo${i + 1}Id`] || "",
+            nombre: equipamiento3Data[`articulo${i + 1}Nombre`] || "",
+          })),
+          selectedMedidas: Array(15).fill({}).map((_, i) => ({
+            id: equipamiento3Data[`medidas${i + 1}Id`] || "",
+            nombre: equipamiento3Data[`medidas${i + 1}Nombre`] || "",
+            puntos: equipamiento3Data[`medidas${i + 1}Puntos`] || 0,
+          })),
+          cantidades: Array(15).fill(0).map((_, i) => equipamiento3Data[`cantidad${i + 1}`] || 0),
+          puntos: Array(15).fill(0).map((_, i) => equipamiento3Data[`puntos${i + 1}`] || 0),
+          fronteraLacadaCajon: {
+            id: equipamiento3Data.fronteraLacadaCajonId || "",
+            nombre: equipamiento3Data.fronteraLacadaCajonNombre || "",
+          },
+          cantidadFronteraLacadaCajon: equipamiento3Data.cantidadFronteraLacadaCajon || 0,
+          puntosFronteraLacadaCajon: equipamiento3Data.puntosFronteraLacadaCajon || 0,
+        };
+
+        saveData("equipamiento3", formattedEquipamiento3);
+        console.log("Datos guardados en equipamiento3:", formattedEquipamiento3);
+      }
+
       alert("Datos restaurados correctamente.");
       setShowRestoreModal(false); // Cerrar el modal
+      // Pasar por todas las pestañas
+      tabs.forEach((tab, index) => {
+        setTimeout(() => {
+          navigate(tab); // Cambiar a la pestaña activa
+          if (index === tabs.length - 1) {
+            setIsLoading(false); // Ocultar la ventana de carga al final
+            setIsFinished(true); // Mostrar la ventana de finalización
+          }
+        }, index * 100); // 0.1 segundos por pestaña
+      });
     } catch (error) {
       console.error("Error al restaurar el presupuesto:", error.message);
       alert(`Hubo un error al intentar restaurar el presupuesto: ${error.message}`);
@@ -401,6 +424,23 @@ function Instalacion() {
   };
   return (
     <div className="container">
+      {isLoading && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h2>Cargando datos del presupuesto...</h2>
+          </div>
+        </div>
+      )}
+
+      {isFinished && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h2>Datos cargados</h2>
+            <p>AVISO: Esta funcionalidad está en fase de pruebas, es recomendable revisar todas las pestañas para asegurarse de que están todos los datos.</p>
+            <button onClick={() => setIsFinished(false)}>Cerrar</button>
+          </div>
+        </div>
+      )}
       <div className="container2">
         <h1>Instalación</h1>
         <div className="field-instalacion">
@@ -450,29 +490,29 @@ function Instalacion() {
         </div>
       )}
       <button
-      id="restoreButton"
-      onClick={() => setShowRestoreModal(true)}
-    >
-      Restaurar presupuesto (experimental)
-    </button>
-    {showRestoreModal && (
-      <div className="modal-overlay">
-        <div className="modal-content">
-          <h2>Restaurar Presupuesto</h2>
-          <p>Introduce el ID del presupuesto que deseas restaurar:</p>
-          <input
-            type="text"
-            value={presupuestoId}
-            onChange={(e) => setPresupuestoId(e.target.value)}
-            placeholder="ID del presupuesto"
-          />
-          <div style={{ marginTop: "20px" }}>
-            <button onClick={handleRestorePresupuesto}>Restaurar</button>
-            <button onClick={() => setShowRestoreModal(false)}>Cancelar</button>
+        id="restoreButton"
+        onClick={() => setShowRestoreModal(true)}
+      >
+        Restaurar presupuesto (experimental)
+      </button>
+      {showRestoreModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h2>Restaurar Presupuesto</h2>
+            <p>Introduce el ID del presupuesto que deseas restaurar:</p>
+            <input
+              type="text"
+              value={presupuestoId}
+              onChange={(e) => setPresupuestoId(e.target.value)}
+              placeholder="ID del presupuesto"
+            />
+            <div style={{ marginTop: "20px" }}>
+              <button onClick={handleRestorePresupuesto}>Restaurar</button>
+              <button onClick={() => setShowRestoreModal(false)}>Cancelar</button>
+            </div>
           </div>
         </div>
-      </div>
-    )}
+      )}
     </div>
   );
 }

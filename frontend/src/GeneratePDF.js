@@ -246,7 +246,7 @@ export const generatePDF = async (data, userInfo) => {
   doc.text('', pageWidth - 90, lastDetailY + marginAfterEmail); // Crear el margen
 
   doc.setFontSize(13);
-  doc.text("Presupuesto", pageWidth - 90, 40);
+  doc.text(`Presupuesto ${data.idPresupuesto}`, pageWidth - 90, 40);
 
   // Configuramos las secciones y hacemos que en baldas salga solo baldas si no hay iluminacion.
   const sections = {
