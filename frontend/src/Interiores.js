@@ -7,6 +7,7 @@ function Interiores() {
   const { handleSelectChangeG } = useTabs();
   const { data, saveData } = useData();
   const [listArticulo, setListArticulo] = useState([]);
+  const [showGuide, setShowGuide] = useState(false); // Estado para mostrar/ocultar la guía
   const [listEspeciales, setListEspeciales] = useState([]);
   const [listColores, setListColores] = useState([]);  // Estado para los colores
   const [listInterioresOtros, setListInterioresOtros] = useState([]);
@@ -598,6 +599,9 @@ function Interiores() {
     <div className="container">
       <div className="section">
         <div className="container2">
+        <button className="guide-button" onClick={() => setShowGuide(true)}>
+              Guía
+            </button>
           <h1>Interiores</h1>
           <div className="field-special">
             {renderSelectArticulo(0)}
@@ -711,6 +715,54 @@ function Interiores() {
               min="0"
             />
           </div>
+          {showGuide && (
+        <div
+          className="modal-overlay"
+          onClick={(e) => {
+            // Cerrar el modal si se hace clic fuera del contenido
+            if (e.target.className === "modal-overlay") {
+              setShowGuide(false);
+            }
+          }}
+        >
+          <div className="modal-content">
+            <h2>Guía de Uso: Configuración de Interiores</h2>
+            <ol>
+              <li>
+                <strong>Seleccionar el Módulo</strong>
+                <p>En los campos de "Módulo", selecciona el módulo de interiores que deseas configurar.</p>
+                <p>Puedes elegir entre las opciones disponibles en el desplegable.</p>
+              </li>
+              <li>
+                <strong>Seleccionar el Color</strong>
+                <p>En el campo "Color", selecciona el color del módulo.</p>
+                <p>Asegúrate de elegir un color para cada módulo configurado.</p>
+              </li>
+              <li>
+                <strong>Configurar la Cantidad</strong>
+                <p>En el campo "Cantidad", introduce el número de módulos que deseas presupuestar.</p>
+                <p>El valor predeterminado es 1, pero puedes ajustarlo según tus necesidades.</p>
+              </li>
+              <li>
+                <strong>Verificar los Puntos</strong>
+                <p>Los puntos totales del módulo se calculan automáticamente y se muestran en el campo "Puntos".</p>
+                <p>Asegúrate de que los puntos reflejen correctamente las configuraciones seleccionadas.</p>
+              </li>
+              <li>
+                <strong>Configuración de Soluciones Especiales</strong>
+                <p>Selecciona hasta cinco soluciones especiales y configura la cantidad deseada.</p>
+                <p>Los puntos totales de cada solución especial se calculan automáticamente.</p>
+              </li>
+              <li>
+                <strong>Configuración de Complementos Especiales</strong>
+                <p>Selecciona hasta cuatro complementos especiales y configura la cantidad deseada.</p>
+                <p>Los puntos totales de cada complemento especial se calculan automáticamente.</p>
+              </li>
+            </ol>
+            <button onClick={() => setShowGuide(false)}>Cerrar</button>
+          </div>
+        </div>
+      )}
           <div className="fake-field-special">
             <label htmlFor="puntosEspecial2">Puntos:</label>
             <select disabled>

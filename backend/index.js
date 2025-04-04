@@ -337,18 +337,34 @@ app.get("/articulo/interiores", (req, res) => {
 });
 app.get("/articulo/remates", (req, res) => {
   const query = `
-    SELECT a.articulo_id, a.nombre AS articulo_nombre, m.puntos, ma.nombre AS material_nombre
+    SELECT 
+      a.articulo_id, 
+      a.nombre AS articulo_nombre, 
+      m.puntos, 
+      ma.nombre AS material_nombre,
+      GROUP_CONCAT(DISTINCT c.nombre) AS colores
     FROM articulo a
     LEFT JOIN medidas m ON a.articulo_id = m.articulos_id
     LEFT JOIN material ma ON m.material = ma.material_id
+    LEFT JOIN material_color mc ON ma.material_id = mc.id_material
+    LEFT JOIN color c ON mc.id_color = c.color_id
     WHERE a.serie_id = 37
+    GROUP BY a.articulo_id, a.nombre, m.puntos, ma.nombre
   `;
+
   db.query(query, (err, data) => {
     if (err) {
       console.error("Error fetching articulos:", err);
       return res.status(500).json(err);
     }
-    return res.json(data);
+
+    // Formatear los colores como un array de nombres
+    const formattedData = data.map((item) => ({
+      ...item,
+      colores: item.colores ? item.colores.split(",") : [], // Convertir los colores en un array de nombres
+    }));
+
+    return res.json(formattedData);
   });
 });
 app.get("/articulo/otros", (req, res) => {

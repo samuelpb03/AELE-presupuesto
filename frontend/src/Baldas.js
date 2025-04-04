@@ -7,6 +7,7 @@ function Baldas() {
   const { data, saveData } = useData();
   const [listSensores, setListSensores] = useState([]); // Nueva lista para los sensores
   const [listArticulo, setListArticulo] = useState([]);
+  const [showGuide, setShowGuide] = useState(false); // Estado para mostrar/ocultar la guía
   const [listArticuloIluminacion, setListArticuloIluminacion] = useState([]);
   const [listMedidas, setListMedidas] = useState(Array(12).fill([]));
   const [cantidades, setCantidades] = useState(Array(12).fill(0));
@@ -329,12 +330,61 @@ useEffect(() => {
 
   return (
     <div className="container">
-      <div className="section">
+      <div className="container2">
         <h1>Baldas e Iluminación</h1>
+        <button className="guide-button" onClick={() => setShowGuide(true)}>
+            Guía
+          </button>
         <div className="container2">
           <h2>Baldas y Divisores</h2>
           {Array.from({ length: 3 }).map((_, i) => renderSelectArticulo(i, listArticulo, false))}
         </div>
+        {showGuide && (
+        <div
+          className="modal-overlay"
+          onClick={(e) => {
+            if (e.target.className === "modal-overlay") {
+              setShowGuide(false);
+            }
+          }}
+        >
+          <div className="modal-content">
+            <h2>Guía de Uso: Configuración de Baldas y Divisores</h2>
+            <ol>
+              <li>
+                <strong>Seleccionar Baldas y Divisores</strong>
+                <p>En los campos de "Baldas y Divisores", selecciona los artículos que deseas configurar.</p>
+                <p>Puedes elegir entre las opciones disponibles en el desplegable.</p>
+              </li>
+              <li>
+                <strong>Seleccionar las Medidas</strong>
+                <p>En el campo "Medidas", selecciona las dimensiones de las baldas o divisores.</p>
+                <p>Este campo se habilitará automáticamente después de seleccionar un artículo válido.</p>
+              </li>
+              <li>
+                <strong>Configurar la Cantidad</strong>
+                <p>En el campo "Cantidad", introduce el número de unidades que deseas presupuestar.</p>
+                <p>El valor predeterminado es 1, pero puedes ajustarlo según tus necesidades.</p>
+              </li>
+              <li>
+                <strong>Verificar los Puntos</strong>
+                <p>Los puntos totales de cada artículo se calculan automáticamente y se muestran al lado del campo "Cantidad".</p>
+                <p>Asegúrate de que los puntos reflejen correctamente las configuraciones seleccionadas.</p>
+              </li>
+              <li>
+                <strong>Configuración de Iluminación</strong>
+                <p>Selecciona el color de iluminación y los artículos de iluminación que deseas configurar.</p>
+                <p>Configura la cantidad y verifica los puntos totales.</p>
+              </li>
+              <li>
+                <strong>Configuración de Sensores</strong>
+                <p>Selecciona los sensores que deseas añadir, configura la cantidad y verifica los puntos totales.</p>
+              </li>
+            </ol>
+            <button onClick={() => setShowGuide(false)}>Cerrar</button>
+          </div>
+        </div>
+      )}
         <div className="container3">
           {Array.from({ length: 3 }).map((_, i) => renderSelectArticulo(i + 3, listArticulo, false))}
         </div>

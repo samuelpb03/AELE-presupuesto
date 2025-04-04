@@ -9,6 +9,7 @@ function Instalacion() {
   const { data, saveData } = useData();
   const [numFrentesInteriores, setNumFrentesInteriores] = useState("");
   const [numArmariosCompletos, setNumArmariosCompletos] = useState("");
+  const [showHelp, setShowHelp] = useState(false); // Estado para mostrar/ocultar el cuadro de ayuda
   const [isFinished, setIsFinished] = useState(false); // Estado para la ventana de finalización
   const [showRestoreModal, setShowRestoreModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -404,8 +405,7 @@ function Instalacion() {
         saveData("equipamiento3", formattedEquipamiento3);
         console.log("Datos guardados en equipamiento3:", formattedEquipamiento3);
       }
-
-      alert("Datos restaurados correctamente.");
+      alert("Datos restaurados correctamente. AVISO: La instalación y el nombre del cliente deben añadirse manualmente.");
       setShowRestoreModal(false); // Cerrar el modal
       // Pasar por todas las pestañas
       tabs.forEach((tab, index) => {
@@ -509,6 +509,30 @@ function Instalacion() {
             <div style={{ marginTop: "20px" }}>
               <button onClick={handleRestorePresupuesto}>Restaurar</button>
               <button onClick={() => setShowRestoreModal(false)}>Cancelar</button>
+            </div>
+            <div style={{ marginTop: "10px" }}>
+              <button
+                style={{
+                  background: "none",
+                  border: "none",
+                  color: "blue",
+                  textDecoration: "underline",
+                  cursor: "pointer",
+                }}
+                onClick={() => setShowHelp(!showHelp)}
+              >
+                ¿Dónde encuentro el ID?
+              </button>
+              {showHelp && (
+                <div style={{ marginTop: "10px", border: "1px solid #ccc", padding: "10px", borderRadius: "5px" }}>
+                  <p>Al descargar un presupuesto, el ID de este son los últimos números que aparecen en el nombre.</p>
+                  <img
+                    src="idpresupuesto.png" // Cambia esta ruta por la ubicación real de tu imagen
+                    alt="Ejemplo de ID en el nombre del presupuesto"
+                    style={{ maxWidth: "100%", height: "auto", marginTop: "10px" }}
+                  />
+                </div>
+              )}
             </div>
           </div>
         </div>

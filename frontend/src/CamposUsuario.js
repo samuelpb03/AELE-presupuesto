@@ -3,6 +3,16 @@ import { useTabs } from './TabsContext';  // Importamos el contexto
 
 function CamposUsuario() {
   const { userInfo, handleUserInfoChange } = useTabs();  // Obtenemos la info del usuario y el manejador del contexto
+  const handleDownload = () => {
+    // Ruta relativa al archivo en la carpeta raíz
+    const fileUrl = '/Guía del nuevo presupuestador AELE.docx';
+    const link = document.createElement('a');
+    link.href = fileUrl;
+    link.download = 'Guía del nuevo presupuestador AELE.docx';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   return (
     <div className="campos-usuario">
@@ -30,6 +40,9 @@ function CamposUsuario() {
           onChange={(e) => handleUserInfoChange('email', e.target.value)}  // Actualizamos el contexto
         />
       </label>
+      <button className="download-guide-button" onClick={handleDownload}>
+        Descargar guía completa (en desarrollo)
+      </button>
     </div>
   );
 }

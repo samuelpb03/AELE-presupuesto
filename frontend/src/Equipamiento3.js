@@ -7,6 +7,7 @@ function Equipamiento3() {
   const { handleSelectChangeE3 } = useTabs();
   const { data, saveData } = useData();
   const [listArticuloEquipamiento, setListArticuloEquipamiento] = useState([]);
+  const [showGuide , setShowGuide] = useState(false);
   const [fronteraLacadaCajon, setFronteraLacadaCajon] = useState({ id: "", nombre: "" });
 const [cantidadFronteraLacadaCajon, setCantidadFronteraLacadaCajon] = useState(0);
 const [puntosFronteraLacadaCajon, setPuntosFronteraLacadaCajon] = useState(0);
@@ -347,6 +348,9 @@ const [puntosFronteraLacadaCajon, setPuntosFronteraLacadaCajon] = useState(0);
     <div className="container">
       <div className="container2">
         <h1>Equipamiento y Antracita</h1>
+        <button className="guide-button" onClick={() => setShowGuide(true)}>
+            Guía
+          </button>
         <h2>Equipamiento</h2>
         {Array.from({ length: 3 }).map((_, i) => renderSelectArticulo(i, listArticuloEquipamiento))}
       </div>
@@ -363,6 +367,54 @@ const [puntosFronteraLacadaCajon, setPuntosFronteraLacadaCajon] = useState(0);
         {Array.from({ length: 2 }).map((_, i) => renderSelectArticulo(i + 9, listArticuloAntracita))}
         {Array.from({ length: 3 }).map((_, i) => renderSelectArticulo(i + 11, listArticuloAntracita))}
       </div>
+      {showGuide && (
+        <div
+          className="modal-overlay"
+          onClick={(e) => {
+            // Cerrar el modal si se hace clic fuera del contenido
+            if (e.target.className === "modal-overlay") {
+              setShowGuide(false);
+            }
+          }}
+        >
+          <div className="modal-content">
+            <h2>Guía de Uso: Configuración de Equipamientos</h2>
+            <ol>
+              <li>
+                <strong>Seleccionar el Artículo</strong>
+                <p>En los campos de "Artículo", selecciona el artículo de equipamiento que deseas configurar.</p>
+                <p>Puedes elegir entre las opciones disponibles en el desplegable.</p>
+              </li>
+              <li>
+                <strong>Seleccionar las Medidas</strong>
+                <p>En el campo "Medidas", selecciona las dimensiones del artículo.</p>
+                <p>Este campo se habilitará automáticamente después de seleccionar un artículo válido.</p>
+              </li>
+              <li>
+                <strong>Configurar la Cantidad</strong>
+                <p>En el campo "Cantidad", introduce el número de unidades del artículo que deseas presupuestar.</p>
+                <p>El valor predeterminado es 1, pero puedes ajustarlo según tus necesidades.</p>
+              </li>
+              <li>
+                <strong>Verificar los Puntos</strong>
+                <p>Los puntos totales del artículo se calculan automáticamente y se muestran al lado del campo "Cantidad".</p>
+                <p>Asegúrate de que los puntos reflejen correctamente las configuraciones seleccionadas.</p>
+              </li>
+              <li>
+                <strong>Configuración de Frontera Lacada del Cajón</strong>
+                <p>En el campo "Cantidad Frontera Lacada Cajón", introduce el número de cajones seleccionados a los que deseas aplicar la frontera lacada.</p>
+                <p>Este campo no selecciona cajones nuevos, sino que aplica la frontera lacada a los cajones ya configurados.</p>
+              </li>
+              <li>
+                <strong>Configuración de Artículos Antracita</strong>
+                <p>En los campos de "Artículo Antracita", selecciona el artículo de antracita que deseas configurar.</p>
+                <p>Puedes elegir entre las opciones disponibles en el desplegable.</p>
+              </li>
+            </ol>
+            <button onClick={() => setShowGuide(false)}>Cerrar</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

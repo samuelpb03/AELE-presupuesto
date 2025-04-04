@@ -7,6 +7,7 @@ function Frentes() {
   const { handleSelectChange } = useTabs();
   const { data, saveData } = useData();
   const [listProducto, setListProducto] = useState([]);
+  const [showGuide, setShowGuide] = useState(false);
   const [listSerie, setListSerie] = useState([]);
   const [listArticulo, setListArticulo] = useState([]);
   const [selectedColorPerfil, setSelectedColorPerfil] = useState("");
@@ -536,7 +537,7 @@ function Frentes() {
     setCantidadEspecial2(0);
     setPuntosEspecial2(0);
     setPuntos(0); // Restablecer puntos
-  
+
     // Añadir logs en la respuesta del backend
     //console.log("Selected material ID:", id);
     if (nombre.toLowerCase() === 'melamina') {
@@ -585,7 +586,7 @@ function Frentes() {
     setSelectedColor({ id, nombre });
     handleSelectChange("color", id, nombre);
 
-    if (id === '55' || id === '56') {
+    if (id === '55' || id === '56' || id === '60') {
       setShouldApplyColorIncrement(true);  // Marcar que se debe aplicar el incremento cuando haya puntos
       setIsColorValueAdded(true);  // Activar el mensaje del 20%
 
@@ -611,7 +612,7 @@ function Frentes() {
     let newPuntos = selectedMedida.puntos;
 
     // Verificar si el color seleccionado es "Color según muestra" o "Laca según muestra"
-    if (selectedColor.id === '55' || selectedColor.id === '56') {
+    if (selectedColor.id === '55' || selectedColor.id === '56' || selectedColor.id === '60') {
       newPuntos = Math.ceil(selectedMedida.puntos * 1.2);  // Aplicar incremento del 20% y redondear hacia arriba
     }
     if (brakesChecked) {
@@ -705,7 +706,7 @@ function Frentes() {
     if (selectedMaterial.nombre.toLowerCase() === "melamina") {
       //console.log("Especiales:", listEspeciales.slice(0, 2));
       return listEspeciales.length >= 3 ? [listEspeciales[0], listEspeciales[2]] : listEspeciales.slice(0, 2);
-       // Mostrar solo la primera y la tercera opción si hay suficientes elementos
+      // Mostrar solo la primera y la tercera opción si hay suficientes elementos
     } else {
       return listEspeciales.slice(0, 2); // Mostrar solo la primera y la segunda opción
     }
@@ -743,6 +744,9 @@ function Frentes() {
     <div className="container">
       <div className="section">
         <div className="container2">
+          <button className="guide-button" onClick={() => setShowGuide(true)}>
+            Guía
+          </button>
           <h1>Puertas</h1>
           <div className="field">
             <label htmlFor="producto">Tipo de Frente:</label>
@@ -891,10 +895,8 @@ function Frentes() {
               />
             </div>
             <div className="fake-field-special">
-              <label htmlFor="especial2">Puntos:</label>
-              <select disabled>
-                <option value="">{puntosEspecial1}</option>
-              </select>
+              <label htmlFor="especial1">Puntos:</label>
+              <p className="puntos-text">{puntosEspecial1}</p> {/* Mostrar los puntos como texto */}
             </div>
             <div className="field-special">
               <label htmlFor="especial2">Artículo Especial 2:</label>
@@ -911,7 +913,88 @@ function Frentes() {
                 ))}
               </select>
             </div>
-
+            {showGuide && (
+              <div
+                className="modal-overlay"
+                onClick={(e) => {
+                  // Cerrar el modal si se hace clic fuera del contenido
+                  if (e.target.className === "modal-overlay") {
+                    setShowGuide(false);
+                  }
+                }}
+              >
+                <div className="modal-content">
+                  <h2>Guía de Uso: Configuración de Frentes</h2>
+                  <ol>
+                    <li>
+                      <strong>Seleccionar el Tipo de Frente</strong>
+                      <p>En el campo "Tipo de Frente", selecciona el tipo de frente que deseas configurar.</p>
+                      <p>Ejemplo: Puertas correderas o abatibles.</p>
+                      <p>Si no ves opciones disponibles, asegúrate de haber iniciado sesión correctamente.</p>
+                    </li>
+                    <li>
+                      <strong>Seleccionar la Serie</strong>
+                      <p>Una vez seleccionado el tipo de frente, el campo "Serie" se habilitará.</p>
+                      <p>Selecciona la serie que corresponde al tipo de frente elegido.</p>
+                      <p>Ejemplo: Serie Kanto, Serie Uniforme.</p>
+                    </li>
+                    <li>
+                      <strong>Seleccionar el Modelo</strong>
+                      <p>En el campo "Modelo", selecciona el modelo del frente.</p>
+                      <p>Este campo se habilitará después de seleccionar una serie válida.</p>
+                    </li>
+                    <li>
+                    <strong>Respecto a las puertas correderas con frenos</strong>
+                      <p>Las puertas correderas con frenos los llevan incluidos por defecto, estan pensadas para llevarlos</p>
+                    </li>
+                    <li>
+                      <strong>Seleccionar el Material</strong>
+                      <p>En el campo "Material", selecciona el material principal del frente.</p>
+                      <p>Ejemplo: Melamina, Laca, Cristal.</p>
+                    </li>
+                    <li>
+                      <strong>Seleccionar el Color Principal</strong>
+                      <p>En el campo "Color Principal", selecciona el color del frente.</p>
+                      <p>Ejemplo: Blanco, Roble, Gris.</p>
+                      <p>Si seleccionas colores especiales como "Color según muestra", se aplicará un incremento del 20% en los puntos.</p>
+                    </li>
+                    <li>
+                      <strong>Seleccionar las Medidas</strong>
+                      <p>En el campo "Medidas", selecciona las dimensiones del frente.</p>
+                      <p>Las medidas disponibles dependen del modelo y material seleccionados.</p>
+                    </li>
+                    <li>
+                      <strong>Configurar la Franja (Opcional)</strong>
+                      <p>Si el modelo seleccionado admite franjas, los campos "Material Franja" y "Color Franja" estarán habilitados.</p>
+                      <p>Selecciona el material y color de la franja según tus preferencias.</p>
+                    </li>
+                    <li>
+                      <strong>Configurar el Color del Perfil</strong>
+                      <p>Si el tipo de frente o la serie seleccionada lo permite, aparecerá el campo "Color del Perfil".</p>
+                      <p>Selecciona el color del perfil entre las opciones disponibles: Blanco, Plata o Negro.</p>
+                    </li>
+                    <li>
+                      <strong>Configurar la Cantidad</strong>
+                      <p>En el campo "Cantidad", introduce el número de frentes que deseas presupuestar.</p>
+                      <p>El precio total se calculará automáticamente en función de la cantidad y las configuraciones seleccionadas.</p>
+                    </li>
+                    <li>
+                      <strong>Configurar Artículos Especiales (Opcional)</strong>
+                      <p>En la sección "Especiales a Medida", puedes añadir hasta dos artículos especiales.</p>
+                      <p>Selecciona el artículo especial en los campos "Artículo Especial 1" y "Artículo Especial 2".</p>
+                      <p>Introduce la cantidad correspondiente en los campos de cantidad.</p>
+                      <p>El precio de los artículos especiales se calculará automáticamente.</p>
+                    </li>
+                    <li>
+                      <strong>Verificar los Puntos Totales</strong>
+                      <p>Los puntos totales (el precio) se muestran en el campo "Puntos".</p>
+                      <p>Asegúrate de que los puntos reflejen correctamente todas las configuraciones seleccionadas.</p>
+                    </li>
+                  </ol>
+                  <button onClick={() => setShowGuide(false)}>Cerrar</button>
+                </div>
+              </div>
+            )}
             <div className="field-special">
               <label htmlFor="cantidadEspecial2">Cantidad:</label>
               <input
@@ -924,9 +1007,7 @@ function Frentes() {
             </div>
             <div className="fake-field-special">
               <label htmlFor="especial2">Puntos:</label>
-              <select disabled>
-                <option value="">{puntosEspecial2}</option>
-              </select>
+              <p className="puntos-text">{puntosEspecial2}</p> {/* Mostrar los puntos como texto */}
             </div>
           </div>
         </div>

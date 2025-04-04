@@ -398,32 +398,34 @@ if (data.baldas && data.baldas.colorIluminacion) {
   // Procesar remates a medida
 let puntosRematesTotal = 0; // Inicializar los puntos de los remates
 if (data.remates) {
-  let rematesData = []; // Declarar array para los datos de los remates
-  const { selectedArticulos = [], metros = [], selectedOtros = [], cantidadesOtros = [] } = data.remates;
+  let rematesData = [];
+  const { selectedArticulos = [], metros = [], selectedOtros = [], cantidadesOtros = [], selectedColores = [] } = data.remates;
 
   // Procesar los artículos de remates y agregar a rematesData
   selectedArticulos.forEach((articulo, index) => {
     if (articulo.nombre && metros[index] > 0) {
+      const puntos = articulo.puntos; // Puntos del artículo
       rematesData.push({
         nombre: articulo.nombre,
         metros: metros[index],
-        puntos: articulo.puntos,
+        puntos: puntos,
+        color: selectedColores[index] || "Color de las puertas/interiores" // Añadir el color seleccionado o "Sin color"
       });
-      // Sumar los puntos de remates por metros
-      puntosRematesTotal += articulo.puntos;
+      puntosRematesTotal += puntos; // Acumular los puntos de los remates
     }
   });
 
   // Procesar otros artículos de remates y agregar a rematesData
   selectedOtros.forEach((otro, index) => {
     if (otro.nombre && cantidadesOtros[index] > 0) {
+      const puntos = otro.puntos * cantidadesOtros[index]; // Puntos del otro artículo
       rematesData.push({
         nombre: otro.nombre,
         cantidad: cantidadesOtros[index],
-        puntos: otro.puntos * cantidadesOtros[index],
+        puntos: puntos,
+        color: "N/A" // Otros artículos no tienen color
       });
-      // Sumar los puntos de otros remates por cantidad
-      puntosRematesTotal += otro.puntos * cantidadesOtros[index];
+      puntosRematesTotal += puntos; // Acumular los puntos de los otros artículos
     }
   });
 
@@ -437,8 +439,11 @@ if (data.remates) {
     startY += 6;
 
     doc.setFontSize(7); // Ajustar el tamaño de la fuente para los datos
-    rematesData.forEach((remate, index) => {
+    rematesData.forEach((remate) => {
       doc.text(`${remate.nombre || ''}`, 12, startY);
+      if (remate.color) {
+        doc.text(`Color: ${remate.color}`, 70, startY); // Imprimir el color seleccionado
+      }
       if (remate.metros) {
         doc.text(`Metros: ${remate.metros.toFixed(2)}`, pageWidth - 50, startY);
       }
@@ -450,7 +455,6 @@ if (data.remates) {
       startY = checkPageSpace(doc, startY);
     });
   }
-  
 }
   // Comprobación para verificar si hay datos en los especiales
   const hasEspeciales = (especiales) => {
@@ -630,7 +634,8 @@ if (valorPuntoPromo < 1) {
   doc.text(`Descuento por promoción del ${descuento.toFixed(0)}%`, 12, startY);
   startY += 10;
 }
-doc.text('Total precio: ' + precioTotal * valorPuntoPromo + '€', 12, startY);
+// Calcular el precio total con el valor del punto de promoción y solo añadir 2 decimales de máximo
+doc.text('Total precio: ' + precioTotal.toFixed(2) * valorPuntoPromo + '€', 12, startY);
 startY += 10;
 //doc.text('C1: '+ (precioTotal * valorPuntoPromo) * 0.58 + '€', 12, startY);
   // Crear el nombre del PDF y enviarlo

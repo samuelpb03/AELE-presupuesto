@@ -16,6 +16,7 @@ function Tiradores() {
   const [materialFrente3, setMaterialFrente3] = useState("");
   var [cantidades, setCantidades] = useState(Array(6).fill(0));
   const [puntos, setPuntos] = useState(Array(6).fill(0));
+  const [showGuide, setShowGuide] = useState(false); // Estado para mostrar/ocultar la guía
   // IDs de los tiradores que requieren la advertencia
   const golaIds = [124, 125, 126, 25];
 
@@ -381,6 +382,9 @@ function Tiradores() {
     <div className="container">
       <div className="section">
         <div className="container2">
+        <button className="guide-button" onClick={() => setShowGuide(true)}>
+          Guía
+        </button>
           <h1>Tiradores</h1>
           <div className="field">
             {renderSelectArticulo(0)}
@@ -405,6 +409,58 @@ function Tiradores() {
             </div>
           )}
         </div>
+        {showGuide && (
+        <div
+          className="modal-overlay"
+          onClick={(e) => {
+            if (e.target.className === "modal-overlay") {
+              setShowGuide(false);
+            }
+          }}
+        >
+          <div className="modal-content">
+            <h2>Guía de Uso: Configuración de Tiradores y Cerraduras</h2>
+            <ol>
+              <li>
+                <strong>Seleccionar el Tipo de Tirador</strong>
+                <p>En los campos de "Tipo", selecciona el tirador que deseas configurar.</p>
+                <p>Puedes elegir entre las opciones disponibles en el desplegable.</p>
+              </li>
+              <li>
+                <strong>Seleccionar el Color</strong>
+                <p>En el campo "Color", selecciona el color del tirador.</p>
+                <p>Este campo se habilitará automáticamente después de seleccionar un tirador válido.</p>
+              </li>
+              <li>
+                <strong>Configurar la Cantidad</strong>
+                <p>En el campo "Cantidad", introduce el número de unidades del tirador que deseas presupuestar.</p>
+                <p>El valor predeterminado es 1, pero puedes ajustarlo según tus necesidades.</p>
+              </li>
+              <li>
+                <strong>Verificar los Puntos</strong>
+                <p>Los puntos totales del tirador se calculan automáticamente y se muestran al lado del campo "Cantidad".</p>
+                <p>Asegúrate de que los puntos reflejen correctamente las configuraciones seleccionadas.</p>
+              </li>
+              <li>
+                <strong>Seleccionar el Tipo de Cerradura</strong>
+                <p>En el campo "Tipo", selecciona la cerradura que deseas configurar.</p>
+                <p>Puedes elegir entre las opciones disponibles en el desplegable.</p>
+              </li>
+              <li>
+                <strong>Configurar la Cantidad</strong>
+                <p>En el campo "Cantidad", introduce el número de unidades de la cerradura que deseas presupuestar.</p>
+                <p>El valor predeterminado es 1, pero puedes ajustarlo según tus necesidades.</p>
+              </li>
+              <li>
+                <strong>Verificar los Puntos</strong>
+                <p>Los puntos totales de la cerradura se calculan automáticamente y se muestran al lado del campo "Cantidad".</p>
+                <p>Asegúrate de que los puntos reflejen correctamente las configuraciones seleccionadas.</p>
+              </li>
+            </ol>
+            <button onClick={() => setShowGuide(false)}>Cerrar</button>
+          </div>
+        </div>
+      )}
         <div className="container2">
           <div className="section">
 
