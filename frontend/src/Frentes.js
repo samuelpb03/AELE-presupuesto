@@ -15,6 +15,7 @@ function Frentes() {
   const [listMaterial, setListMaterial] = useState([]);
   const [listColor, setListColor] = useState([]);
   const [listMedidas, setListMedidas] = useState([]);
+  const [imageAvailable, setImageAvailable] = useState(true);
   const [listMaterialFranja, setListMaterialFranja] = useState([]);
   const [listColorFranja, setListColorFranja] = useState([]);
   const [listEspeciales, setListEspeciales] = useState([]);
@@ -39,6 +40,7 @@ function Frentes() {
   const [brakesChecked, setBrakesChecked] = useState(false);
   const [brakesPointsApplied, setBrakesPointsApplied] = useState(false);
   const [shouldApplyColorIncrement, setShouldApplyColorIncrement] = useState(false);
+  
   // Conectar con el backend en localhost para hacer pruebas
   //const backendUrl = "http://localhost:3306";
   //Backend real
@@ -739,6 +741,11 @@ function Frentes() {
     } else {
       setPuntos(puntos - 73);
     }
+  };
+  const getImagePath = (modelName) => {
+    if (!modelName) return null; // Si no hay modelo seleccionado, no mostrar nada
+    const formattedName = modelName.toLowerCase().replace(/\s+/g, "-"); // Formatear el nombre para que coincida con el nombre del archivo
+    return `/ImagenesPresupuestador/${formattedName}.png`; // Ruta de la imagen
   };
   return (
     <div className="container">
