@@ -40,8 +40,8 @@ function Remates() {
       if (Array.isArray(res.data)) {
         const formattedArticulos = res.data.map((articulo) => ({
           id: articulo.articulo_id,
-          material: articulo.material_id, // Asegúrate de incluir el material
-          nombre: `${articulo.articulo_nombre} - ${articulo.material_nombre}`, // Formatear el nombre con el material
+          material: articulo.material_id,
+          nombre: `${articulo.articulo_nombre} - ${articulo.material_nombre}`.replace(/\s+/g, " ").trim(), // Eliminar espacios adicionales
           puntosOriginal: articulo.puntos,
           puntos: articulo.puntos,
         }));
@@ -92,8 +92,8 @@ function Remates() {
         if (Array.isArray(res.data)) {
           const formattedArticulos = res.data.map((articulo) => ({
             id: articulo.articulo_id,
-            material: articulo.material_id, // Asegúrate de incluir el material
-            nombre: `${articulo.articulo_nombre} - ${articulo.material_nombre}`, // Formatear el nombre con el material
+            material: articulo.material_id,
+            nombre: `${articulo.articulo_nombre} - ${articulo.material_nombre}`.replace(/\s+/g, " ").trim(), // Eliminar espacios adicionales
             puntosOriginal: articulo.puntos,
             puntos: articulo.puntos,
           }));
@@ -202,6 +202,8 @@ function Remates() {
                        materialNombre.toLowerCase() === "melamina" ? 3 : null;
 
     console.log(`Artículo seleccionado: ${nombre}, ID: ${id}, Material: ${materialNombre}, Material ID: ${materialId}`);
+    console.log("Value del selector:", selectedArticulos[index].nombre);
+    console.log("Opciones disponibles:", filteredArticulos.map((articulo) => articulo.nombre));
 
     // Actualizar el artículo seleccionado con toda la lógica existente
     updatedArticulos[index] = {
@@ -318,6 +320,7 @@ function Remates() {
 
   // Renderizar selectores de artículos
   const renderSelectArticulo = (index) => (
+  
     <div key={index}>
       <label htmlFor={`articulo${index + 1}`}>Remate {index + 1}:</label>
       <select
@@ -337,10 +340,6 @@ function Remates() {
           </option>
         ))}
       </select>
-      <p style={{ marginTop: "0.5rem", fontStyle: "italic" }}>
-        {selectedArticulos[index].nombre || "--Selecciona--"}
-      </p>
-
       <label htmlFor={`metros${index + 1}`}>Metros:</label>
       <input
         type="number"
