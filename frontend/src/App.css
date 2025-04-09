@@ -412,3 +412,33 @@ a:link, a:visited, a:active {
 #version-text {
     text-align: left; /* Alinear el texto a la izquierda */
 }
+
+/* Contenedor para la explosión */
+.explosion-container {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none; /* Evita que interfiera con otros elementos */
+  z-index: 2000;
+  display: none; /* Oculto por defecto */
+}
+
+.explosion {
+  width: 100px;
+  height: 100px;
+  background: radial-gradient(circle, #ff5722, #ff9800, transparent);
+  border-radius: 50%;
+  animation: explode 0.6s ease-out forwards;
+}
+
+@keyframes explode {
+  0% {
+    transform: scale(0.5);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(5);
+    opacity: 0;
+  }
+}
