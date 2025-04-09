@@ -8,40 +8,66 @@
     <meta
       name="description"
       content="Web site created using create-react-app"
-      
     />
     <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
-    <!--
-      manifest.json provides metadata used when your web app is installed on a
-      user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
-    -->
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-    <!--
-      Notice the use of %PUBLIC_URL% in the tags above.
-      It will be replaced with the URL of the `public` folder during the build.
-      Only files inside the `public` folder can be referenced from the HTML.
-
-      Unlike "/favicon.ico" or "favicon.ico", "%PUBLIC_URL%/favicon.ico" will
-      work correctly both with client-side routing and a non-root public URL.
-      Learn how to configure a non-root public URL by running `npm run build`.
-    -->
     <title>AELE Configurador</title>
+    <script>
+      // Verificar si el usuario está autenticado
+      const user = JSON.parse(localStorage.getItem('user'));
+      if (!user) {
+        // Redirigir a login.php si no está autenticado
+        window.location.href = '/login.php';
+      } else {
+        // Obtener solo la primera palabra del nombre del usuario
+        const userName = (user.nombrePersonal || 'Usuario').split(' ')[0]; // Cambia 'nombrePersonal' por la clave que almacena el nombre completo del usuario
+        const userUsername = user.username || 'Desconocido'; // Cambia 'username' por la clave que almacena el nombre de usuario
+        document.title = `AELE Configurador - Bienvenido/a, ${userName}`;
+        console.log("Usuario autenticado:", user);
+
+        // Añadir el nombre del usuario al body
+        document.addEventListener('DOMContentLoaded', () => {
+          // Crear el contenedor del texto
+          const userContainer = document.createElement('div');
+          userContainer.id = 'user-info';
+          userContainer.style.textAlign = 'center';
+          userContainer.style.marginTop = '10px';
+          userContainer.style.fontSize = '20px'; // Tamaño de fuente más grande
+          userContainer.style.fontWeight = 'bold'; // Negrita para destacar
+          userContainer.style.color = '#333'; // Color oscuro para mejor contraste
+          userContainer.style.padding = '10px'; // Espaciado interno
+          userContainer.style.borderRadius = '8px'; // Bordes redondeados
+          userContainer.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)'; // Sombra sutil
+          userContainer.style.width = 'fit-content'; // Ajustar al contenido
+          userContainer.style.margin = '10px auto'; // Centrar horizontalmente
+          userContainer.innerHTML = `Bienvenido/a, ${userName}`;
+          document.body.insertBefore(userContainer, document.getElementById('root'));
+
+          // Crear la línea horizontal
+          const horizontalLine = document.createElement('hr');
+          horizontalLine.style.border = 'none';
+          horizontalLine.style.borderTop = '2px solid #ccc'; // Línea gris clara
+          horizontalLine.style.width = '70%'; // Ajustar al ancho deseado
+          horizontalLine.style.margin = '10px auto'; // Centrar horizontalmente
+          document.body.insertBefore(horizontalLine, document.getElementById('root'));
+
+          // Mostrar "Sesión iniciada como" al lado del logo
+          const sessionInfo = document.createElement('span');
+          sessionInfo.id = 'session-info';
+          sessionInfo.style.marginLeft = '10px';
+          sessionInfo.style.fontSize = '16px';
+          sessionInfo.style.color = '#555';
+          sessionInfo.innerHTML = `Sesión iniciada como: <strong>${userUsername}</strong>`;
+          document.getElementById('logo').appendChild(sessionInfo);
+        });
+      }
+    </script>
   </head>
   <body>
-    <div id="logo">
-      <img src="logoAELE.png" alt="Logotipo de Empresa">
+    <div id="logo" style="display: flex; align-items: center;">
+      <img src="logoAELE.png" alt="Logotipo de Empresa" />
     </div>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
-    <!--
-      This HTML file is a template.
-      If you open it directly in the browser, you will see an empty page.
-
-      You can add webfonts, meta tags, or analytics to this file.
-      The build step will place the bundled scripts into the <body> tag.
-
-      To begin the development, run `npm start` or `yarn start`.
-      To create a production bundle, use `npm run build` or `yarn build`.
-    -->
   </body>
 </html>

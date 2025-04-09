@@ -95,7 +95,23 @@ function Instalacion() {
       }
 
       const presupuesto = await response.json();
-      console.log("Respuesta del backend:", presupuesto); // Verifica la respuesta completa
+
+      // Obtener el centro del usuario activo (codigoTienda) desde la tienda
+      const user = JSON.parse(localStorage.getItem('user'));
+      const tiendaUsuario = user?.tienda; // Identificador de la tienda del usuario
+      const codigoTiendaUsuario = await obtenerCodigoTienda(tiendaUsuario); // Obtener el codigoTienda
+
+      console.log("Código de la tienda del usuario activo:", codigoTiendaUsuario); // Log del código de la tienda del usuario
+      console.log("Centro del presupuesto:", presupuesto.Centro); // Log del centro del presupuesto
+
+      // Comprobar si el codigoTienda del usuario activo coincide con el centro del presupuesto
+      if (codigoTiendaUsuario !== "AC1" && codigoTiendaUsuario !== presupuesto.Centro) {
+        setIsLoading(false); // Ocultar la ventana de carga
+        alert("Error, este presupuesto no es de esta tienda.");
+        return;
+      }
+
+      // Restaurar datos del presupuesto si los centros coinciden o si el centro es AC1
       if (presupuesto.cliente) {
         userInfo.cliente = presupuesto.cliente;
       }
@@ -111,7 +127,8 @@ function Instalacion() {
         email: userInfo.email,
       });
       restoreUserInfo(presupuesto.cliente, presupuesto.telefono, presupuesto.email);
-      // Procesar datos de frentes3
+
+      // Procesar y guardar los datos del presupuesto (mantén el resto de la lógica existente)
       if (presupuesto.frentes3) {
         const frentes3Data = typeof presupuesto.frentes3 === "string"
           ? JSON.parse(presupuesto.frentes3)
@@ -420,6 +437,7 @@ function Instalacion() {
     } catch (error) {
       console.error("Error al restaurar el presupuesto:", error.message);
       alert(`Hubo un error al intentar restaurar el presupuesto: ${error.message}`);
+      setIsLoading(false); // Ocultar la ventana de carga en caso de error
     }
   };
   return (
@@ -542,3 +560,20 @@ function Instalacion() {
 }
 
 export default Instalacion;
+
+const obtenerCodigoTienda = async (tiendaId) => {
+  try {
+    const response = await fetch(`https://api.adpta.com/getCodigoTienda?idTienda=${tiendaId}`);
+    const data = await response.json();
+
+    if (response.ok) {
+      return data.codigoTienda;  // Devolver el código de la tienda
+    } else {
+      console.error("Error al obtener el código de la tienda:", data.message);
+      return 'Código no encontrado';
+    }
+  } catch (error) {
+    console.error("Error en la solicitud:", error);
+    return 'Error al obtener código';
+  }
+};

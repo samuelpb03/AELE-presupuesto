@@ -192,11 +192,13 @@ include("header.php")
         <!-- Sección de los botones -->
         <div class="col-md-6">
             <div class="row justify-content-start button-container">
-                <div class="col-12 text-center"> <!-- Menos margen, más centrado -->
+            <div class="col-12 text-center">
+                <p style="color: red; font-weight: bold; text-decoration: underline; margin-bottom: 5px;">
+                    <a href="cambios.php" style="color: red; text-decoration: underline;">Nueva versión disponible</a>
+                </p>
                     <a id="btn-normal" href="/index.html">
-                        <div id="caja1b" style="background: #eee2b4; color: #7a7a7a;"
-                             onmouseout="imagenDefecto()">PRESUPUESTADOR AELE</div>
-                 	                    <a id="btn-normal" href="medicionc.pdf">
+                        <div id="caja1b" style="background: #eee2b4; color: #7a7a7a;" onmouseout="imagenDefecto()">PRESUPUESTADOR AELE</div>
+                 	    <a id="btn-normal" href="medicionc.pdf">
                         <div id="caja3b" style="background: #b68e56;"
                              onmouseout="imagenDefecto()">PLANTILLA MEDICIÓN</div>
                     </a>

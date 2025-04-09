@@ -40,9 +40,14 @@ function CamposUsuario() {
           onChange={(e) => handleUserInfoChange('email', e.target.value)}  // Actualizamos el contexto
         />
       </label>
-      <button className="download-guide-button" onClick={handleDownload}>
-        Descargar guía completa (en desarrollo)
-      </button>
+      <div className="download-section">
+        <button className="download-guide-button" onClick={handleDownload}>
+          Descargar guía completa (en desarrollo)
+        </button>
+        <p className="restore-budget-text">
+          <strong> * Para restaurar un presupuesto, diríjase a la pestaña de Instalación</strong>
+        </p>
+      </div>
     </div>
   );
 }

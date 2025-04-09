@@ -880,70 +880,7 @@ function Frentes3() {
             <label htmlFor="puntos">Puntos: {puntos * cantidad}</label>
           </div>
         </div>
-      </div>
-
-      <div className="section">
-        <div className="container4">
-        <h2>Especiales a Medida</h2>
-            <div className="field-special">
-              <label htmlFor="especial1">Artículo Especial 1:</label>
-              <select
-                id="especial1"
-                onChange={(event) => handleSelectEspecialChange(1, event)}
-                value={selectedEspecial1.id || ""}
-              >
-                <option value="">--Selecciona una opción--</option>
-                {getEspecialesOptions().map((especial) => (
-                  <option key={especial.articulo_id} value={especial.articulo_id}>
-                    {especial.articulo_nombre}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="field-special">
-              <label htmlFor="cantidadEspecial1">Cantidad:</label>
-              <input
-                type="number"
-                id="cantidadEspecial1"
-                value={cantidadEspecial1}
-                onChange={(event) => handleCantidadEspecialChange(1, event)}
-                min="0"
-              />
-            </div>
-            <div className="fake-field-special">
-              <label htmlFor="especial2">Puntos:</label>
-              <select disabled>
-                <option value="">{puntosEspecial1}</option>
-              </select>
-            </div>
-            <div className="field-special">
-              <label htmlFor="especial2">Artículo Especial 2:</label>
-              <select
-                id="especial2"
-                onChange={(event) => handleSelectEspecialChange(2, event)}
-                value={selectedEspecial2.id || ""}
-              >
-                <option value="">--Selecciona una opción--</option>
-                {getEspecialesOptions().map((especial) => (
-                  <option key={especial.articulo_id} value={especial.articulo_id}>
-                    {especial.articulo_nombre}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-          <div className="field-special">
-            <label htmlFor="cantidadEspecial2">Cantidad:</label>
-            <input
-              type="number"
-              id="cantidadEspecial2"
-              value={cantidadEspecial2}
-              onChange={(event) => handleCantidadEspecialChange(2, event)}
-              min="0"
-            />
-          </div>
-          {showGuide && (
+        {showGuide && (
               <div
                 className="modal-overlay"
                 onClick={(e) => {
@@ -1021,13 +958,112 @@ function Frentes3() {
                 </div>
               </div>
             )}
-          <div className="fake-field-special">
-            <label htmlFor="especial2">Puntos:</label>
-            <select disabled>
-              <option value="">{puntosEspecial2}</option>
-            </select>
+      </div>
+
+      <div className="section">
+        <div className="container4" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", paddingRight: "20px" }}>
+            {/* Columna de campos especiales */}
+            <div style={{ flex: 1, marginRight: "20px" }}>
+              <h2>Especiales a Medida</h2>
+
+              {/* Línea horizontal para Artículo Especial 1 */}
+              <div style={{ display: "flex", alignItems: "flex-end", marginBottom: "12px" }}>
+                <div className="field-special" style={{ flexBasis: "40%" }}>
+                  <label htmlFor="especial1">Artículo Especial 1:</label>
+                  <select
+                    id="especial1"
+                    onChange={(event) => handleSelectEspecialChange(1, event)}
+                    value={selectedEspecial1.id || ""}
+                  >
+                    <option value="">--Selecciona una opción--</option>
+                    {getEspecialesOptions().map((especial) => (
+                      <option key={especial.articulo_id} value={especial.articulo_id}>
+                        {especial.articulo_nombre}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="field-special" style={{ flexBasis: "20%" }}>
+                  <label htmlFor="cantidadEspecial1">Cantidad:</label>
+                  <input
+                    type="number"
+                    id="cantidadEspecial1"
+                    value={cantidadEspecial1}
+                    onChange={(event) => handleCantidadEspecialChange(1, event)}
+                    min="0"
+                  />
+                </div>
+
+                <div className="fake-field-special" style={{ flexBasis: "10%", display: "flex", alignItems: "center", gap: "5px" , fontWeight: "bold", marginLeft: "15px"}}>
+                  <label style={{ marginBottom: 0 }}>Puntos:</label>
+                  <p className="puntos-text" style={{ margin: 0 }}>{puntosEspecial1}</p>
+                </div>
+              </div>
+
+              {/* Línea horizontal para Artículo Especial 2 */}
+              <div style={{ display: "flex", alignItems: "flex-end" }}>
+                <div className="field-special" style={{ flexBasis: "40%" }}>
+                  <label htmlFor="especial2">Artículo Especial 2:</label>
+                  <select
+                    id="especial2"
+                    onChange={(event) => handleSelectEspecialChange(2, event)}
+                    value={selectedEspecial2.id || ""}
+                  >
+                    <option value="">--Selecciona una opción--</option>
+                    {getEspecialesOptions().map((especial) => (
+                      <option key={especial.articulo_id} value={especial.articulo_id}>
+                        {especial.articulo_nombre}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="field-special" style={{ flexBasis: "20%" }}>
+                  <label htmlFor="cantidadEspecial2">Cantidad:</label>
+                  <input
+                    type="number"
+                    id="cantidadEspecial2"
+                    value={cantidadEspecial2}
+                    onChange={(event) => handleCantidadEspecialChange(2, event)}
+                    min="0"
+                  />
+                </div>
+
+                <div className="fake-field-special" style={{ flexBasis: "10%", display: "flex", alignItems: "center", gap: "5px" , fontWeight: "bold", marginLeft: "15px"}}>
+                  <label style={{ marginBottom: 0 }}>Puntos:</label>
+                  <p className="puntos-text" style={{ margin: 0 }}>{puntosEspecial2}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Imagen a la derecha */}
+            <div
+              style={{
+                width: "350px",
+                marginTop: "10px",
+                marginRight: "100px",
+                display: "flex",
+                alignItems: "flex-start",
+                justifyContent: "center",
+              }}
+            >
+              {selectedArticulo.nombre && (
+                <img
+                  src={`/ImagenesPresupuestador/${selectedArticulo.nombre}.png`}
+                  alt={`Imagen de ${selectedArticulo.nombre}`}
+                  style={{
+                    width: "100%",
+                    maxHeight: "300px",
+                    objectFit: "contain",
+                    border: "none",
+                    borderRadius: "0",
+                  }}
+                  onError={(e) => (e.target.style.display = "none")}
+                />
+              )}
+            </div>
           </div>
-        </div>
       </div>
     </div>
   );

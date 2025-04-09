@@ -223,7 +223,7 @@ function Frentes2() {
           const kantoSeries = res.data.filter(serie => serie.nombre === "kanto");
           const otherSeries = res.data.filter(serie => serie.nombre !== "kanto");
           const sortedSeries = [...kantoSeries, ...otherSeries]; // Poner Kanto primero
-  
+
           setListSerie(sortedSeries);
           document.getElementById("serie").disabled = false;
         } else {
@@ -391,7 +391,7 @@ function Frentes2() {
     setCantidadEspecial2(0);
     setPuntosEspecial1(0);
     setPuntosEspecial2(0);
-// 🔹 Si se selecciona "--Selecciona una opción--", desactivar todos los selectores
+    // 🔹 Si se selecciona "--Selecciona una opción--", desactivar todos los selectores
     if (id === "") {
       document.getElementById("serie").disabled = true;
       document.getElementById("articulo").disabled = true;
@@ -400,7 +400,7 @@ function Frentes2() {
       document.getElementById("medidas").disabled = true;
       document.getElementById("materialFranja").disabled = true;
       document.getElementById("colorFranja").disabled = true;
-  
+
       // También limpiar los valores seleccionados
       setSelectedSerie({ id: "", nombre: "" });
       setSelectedArticulo({ id: "", nombre: "" });
@@ -476,7 +476,7 @@ function Frentes2() {
     const index = event.target.selectedIndex;
     const nombre = event.target.options[index].text;
     const id = event.target.value;
-  
+
     if (id === "") {
       // Si se selecciona "--Selecciona una opción--", limpiar todos los campos relacionados
       setSelectedArticulo({ id: "", nombre: "" });
@@ -486,7 +486,7 @@ function Frentes2() {
       setSelectedMaterialFranja({ id: "", nombre: "" });
       setSelectedColorFranja({ id: "", nombre: "" });
       setPuntos(0); // Restablecer puntos
-  
+
       // También actualizar el contexto para que no aparezcan en el PDF
       handleSelectChange("articulo", "", "");
       handleSelectChange("material", "", "");
@@ -498,7 +498,7 @@ function Frentes2() {
       // Si se selecciona un artículo válido, continuar normalmente
       setSelectedArticulo({ id, nombre });
       handleSelectChange("articulo", id, nombre);
-  
+
       // Restablecer los otros campos porque el artículo ha cambiado
       setSelectedMaterial({ id: "", nombre: "" });
       setSelectedColor({ id: "", nombre: "" });
@@ -526,7 +526,7 @@ function Frentes2() {
     setCantidadEspecial2(0);
     setPuntosEspecial2(0);
     setPuntos(0); // Restablecer puntos
-  
+
     // Añadir logs en la respuesta del backend
     console.log("Selected material ID:", id);
     if (nombre.toLowerCase() === 'melamina') {
@@ -594,7 +594,7 @@ function Frentes2() {
     if (selectedMaterial.nombre.toLowerCase() === "melamina") {
       //console.log("Especiales:", listEspeciales.slice(0, 2));
       return listEspeciales.length >= 3 ? [listEspeciales[0], listEspeciales[2]] : listEspeciales.slice(0, 2);
-       // Mostrar solo la primera y la tercera opción si hay suficientes elementos
+      // Mostrar solo la primera y la tercera opción si hay suficientes elementos
     } else {
       return listEspeciales.slice(0, 2); // Mostrar solo la primera y la segunda opción
     }
@@ -735,7 +735,7 @@ function Frentes2() {
     <div className="container">
       <div className="section">
         <div className="container2">
-        <button className="guide-button" onClick={() => setShowGuide(true)}>
+          <button className="guide-button" onClick={() => setShowGuide(true)}>
             Guía
           </button>
           <h1>Puertas 2</h1>
@@ -854,154 +854,190 @@ function Frentes2() {
             <label htmlFor="puntos">Puntos: {puntos * cantidad}</label>
           </div>
         </div>
+        {showGuide && (
+          <div
+            className="modal-overlay"
+            onClick={(e) => {
+              // Cerrar el modal si se hace clic fuera del contenido
+              if (e.target.className === "modal-overlay") {
+                setShowGuide(false);
+              }
+            }}
+          >
+            <div className="modal-content">
+              <h2>Guía de Uso: Configuración de Frentes</h2>
+              <ol>
+                <li>
+                  <strong>Seleccionar el Tipo de Frente</strong>
+                  <p>En el campo "Tipo de Frente", selecciona el tipo de frente que deseas configurar.</p>
+                  <p>Ejemplo: Puertas correderas o abatibles.</p>
+                  <p>Si no ves opciones disponibles, asegúrate de haber iniciado sesión correctamente.</p>
+                </li>
+                <li>
+                  <strong>Seleccionar la Serie</strong>
+                  <p>Una vez seleccionado el tipo de frente, el campo "Serie" se habilitará.</p>
+                  <p>Selecciona la serie que corresponde al tipo de frente elegido.</p>
+                  <p>Ejemplo: Serie Kanto, Serie Uniforme.</p>
+                </li>
+                <li>
+                  <strong>Seleccionar el Modelo</strong>
+                  <p>En el campo "Modelo", selecciona el modelo del frente.</p>
+                  <p>Este campo se habilitará después de seleccionar una serie válida.</p>
+                </li>
+                <li>
+                  <strong>Seleccionar el Material</strong>
+                  <p>En el campo "Material", selecciona el material principal del frente.</p>
+                  <p>Ejemplo: Melamina, Laca, Cristal.</p>
+                </li>
+                <li>
+                  <strong>Seleccionar el Color Principal</strong>
+                  <p>En el campo "Color Principal", selecciona el color del frente.</p>
+                  <p>Ejemplo: Blanco, Roble, Gris.</p>
+                  <p>Si seleccionas colores especiales como "Color según muestra", se aplicará un incremento del 20% en los puntos.</p>
+                </li>
+                <li>
+                  <strong>Seleccionar las Medidas</strong>
+                  <p>En el campo "Medidas", selecciona las dimensiones del frente.</p>
+                  <p>Las medidas disponibles dependen del modelo y material seleccionados.</p>
+                </li>
+                <li>
+                  <strong>Configurar la Franja (Opcional)</strong>
+                  <p>Si el modelo seleccionado admite franjas, los campos "Material Franja" y "Color Franja" estarán habilitados.</p>
+                  <p>Selecciona el material y color de la franja según tus preferencias.</p>
+                </li>
+                <li>
+                  <strong>Configurar el Color del Perfil</strong>
+                  <p>Si el tipo de frente o la serie seleccionada lo permite, aparecerá el campo "Color del Perfil".</p>
+                  <p>Selecciona el color del perfil entre las opciones disponibles: Blanco, Plata o Negro.</p>
+                </li>
+                <li>
+                  <strong>Configurar la Cantidad</strong>
+                  <p>En el campo "Cantidad", introduce el número de frentes que deseas presupuestar.</p>
+                  <p>El precio total se calculará automáticamente en función de la cantidad y las configuraciones seleccionadas.</p>
+                </li>
+                <li>
+                  <strong>Configurar Artículos Especiales (Opcional)</strong>
+                  <p>En la sección "Especiales a Medida", puedes añadir hasta dos artículos especiales.</p>
+                  <p>Selecciona el artículo especial en los campos "Artículo Especial 1" y "Artículo Especial 2".</p>
+                  <p>Introduce la cantidad correspondiente en los campos de cantidad.</p>
+                  <p>El precio de los artículos especiales se calculará automáticamente.</p>
+                </li>
+                <li>
+                  <strong>Verificar los Puntos Totales</strong>
+                  <p>Los puntos totales (el precio) se muestran en el campo "Puntos".</p>
+                  <p>Asegúrate de que los puntos reflejen correctamente todas las configuraciones seleccionadas.</p>
+                </li>
+              </ol>
+              <button onClick={() => setShowGuide(false)}>Cerrar</button>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="section">
-        <div className="container4">
-        <h2>Especiales a Medida</h2>
-            <div className="field-special">
-              <label htmlFor="especial1">Artículo Especial 1:</label>
-              <select
-                id="especial1"
-                onChange={(event) => handleSelectEspecialChange(1, event)}
-                value={selectedEspecial1.id || ""}
-              >
-                <option value="">--Selecciona una opción--</option>
-                {getEspecialesOptions().map((especial) => (
-                  <option key={especial.articulo_id} value={especial.articulo_id}>
-                    {especial.articulo_nombre}
-                  </option>
-                ))}
-              </select>
-            </div>
+        <div className="container4" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", paddingRight: "20px" }}>
+            {/* Columna de campos especiales */}
+            <div style={{ flex: 1, marginRight: "20px" }}>
+              <h2>Especiales a Medida</h2>
 
-            <div className="field-special">
-              <label htmlFor="cantidadEspecial1">Cantidad:</label>
-              <input
-                type="number"
-                id="cantidadEspecial1"
-                value={cantidadEspecial1}
-                onChange={(event) => handleCantidadEspecialChange(1, event)}
-                min="0"
-              />
-            </div>
-            <div className="fake-field-special">
-              <label htmlFor="especial2">Puntos:</label>
-              <select disabled>
-                <option value="">{puntosEspecial1}</option>
-              </select>
-            </div>
-            <div className="field-special">
-              <label htmlFor="especial2">Artículo Especial 2:</label>
-              <select
-                id="especial2"
-                onChange={(event) => handleSelectEspecialChange(2, event)}
-                value={selectedEspecial2.id || ""}
-              >
-                <option value="">--Selecciona una opción--</option>
-                {getEspecialesOptions().map((especial) => (
-                  <option key={especial.articulo_id} value={especial.articulo_id}>
-                    {especial.articulo_nombre}
-                  </option>
-                ))}
-              </select>
-            </div>
+              {/* Línea horizontal para Artículo Especial 1 */}
+              <div style={{ display: "flex", alignItems: "flex-end", marginBottom: "12px" }}>
+                <div className="field-special" style={{ flexBasis: "40%" }}>
+                  <label htmlFor="especial1">Artículo Especial 1:</label>
+                  <select
+                    id="especial1"
+                    onChange={(event) => handleSelectEspecialChange(1, event)}
+                    value={selectedEspecial1.id || ""}
+                  >
+                    <option value="">--Selecciona una opción--</option>
+                    {getEspecialesOptions().map((especial) => (
+                      <option key={especial.articulo_id} value={especial.articulo_id}>
+                        {especial.articulo_nombre}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-          <div className="field-special">
-            <label htmlFor="cantidadEspecial2">Cantidad:</label>
-            <input
-              type="number"
-              id="cantidadEspecial2"
-              value={cantidadEspecial2}
-              onChange={(event) => handleCantidadEspecialChange(2, event)}
-              min="0"
-            />
-          </div>
-          {showGuide && (
-              <div
-                className="modal-overlay"
-                onClick={(e) => {
-                  // Cerrar el modal si se hace clic fuera del contenido
-                  if (e.target.className === "modal-overlay") {
-                    setShowGuide(false);
-                  }
-                }}
-              >
-                <div className="modal-content">
-                  <h2>Guía de Uso: Configuración de Frentes</h2>
-                  <ol>
-                    <li>
-                      <strong>Seleccionar el Tipo de Frente</strong>
-                      <p>En el campo "Tipo de Frente", selecciona el tipo de frente que deseas configurar.</p>
-                      <p>Ejemplo: Puertas correderas o abatibles.</p>
-                      <p>Si no ves opciones disponibles, asegúrate de haber iniciado sesión correctamente.</p>
-                    </li>
-                    <li>
-                      <strong>Seleccionar la Serie</strong>
-                      <p>Una vez seleccionado el tipo de frente, el campo "Serie" se habilitará.</p>
-                      <p>Selecciona la serie que corresponde al tipo de frente elegido.</p>
-                      <p>Ejemplo: Serie Kanto, Serie Uniforme.</p>
-                    </li>
-                    <li>
-                      <strong>Seleccionar el Modelo</strong>
-                      <p>En el campo "Modelo", selecciona el modelo del frente.</p>
-                      <p>Este campo se habilitará después de seleccionar una serie válida.</p>
-                    </li>
-                    <li>
-                      <strong>Seleccionar el Material</strong>
-                      <p>En el campo "Material", selecciona el material principal del frente.</p>
-                      <p>Ejemplo: Melamina, Laca, Cristal.</p>
-                    </li>
-                    <li>
-                      <strong>Seleccionar el Color Principal</strong>
-                      <p>En el campo "Color Principal", selecciona el color del frente.</p>
-                      <p>Ejemplo: Blanco, Roble, Gris.</p>
-                      <p>Si seleccionas colores especiales como "Color según muestra", se aplicará un incremento del 20% en los puntos.</p>
-                    </li>
-                    <li>
-                      <strong>Seleccionar las Medidas</strong>
-                      <p>En el campo "Medidas", selecciona las dimensiones del frente.</p>
-                      <p>Las medidas disponibles dependen del modelo y material seleccionados.</p>
-                    </li>
-                    <li>
-                      <strong>Configurar la Franja (Opcional)</strong>
-                      <p>Si el modelo seleccionado admite franjas, los campos "Material Franja" y "Color Franja" estarán habilitados.</p>
-                      <p>Selecciona el material y color de la franja según tus preferencias.</p>
-                    </li>
-                    <li>
-                      <strong>Configurar el Color del Perfil</strong>
-                      <p>Si el tipo de frente o la serie seleccionada lo permite, aparecerá el campo "Color del Perfil".</p>
-                      <p>Selecciona el color del perfil entre las opciones disponibles: Blanco, Plata o Negro.</p>
-                    </li>
-                    <li>
-                      <strong>Configurar la Cantidad</strong>
-                      <p>En el campo "Cantidad", introduce el número de frentes que deseas presupuestar.</p>
-                      <p>El precio total se calculará automáticamente en función de la cantidad y las configuraciones seleccionadas.</p>
-                    </li>
-                    <li>
-                      <strong>Configurar Artículos Especiales (Opcional)</strong>
-                      <p>En la sección "Especiales a Medida", puedes añadir hasta dos artículos especiales.</p>
-                      <p>Selecciona el artículo especial en los campos "Artículo Especial 1" y "Artículo Especial 2".</p>
-                      <p>Introduce la cantidad correspondiente en los campos de cantidad.</p>
-                      <p>El precio de los artículos especiales se calculará automáticamente.</p>
-                    </li>
-                    <li>
-                      <strong>Verificar los Puntos Totales</strong>
-                      <p>Los puntos totales (el precio) se muestran en el campo "Puntos".</p>
-                      <p>Asegúrate de que los puntos reflejen correctamente todas las configuraciones seleccionadas.</p>
-                    </li>
-                  </ol>
-                  <button onClick={() => setShowGuide(false)}>Cerrar</button>
+                <div className="field-special" style={{ flexBasis: "20%" }}>
+                  <label htmlFor="cantidadEspecial1">Cantidad:</label>
+                  <input
+                    type="number"
+                    id="cantidadEspecial1"
+                    value={cantidadEspecial1}
+                    onChange={(event) => handleCantidadEspecialChange(1, event)}
+                    min="0"
+                  />
+                </div>
+
+                <div className="fake-field-special" style={{ flexBasis: "10%", display: "flex", alignItems: "center", gap: "5px" , fontWeight: "bold", marginLeft: "15px"}}>
+                  <label style={{ marginBottom: 0 }}>Puntos:</label>
+                  <p className="puntos-text" style={{ margin: 0 }}>{puntosEspecial1}</p>
                 </div>
               </div>
-            )}
-          <div className="fake-field-special">
-            <label htmlFor="especial2">Puntos:</label>
-            <select disabled>
-              <option value="">{puntosEspecial2}</option>
-            </select>
+
+              {/* Línea horizontal para Artículo Especial 2 */}
+              <div style={{ display: "flex", alignItems: "flex-end"}}>
+                <div className="field-special" style={{ flexBasis: "40%" }}>
+                  <label htmlFor="especial2">Artículo Especial 2:</label>
+                  <select
+                    id="especial2"
+                    onChange={(event) => handleSelectEspecialChange(2, event)}
+                    value={selectedEspecial2.id || ""}
+                  >
+                    <option value="">--Selecciona una opción--</option>
+                    {getEspecialesOptions().map((especial) => (
+                      <option key={especial.articulo_id} value={especial.articulo_id}>
+                        {especial.articulo_nombre}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="field-special" style={{ flexBasis: "20%" }}>
+                  <label htmlFor="cantidadEspecial2">Cantidad:</label>
+                  <input
+                    type="number"
+                    id="cantidadEspecial2"
+                    value={cantidadEspecial2}
+                    onChange={(event) => handleCantidadEspecialChange(2, event)}
+                    min="0"
+                  />
+                </div>
+
+                <div className="fake-field-special" style={{ flexBasis: "10%", display: "flex", alignItems: "center", gap: "5px" , fontWeight: "bold", marginLeft: "15px"}}>
+                  <label style={{ marginBottom: 0 }}>Puntos:</label>
+                  <p className="puntos-text" style={{ margin: 0 }}>{puntosEspecial2}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Imagen a la derecha */}
+            <div
+              style={{
+                width: "350px",
+                marginTop: "10px",
+                marginRight: "100px",
+                display: "flex",
+                alignItems: "flex-start",
+                justifyContent: "center",
+              }}
+            >
+              {selectedArticulo.nombre && (
+                <img
+                  src={`/ImagenesPresupuestador/${selectedArticulo.nombre}.png`}
+                  alt={`Imagen de ${selectedArticulo.nombre}`}
+                  style={{
+                    width: "100%",
+                    maxHeight: "300px",
+                    objectFit: "contain",
+                    border: "none",
+                    borderRadius: "0",
+                  }}
+                  onError={(e) => (e.target.style.display = "none")}
+                />
+              )}
+            </div>
           </div>
-        </div>
       </div>
     </div>
   );
