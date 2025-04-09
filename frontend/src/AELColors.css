@@ -90,24 +90,23 @@ button {
   right: 10px;
 }
 .download-guide-button {
-  padding: 10px 20px;
-  font-size: 16px;
-  background-color: #f5f5f5; /* Gris muy claro */
-  color: #333; /* Texto oscuro para contraste */
-  /*texto en negrita*/
-  font-weight: bold; /* Hace el texto más llamativo */
-  border: 1px solid #ddd; /* Borde gris claro */
+  background-color: white;
+  color: black;
+  border: 1px solid black;
+  padding: 10px 15px;
+  font-size: 14px;
+  font-weight: bold;
   border-radius: 5px;
   cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease; /* Animación suave */
+  margin-top: 10px;
 }
 
 .download-guide-button:hover {
-  background-color: #e0e0e0; /* Gris ligeramente más oscuro al pasar el cursor */
+  background-color: #f0f0f0;
 }
 .guide-button {
-  background-color: #d8d8d8; /* Color azul llamativo */
-  color: rgb(83, 83, 83); /* Texto blanco */
+  background-color: #ffffff; /* Color azul llamativo */
+  color: rgb(39, 39, 39); /* Texto blanco */
   border: none; /* Sin bordes */
   padding: 15px 25px; /* Aumenta el tamaño del botón */
   font-size: 18px; /* Aumenta el tamaño del texto */
@@ -119,7 +118,7 @@ button {
 }
 
 .guide-button:hover {
-  background-color: #d8d8d8; /* Color más oscuro al pasar el ratón */
+  background-color: #0056b3; /* Color más oscuro al pasar el ratón */
   transform: scale(1.1); /* Aumenta ligeramente el tamaño al pasar el ratón */
 }
 
@@ -343,16 +342,10 @@ h1, h2 {
   transition: border-color 0.3s, box-shadow 0.3s;
 }
 .field-centered label {
-  text-align: left; /* Alinear el texto de la etiqueta a la izquierda */
-  display: block; /* Asegurar que la etiqueta ocupe toda la línea */
-  margin-bottom: 5px; /* Añadir un pequeño margen debajo de la etiqueta */
-}
-
-.field-centered input[type="number"] {
-  width: 100%; /* Hacer que el input ocupe el mismo ancho que los demás */
-  max-width: 266.8px; /* Limitar el ancho máximo para mantener consistencia */
-  padding: 8px; /* Añadir padding interno para que coincida con otros inputs */
-  box-sizing: border-box; /* Incluir padding y borde en el ancho total */
+  text-align: center;
+  margin-top: 5px;
+  font-weight: bold;
+  font-family: "Poppins", sans-serif;
 }
 
 select:focus, input:focus {
@@ -479,14 +472,6 @@ a:link, a:visited, a:active {
   flex: 1; /* Ocupa el espacio disponible */
 }
 
-.download-section {
-  text-align: left; /* Centrar el contenido */
-  margin-top: 20px; /* Añadir espacio superior */
-}
-
-.restore-budget-text {
-  margin-top: 10px; /* Espacio entre el botón y el texto */
-  font-size: 14px;
-  color: #ff0000; /* Hacer que el texto destaque en rojo */
-  margin-left: 2px; /* Añade un margen de 2px a la izquierda */
+#version-text {
+  text-align: left; /* Alinear el texto a la izquierda */
 }

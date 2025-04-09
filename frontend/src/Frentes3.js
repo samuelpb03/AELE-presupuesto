@@ -113,7 +113,7 @@ function Frentes3() {
       if (data.frentes3.brakesChecked) {
         setPuntos((prevPuntos) => prevPuntos - 73); // Restar 73 puntos si los frenos estaban activados
       }
-      if (data.frentes3.selectedProductoId === "4" || data.frentes3.selectedProductoId === "5" && data.frentes3.selectedSerieId === "195") {
+      if (data.frentes3.selectedProductoId === "4" || data.frentes3.selectedProductoId === "5") {
         setShowColorPerfil(true); // Mostrar el selector de color del perfil si el producto es 4 o 5
         setSelectedColorPerfil(data.frentes3.selectedColorPerfil || ""); // Restaurar el color del perfil
       } else {
@@ -854,7 +854,7 @@ function Frentes3() {
             </select>
           </div>
           {showColorPerfil && (
-            <div className="field-centered">
+            <div className="field">
               <label htmlFor="colorPerfil">Color del perfil:</label>
               <select
                 id="colorPerfil"
@@ -872,11 +872,11 @@ function Frentes3() {
               </select>
             </div>
           )}
-          <div className="field-centered">
+          <div className="field">
             <label htmlFor="cantidad">Cantidad:</label>
             <input type="number" id="cantidad" value={cantidad} onChange={handleCantidadChange} min="1" />
           </div>
-          <div className="field-centered">
+          <div className="field-centered" style={{ marginLeft: "10px" }}>
             <label htmlFor="puntos">Puntos: {puntos * cantidad}</label>
           </div>
         </div>
@@ -961,7 +961,7 @@ function Frentes3() {
       </div>
 
       <div className="section">
-        <div className="container4" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", paddingRight: "20px" }}>
+        <div className="container4" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", paddingRight: "25px" }}>
             {/* Columna de campos especiales */}
             <div style={{ flex: 1, marginRight: "20px" }}>
               <h2>Especiales a Medida</h2>
@@ -995,7 +995,7 @@ function Frentes3() {
                   />
                 </div>
 
-                <div className="fake-field-special" style={{ flexBasis: "10%", display: "flex", alignItems: "center", gap: "5px" , fontWeight: "bold", marginLeft: "15px"}}>
+                <div className="fake-field-special" style={{ flexBasis: "10%", display: "flex", alignItems: "center", gap: "5px" , fontWeight: "bold", marginLeft: "25px"}}>
                   <label style={{ marginBottom: 0 }}>Puntos:</label>
                   <p className="puntos-text" style={{ margin: 0 }}>{puntosEspecial1}</p>
                 </div>
@@ -1030,7 +1030,7 @@ function Frentes3() {
                   />
                 </div>
 
-                <div className="fake-field-special" style={{ flexBasis: "10%", display: "flex", alignItems: "center", gap: "5px" , fontWeight: "bold", marginLeft: "15px"}}>
+                <div className="fake-field-special" style={{ flexBasis: "10%", display: "flex", alignItems: "center", gap: "5px" , fontWeight: "bold", marginLeft: "20px"}}>
                   <label style={{ marginBottom: 0 }}>Puntos:</label>
                   <p className="puntos-text" style={{ margin: 0 }}>{puntosEspecial2}</p>
                 </div>

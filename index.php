@@ -179,6 +179,10 @@ include("header.php")
         #close-button:hover {
             background-color: #f2f2f2;
         }
+
+        #version-text {
+            text-align: left; /* Alinear el texto a la izquierda */
+        }
     </style>
   </head>
 
@@ -193,7 +197,7 @@ include("header.php")
         <div class="col-md-6">
             <div class="row justify-content-start button-container">
             <div class="col-12 text-center">
-                <p style="color: red; font-weight: bold; text-decoration: underline; margin-bottom: 5px;">
+                <p id="version-text" style="color: red; font-weight: bold; text-decoration: underline; margin-bottom: 5px;">
                     <a href="cambios.php" style="color: red; text-decoration: underline;">Nueva versión disponible</a>
                 </p>
                     <a id="btn-normal" href="/index.html">
@@ -265,6 +269,20 @@ include("header.php")
             localStorage.setItem('user', JSON.stringify(tempUser));
         }
     });
+</script>
+
+<script>
+    // Verificar si hoy es lunes
+    const today = new Date();
+    const isMonday = today.getDay() === 3; // 1 representa lunes en JavaScript
+
+    // Seleccionar el elemento del texto
+    const versionText = document.querySelector('#version-text');
+
+    // Mostrar u ocultar el texto según el día
+    if (!isMonday) {
+        versionText.style.display = 'none'; // Ocultar si no es lunes
+    }
 </script>
 </body>
 </html>

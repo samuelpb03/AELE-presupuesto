@@ -408,3 +408,7 @@ a:link, a:visited, a:active {
   outline: none; /* Quitar el outline por defecto */
   box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.5); /* Añadir un shadow box para el foco */
 }
+
+#version-text {
+    text-align: left; /* Alinear el texto a la izquierda */
+}

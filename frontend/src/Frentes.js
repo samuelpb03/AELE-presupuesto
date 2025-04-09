@@ -852,7 +852,7 @@ function Frentes() {
             </select>
           </div>
           {showColorPerfil && (
-            <div className="field-centered">
+            <div className="field">
               <label htmlFor="colorPerfil">Color del perfil:</label>
               <select
                 id="colorPerfil"
@@ -870,7 +870,7 @@ function Frentes() {
               </select>
             </div>
           )}
-          <div className="field-centered">
+          <div className="field">
             <label htmlFor="cantidad">Cantidad:</label>
             <input
               type="number"
@@ -880,7 +880,7 @@ function Frentes() {
               min="1"
             />
           </div>
-          <div className="field-centered">
+          <div className="field-centered" style={{ marginLeft: "10px" }}>
 
             <label htmlFor="puntos">Puntos: {puntos * cantidad}</label>
           </div>
@@ -1003,7 +1003,7 @@ function Frentes() {
                   />
                 </div>
 
-                <div className="fake-field-special" style={{ flexBasis: "10%", display: "flex", alignItems: "center", gap: "5px" , fontWeight: "bold", marginLeft: "15px"}}>
+                <div className="fake-field-special" style={{ flexBasis: "10%", display: "flex", alignItems: "center", gap: "5px" , fontWeight: "bold", marginLeft: "25px"}}>
                   <label style={{ marginBottom: 0 }}>Puntos:</label>
                   <p className="puntos-text" style={{ margin: 0 }}>{puntosEspecial1}</p>
                 </div>
@@ -1038,7 +1038,7 @@ function Frentes() {
                   />
                 </div>
 
-                <div className="fake-field-special" style={{ flexBasis: "10%", display: "flex", alignItems: "center", gap: "5px" , fontWeight: "bold", marginLeft: "15px"}}>
+                <div className="fake-field-special" style={{ flexBasis: "10%", display: "flex", alignItems: "center", gap: "5px" , fontWeight: "bold", marginLeft: "25px"}}>
                   <label style={{ marginBottom: 0 }}>Puntos:</label>
                   <p className="puntos-text" style={{ margin: 0 }}>{puntosEspecial2}</p>
                 </div>

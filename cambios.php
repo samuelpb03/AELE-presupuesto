@@ -83,9 +83,36 @@ include("header.php");
         .volver-btn:hover {
             background-color: #8a622d;
         }
+
+        #version-text {
+            text-align: left; /* Alinear el texto a la izquierda */
+        }
+
+        .header-bar, .footer-bar {
+            position: fixed; /* Fija las barras en su posición */
+            left: 0; /* Alinea al borde izquierdo */
+            right: 0; /* Alinea al borde derecho */
+            height: 50px; /* Altura de las barras */
+            background-color: #a67c42; /* Color marrón */
+            z-index: 1000; /* Asegura que estén por encima de otros elementos */
+        }
+
+        .header-bar {
+            top: 0; /* Fija la barra superior al borde superior */
+        }
+
+        .footer-bar {
+            bottom: 0; /* Fija la barra inferior al borde inferior */
+            text-align: center; /* Centra el texto dentro de la barra */
+            color: white; /* Color del texto */
+            font-size: 12px; /* Tamaño del texto */
+            height: 50px; /* Altura de la barra */
+            line-height: 50px; /* Alinea el texto verticalmente */
+        }
     </style>
 </head>
 <body>
+    <div class="header-bar"></div>
     <div class="container">
         <h1>🛠 Últimas mejoras del Presupuestador AELE</h1>
         <ul>
@@ -94,13 +121,14 @@ include("header.php");
             <li>📥 Añadida la funcionalidad de <strong>restaurar todos los datos</strong> de un presupuesto con su ID en un solo clic.</li>
             <li>📘 Añadida una <strong>guía</strong> que irá siendo actualizada conforme se añadan nuevas funcionalidades y características.</li>
             <li>🖼 Añadidas las <strong>imágenes de cada frente</strong> seleccionable para tener una mejor guía visual al elegir las puertas.</li>
+            <li>🎨 Modificado el <strong>aspecto visual</strong> de la aplicación para mejorar la experiencia del usuario.</li>
+            <li>🛠 Arreglado un problema con los <strong>colores del perfil</strong> en Puertas 3.</li>
         </ul>
 
-        <a href="index.html" class="volver-btn">← Volver al presupuestador</a>
+        <a href="index.html" class="volver-btn">← Ir al presupuestador</a>
     </div>
-
-    <footer>
-        © AELE - 2024 | Mejorando contigo
-    </footer>
+    <div class="footer-bar">
+        © AELE - 2025
+    </div>
 </body>
 </html>
