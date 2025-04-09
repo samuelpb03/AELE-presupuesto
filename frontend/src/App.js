@@ -23,17 +23,31 @@ function App() {
     const user = JSON.parse(localStorage.getItem('user'));
     const centro = user?.tienda || 'Centro no especificado';
     const empresa = user?.empresa || 'Empresa no especificada';
-    
+
     if (empresa == 5) {
       setStyleSheet('LerColors.css');
+    } else if (empresa == 1) {
+      setStyleSheet('TestColors.css');
     } else {
       setStyleSheet('AELColors.css');
     }
-  }, []);  // Solo se ejecuta una vez cuando el componente se monta
+    console.log('Empresa:', empresa);
+  }, []); // Solo se ejecuta una vez cuando el componente se monta 
+
   return (
     <DataProvider>
       <TabsProvider>
-      <div className={`App ${styleSheet === 'LerColors.css' ? 'ler-colors' : styleSheet === 'AELColors.css' ? 'ael-colors' : ''}`}>
+        <div
+          className={`App ${
+            styleSheet === 'LerColors.css'
+              ? 'ler-colors'
+              : styleSheet === 'AELColors.css'
+              ? 'ael-colors'
+              : styleSheet === 'TestColors.css'
+              ? 'test-colors'
+              : ''
+          }`}
+        >
           <BrowserRouter>
             <NavigationController />
             {/* Incluimos los campos de usuario */}

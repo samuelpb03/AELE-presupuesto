@@ -1,0 +1,169 @@
+@import "https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap";
+
+/* Variables de colores modernos */
+:root {
+  --primary-color: #4caf50; /* Verde vibrante */
+  --secondary-color: #ff9800; /* Naranja vibrante */
+  --background-gradient: linear-gradient(135deg, #1e3c72, #2a5298); /* Degradado azul */
+  --button-hover: #ff5722; /* Naranja oscuro */
+  --text-color: #ffffff; /* Blanco */
+  --card-bg: #2e3b4e; /* Fondo de tarjetas */
+  --card-shadow: rgba(0, 0, 0, 0.3); /* Sombra de tarjetas */
+}
+
+/* Estilo general */
+body {
+  font-family: "Poppins", sans-serif;
+  background: var(--background-gradient);
+  color: var(--text-color);
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 20px auto;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.1); /* Fondo translúcido */
+  border-radius: 15px;
+  box-shadow: 0 8px 20px var(--card-shadow);
+  backdrop-filter: blur(10px); /* Efecto de desenfoque */
+}
+
+/* Títulos */
+h1, h2 {
+  font-size: 2rem;
+  text-align: center;
+  margin-bottom: 20px;
+  color: var(--primary-color);
+  text-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Botones */
+button, .guide-button, .volver-btn {
+  padding: 12px 25px;
+  background: var(--primary-color);
+  color: var(--text-color);
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: bold;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+button:hover, .guide-button:hover, .volver-btn:hover {
+  background: var(--button-hover);
+  transform: scale(1.1); /* Aumenta ligeramente el tamaño */
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Campos de entrada */
+input, select {
+  width: 100%;
+  max-width: 300px;
+  padding: 10px;
+  border: 2px solid var(--primary-color);
+  border-radius: 10px;
+  background: var(--card-bg);
+  color: var(--text-color);
+  font-size: 1rem;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+input:focus, select:focus {
+  border-color: var(--secondary-color);
+  box-shadow: 0 0 10px var(--secondary-color);
+}
+
+/* Tarjetas */
+.card {
+  background: var(--card-bg);
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 4px 10px var(--card-shadow);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-10px); /* Eleva la tarjeta al pasar el ratón */
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.container, .card, button, input, select {
+  animation: fadeIn 0.5s ease;
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: var(--card-bg);
+  padding: 20px;
+  border-radius: 15px;
+  width: 90%;
+  max-width: 600px;
+  color: var(--text-color);
+  box-shadow: 0 8px 20px var(--card-shadow);
+  animation: fadeIn 0.5s ease;
+}
+
+.modal-content h2 {
+  color: var(--primary-color);
+  margin-bottom: 20px;
+}
+
+.modal-content button {
+  margin-top: 20px;
+}
+
+/* Botón flotante */
+#restoreButton {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 60px;
+  height: 60px;
+  background: var(--primary-color);
+  color: var(--text-color);
+  border: none;
+  border-radius: 50%;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+#restoreButton:hover {
+  background: var(--button-hover);
+  transform: scale(1.1);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+}
