@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 
 function Instalacion() {
   const { userInfo, restoreUserInfo } = useTabs();
-  const { data, saveData } = useData();
+  const { data } = useData();
   const [numFrentesInteriores, setNumFrentesInteriores] = useState("");
   const [numArmariosCompletos, setNumArmariosCompletos] = useState("");
   const [showHelp, setShowHelp] = useState(false); // Estado para mostrar/ocultar el cuadro de ayuda
@@ -45,7 +45,7 @@ function Instalacion() {
       montajeAcarreo,
     };
     saveData("instalacion", formattedData);
-  }, [numFrentesInteriores, numArmariosCompletos, numDesmontaje, montajeAcarreo, saveData]);
+  }, [numFrentesInteriores, numArmariosCompletos, numDesmontaje, montajeAcarreo]);
 
   const handleGeneratePDF = () => {
     if (!userInfo.cliente.trim() || !userInfo.telefono.trim()) {
@@ -81,6 +81,7 @@ function Instalacion() {
     const value = e.target.value;
     setNumDesmontaje(value === "" ? "" : parseFloat(value));
   };
+
   const handleRestorePresupuesto = async () => {
     if (!presupuestoId.trim()) {
       alert("Por favor, introduce un ID de presupuesto válido.");
@@ -89,12 +90,22 @@ function Instalacion() {
     setIsLoading(true); // Mostrar la ventana de carga
 
     try {
+      console.log("Solicitando presupuesto con ID:", presupuestoId); // Log del ID solicitado
       const response = await fetch(`https://api.adpta.com/presupuesto/${presupuestoId}`);
       if (!response.ok) {
         throw new Error("No se pudo encontrar el presupuesto con el ID proporcionado.");
       }
 
       const presupuesto = await response.json();
+      console.log("Presupuesto recibido:", presupuesto); // Log del presupuesto recibido
+
+      // Verifica si el ID está presente
+      if (!presupuesto.id) {
+        console.error("El presupuesto no contiene un ID válido:", presupuesto);
+        alert("Error: El presupuesto no contiene un ID válido.");
+        setIsLoading(false);
+        return;
+      }
 
       // Obtener el centro del usuario activo (codigoTienda) desde la tienda
       const user = JSON.parse(localStorage.getItem('user'));
@@ -576,4 +587,9 @@ const obtenerCodigoTienda = async (tiendaId) => {
     console.error("Error en la solicitud:", error);
     return 'Error al obtener código';
   }
+};
+
+const saveData = (key, value) => {
+  console.log(`Guardando datos en ${key}:`, value); // Log de los datos que se están guardando
+  localStorage.setItem(key, JSON.stringify(value));
 };

@@ -481,3 +481,18 @@ a:link, a:visited, a:active {
 #version-text {
   text-align: left; /* Alinear el texto a la izquierda */
 }
+
+.highlight {
+  border: 2px solid #00aaff;
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  50% {
+    border-color: transparent;
+  }
+}
+
+.margin-left {
+  margin-left: 10px; /* Ajusta el valor según sea necesario */
+}
