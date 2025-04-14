@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 
 function Instalacion() {
   const { userInfo, restoreUserInfo } = useTabs();
-  const { data } = useData();
+  const { data, saveData } = useData();
   const [numFrentesInteriores, setNumFrentesInteriores] = useState("");
   const [numArmariosCompletos, setNumArmariosCompletos] = useState("");
   const [showHelp, setShowHelp] = useState(false); // Estado para mostrar/ocultar el cuadro de ayuda
@@ -45,7 +45,7 @@ function Instalacion() {
       montajeAcarreo,
     };
     saveData("instalacion", formattedData);
-  }, [numFrentesInteriores, numArmariosCompletos, numDesmontaje, montajeAcarreo]);
+  }, [numFrentesInteriores, numArmariosCompletos, numDesmontaje, montajeAcarreo, saveData]);
 
   const handleGeneratePDF = () => {
     if (!userInfo.cliente.trim() || !userInfo.telefono.trim()) {
@@ -100,7 +100,7 @@ function Instalacion() {
       console.log("Presupuesto recibido:", presupuesto); // Log del presupuesto recibido
 
       // Verifica si el ID está presente
-      if (!presupuesto.id) {
+      if (!presupuesto.idPresupuestos) {
         console.error("El presupuesto no contiene un ID válido:", presupuesto);
         alert("Error: El presupuesto no contiene un ID válido.");
         setIsLoading(false);
