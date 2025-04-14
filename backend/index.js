@@ -23,7 +23,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 const db = mysql.createPool({
-  connectionLimit: 50,
+  connectionLimit: 500,
   host: "localhost",
   user: "backend_user",  // 🔹 Usar el nuevo usuario
   password: "backend_pass123", // 🔹 Usar la nueva contraseña

@@ -9,7 +9,7 @@ function Remates() {
   const { data, saveData } = useData();
   const [showGuide, setShowGuide] = useState(false); // Estado para mostrar/ocultar la guía
   const [tipoApertura, setTipoApertura] = useState("");
-  const [tipoRemate, setTipoRemate] = useState("");
+  const [tipoRemate, setTipoRemate] = useState(""); // Estado para el tipo de remate
   const [listArticulo, setListArticulo] = useState([]);
   const [selectedArticulos, setSelectedArticulos] = useState(
     Array(3).fill({ id: "", nombre: "", puntosOriginal: 0, puntos: 0 })
@@ -22,6 +22,8 @@ function Remates() {
   const [selectedColores, setSelectedColores] = useState(Array(3).fill(""));
   const [selectedOtros, setSelectedOtros] = useState(Array(3).fill({ id: "", nombre: "", puntosOriginal: 0, puntos: 0 }));
   const [cantidadesOtros, setCantidadesOtros] = useState(Array(3).fill(0));
+  const [isTipoRemateEnabled, setIsTipoRemateEnabled] = useState(false);
+  const [filteredArticulos, setFilteredArticulos] = useState([]);
   const backendUrl = 'https://api.adpta.com';
   const user = localStorage.getItem('user');
   const [forceUpdate, setForceUpdate] = useState(false);
@@ -78,52 +80,135 @@ function Remates() {
     });
   }, []);
   
-  const isFrentesOnly = data && 
+  const isFrentesOnly = data &&
   (data.frentes || data.frentes2 || data.frentes3) && // Hay datos en frentes, frentes 2 o frentes 3
-  !data.interiores && // No hay datos en interiores
-  !data.equipamiento3 && // No hay datos en otras secciones
-  !data.baldas;
+  (!data.interiores || data.interiores.puntos === 0) && // No hay puntos en interiores
+  (!data.equipamiento3 || data.equipamiento3.puntos === 0) && // No hay puntos en equipamiento
+  (!data.baldas || data.baldas.puntos === 0) && // No hay puntos en baldas
+  (!data.tiradores || data.tiradores.puntos === 0); // No hay puntos en tiradores
+  
+
   useEffect(() => {
-    if (tipoApertura) {
-      axios.get(`${backendUrl}/articulo/remates`, {
-        headers: { 'ngrok-skip-browser-warning': 'true' }
-      })
-      .then((res) => {
-        if (Array.isArray(res.data)) {
-          const formattedArticulos = res.data.map((articulo) => ({
-            id: articulo.articulo_id,
-            material: articulo.material_id,
-            nombre: `${articulo.articulo_nombre} - ${articulo.material_nombre}`.replace(/\s+/g, " ").trim(), // Eliminar espacios adicionales
-            puntosOriginal: articulo.puntos,
-            puntos: articulo.puntos,
-          }));
-          // Filtrar los artículos que coinciden con el tipo de apertura seleccionado
-          let filteredArticulos = formattedArticulos.filter((articulo) => 
-            articulo.nombre.includes(tipoApertura)
+    if (listArticulo.length > 0) {
+      let filtered = [...listArticulo];
+
+      if (!isTipoRemateEnabled) {
+        // Filtrar por tipo de apertura y "Premarco" si el selector está desactivado
+        if (tipoApertura) {
+          filtered = filtered.filter((articulo) =>
+            articulo.nombre.toLowerCase().includes(tipoApertura.toLowerCase()) &&
+            articulo.nombre.toLowerCase().includes("premarco")
           );
-          // Filtrar los remates a premarco si solo se han elegido frentes
-          if (isFrentesOnly) {
-            filteredArticulos = filteredArticulos.filter((articulo) => 
-              articulo.nombre.toLowerCase().includes("premarco")
+        } else {
+          filtered = []; // Si no hay tipo de apertura seleccionado, no mostrar nada
+        }
+      } else {
+        if (isFrentesOnly) {
+          // Mostrar solo remates de tipo "Premarco" si es solo Frentes
+          filtered = filtered.filter((articulo) =>
+            articulo.nombre.toLowerCase().includes("premarco")
+          );
+        } else {
+          if (tipoApertura) {
+            filtered = filtered.filter((articulo) =>
+              articulo.nombre.toLowerCase().includes(tipoApertura.toLowerCase())
             );
           }
-          setListArticulo(filteredArticulos);
-        } else {
-          console.error("Error fetching articulos: res.data is not an array");
+
+          if (tipoRemate) {
+            filtered = filtered.filter((articulo) => {
+              const tipoRemateLower = tipoRemate.toLowerCase();
+              return (
+                articulo.nombre.toLowerCase().includes(tipoRemateLower) ||
+                (tipoRemateLower === "pared a costado visto" &&
+                  articulo.nombre.toLowerCase().includes("pared a costado v.")) ||
+                (tipoRemateLower === "dos costados vistos" &&
+                  articulo.nombre.toLowerCase().includes("2 costados vistos"))
+              );
+            });
+          }
         }
-      })
-      .catch((error) => {
-        console.error("Error fetching articulos:", error);
-      });
+      }
+
+      setFilteredArticulos(filtered); // Actualizar la lista de artículos filtrados
     }
-  }, [tipoApertura, forceUpdate, isFrentesOnly]);
+  }, [listArticulo, tipoApertura, tipoRemate, isFrentesOnly, isTipoRemateEnabled]);
+
+  useEffect(() => {
+    const interioresSeleccionados = getSelectedArticulosFromData("interiores").some(
+      (articulo) => articulo.id
+    );
+
+    const baldasSeleccionadas = getSelectedArticulosFromData("baldas").some(
+      (articulo) => articulo.id
+    );
+
+    const tiradoresSeleccionados = getSelectedArticulosFromData("tiradores").some(
+      (articulo) => articulo.id
+    );
+
+    const equipamientoSeleccionado = getSelectedArticulosFromData("equipamiento3").some(
+      (articulo) => articulo.id
+    );
+
+    if (tipoApertura && !isFrentesOnly && (interioresSeleccionados || baldasSeleccionadas || equipamientoSeleccionado || tiradoresSeleccionados)) {
+      setIsTipoRemateEnabled(true);
+
+      // Log detallado de las condiciones que activaron el selector
+      //console.log("Selector de tipo de remate activado. Detalles:");
+      //console.log("Tipo de apertura seleccionado:", tipoApertura);
+      //console.log("Puntos en las pestañas:");
+      //console.log("Frentes:", data?.frentes?.puntos || 0);
+      //console.log("Frentes 2:", data?.frentes2?.puntos || 0);
+      //console.log("Frentes 3:", data?.frentes3?.puntos || 0);
+      //console.log("Interiores seleccionados:", interioresSeleccionados);
+      //console.log("Baldas seleccionadas:", baldasSeleccionadas);
+      //console.log("Equipamiento seleccionado:", equipamientoSeleccionado);
+      //console.log("Tiradores seleccionados:", tiradoresSeleccionados);
+    } else {
+      setIsTipoRemateEnabled(false);
+      setTipoRemate(""); // Reiniciar el tipo de remate si no cumple las condiciones
+
+      // Log detallado de las condiciones que desactivaron el selector
+      //console.log("Selector de tipo de remate desactivado. Detalles:");
+      //console.log("Tipo de apertura seleccionado:", tipoApertura || "Ninguno");
+      //console.log("Puntos en las pestañas:");
+      //console.log("Frentes:", data?.frentes?.puntos || 0);
+      //console.log("Frentes 2:", data?.frentes2?.puntos || 0);
+      //console.log("Frentes 3:", data?.frentes3?.puntos || 0);
+      //console.log("Interiores seleccionados:", interioresSeleccionados);
+      //console.log("Baldas seleccionadas:", baldasSeleccionadas);
+      //console.log("Equipamiento seleccionado:", equipamientoSeleccionado);
+      //console.log("Tiradores seleccionados:", tiradoresSeleccionados);
+    }
+  }, [tipoApertura, isFrentesOnly, data]);
+
+  const hasPoints = () => {
+    const interioresSeleccionados = getSelectedArticulosFromData("interiores").some(
+      (articulo) => articulo.id && articulo.puntos > 0
+    );
+
+    const baldasSeleccionadas = getSelectedArticulosFromData("baldas").some(
+      (articulo) => articulo.id && articulo.puntos > 0
+    );
+
+    const tiradoresSeleccionados = getSelectedArticulosFromData("tiradores").some(
+      (articulo) => articulo.id && articulo.puntos > 0
+    );
+
+    const equipamientoSeleccionado = getSelectedArticulosFromData("equipamiento3").some(
+      (articulo) => articulo.id && articulo.puntos > 0
+    );
+
+    return (
+      interioresSeleccionados ||
+      baldasSeleccionadas ||
+      equipamientoSeleccionado ||
+      tiradoresSeleccionados
+    );
+  };
 
   // Filtrar artículos si es solo frentes
-  const filteredArticulos = listArticulo.filter((articulo) => {
-    const matchesTipoApertura = tipoApertura ? articulo.nombre.includes(tipoApertura) : true;
-    return matchesTipoApertura;
-  });
-
   // Cargar los datos iniciales desde el estado global
   useEffect(() => {
   if (data && data.remates) {
@@ -296,17 +381,25 @@ function Remates() {
       navigate('/Frentes');
       setTimeout(() => {
         navigate('/Remates');
-      }, 10); // Navegar de vuelta a Remates después de 10ms
-    }, 30); // Retraso de 300ms antes de la navegación rápida
+      }, 2); // Navegar de vuelta a Remates después de 10ms
+    }, 3); // Retraso de 300ms antes de la navegación rápida
   };
 
   const handleTipoRemateChange = (event) => {
     const value = event.target.value;
     setTipoRemate(value);
     handleSelectChangeZ("tipoRemate", value, value);
-    if (tipoApertura) {
-      setForceUpdate((prev) => !prev); // Forzar la actualización del componente
-    }
+
+    // Forzar la actualización del componente
+    setForceUpdate((prev) => !prev);
+
+    // Cambiar de pestaña y volver en 0,2 segundos
+    setTimeout(() => {
+      navigate('/Frentes'); // Cambiar a la pestaña de Frentes
+      setTimeout(() => {
+        navigate('/Remates'); // Volver a la pestaña de Remates
+      }, 2); // Esperar 200ms antes de volver
+    }, 3); // Retraso inicial de 30ms
   };
 
   const mapAbbreviationToFull = (value) => {
@@ -318,16 +411,56 @@ function Remates() {
     }
   };
 
+  const getSelectedArticulosFromData = (dataKey) => {
+    const dataForKey = data?.[dataKey];
+    if (!dataForKey) return [];
+
+    // Caso 1: Los datos están en formato de array (Tiradores, Interiores)
+    if (Array.isArray(dataForKey.selectedArticulos)) {
+      return dataForKey.selectedArticulos.map((articulo) => ({
+        id: articulo.id,
+        nombre: articulo.nombre,
+        puntos: articulo.puntos || 0,
+        medidas: articulo.medidas || null,
+        cantidad: articulo.cantidad || 0,
+      }));
+    }
+
+    // Caso 2: Los datos están en formato plano (Baldas)
+    const selectedArticulos = [];
+    for (let i = 1; i <= 3; i++) {
+      const id = dataForKey[`articulo${i}Id`];
+      const nombre = dataForKey[`articulo${i}Nombre`];
+      const puntos = dataForKey[`puntosTotales${i}`];
+      const medidas = {
+        id: dataForKey[`medidas${i}Id`],
+        nombre: dataForKey[`medidas${i}Nombre`],
+        puntos: dataForKey[`medidas${i}Puntos`],
+      };
+      const cantidad = dataForKey[`cantidad${i}`];
+
+      if (id) {
+        selectedArticulos.push({
+          id,
+          nombre,
+          puntos: puntos || 0,
+          medidas,
+          cantidad: cantidad || 0,
+        });
+      }
+    }
+    return selectedArticulos;
+  };
+
   // Renderizar selectores de artículos
   const renderSelectArticulo = (index) => (
-  
     <div key={index}>
       <label htmlFor={`articulo${index + 1}`}>Remate {index + 1}:</label>
       <select
         id={`articulo${index + 1}`}
         onChange={(event) => handleSelectArticuloChange(index, event)}
         value={selectedArticulos[index].nombre || ""} // Usar el nombre completo como valor
-        disabled={!tipoApertura} // Deshabilitar si no se ha seleccionado tipoApertura
+        disabled={!tipoApertura || (isTipoRemateEnabled && !tipoRemate)} // Deshabilitar si no se cumplen las condiciones
       >
         <option value="">--Selecciona una opción--</option>
         {filteredArticulos.map((articulo) => (
@@ -353,7 +486,7 @@ function Remates() {
       <label htmlFor={`puntos${index + 1}`}>Puntos: {selectedArticulos[index].puntos.toFixed(2)}</label>
       {listColores[index] && listColores[index].length > 0 && (
         <>
-          <div style={{ marginTop: "1rem", display: "flex", flexDirection: "column" }}> {/* Contenedor con diseño en columna */}
+          <div style={{ marginTop: "1rem", display: "flex", flexDirection: "column" }}>
             <label htmlFor={`color${index + 1}`}>Color:</label>
             <select
               id={`color${index + 1}`}
@@ -462,6 +595,40 @@ function Remates() {
     fetchColors();
   }, [selectedArticulos]);
 
+  useEffect(() => {
+    const baldasSeleccionadas = getSelectedArticulosFromData("baldas");
+    baldasSeleccionadas.forEach((articulo) => {
+      console.log(`Artículo: ${articulo.nombre}, Puntos: ${articulo.puntos}`);
+    });
+  }, [data]);
+
+  useEffect(() => {
+    // Procesar datos de Baldas
+    const baldasSeleccionadas = getSelectedArticulosFromData("baldas");
+    baldasSeleccionadas.forEach((articulo) => {
+      console.log(`Baldas - Artículo: ${articulo.nombre}, Puntos: ${articulo.puntos}`);
+    });
+
+    // Procesar datos de Tiradores
+    const tiradoresSeleccionados = getSelectedArticulosFromData("tiradores");
+    tiradoresSeleccionados.forEach((articulo) => {
+      console.log(`Tiradores - Artículo: ${articulo.nombre}, Puntos: ${articulo.puntos}`);
+    });
+
+    // Procesar datos de Interiores
+    const interioresSeleccionados = getSelectedArticulosFromData("interiores");
+    interioresSeleccionados.forEach((articulo) => {
+      console.log(`Interiores - Artículo: ${articulo.nombre}, Puntos: ${articulo.puntos}`);
+    });
+
+    // Procesar datos de Equipamiento3
+    const equipamientoSeleccionado = getSelectedArticulosFromData("equipamiento3");
+    equipamientoSeleccionado.forEach((articulo) => {
+      console.log(`Equipamiento3 - Artículo: ${articulo.nombre}, Puntos: ${articulo.puntos}`);
+    });
+  }, [data]);
+  
+
   return (
     <div key={forceUpdate} className="container">
       <div className="container2">
@@ -479,6 +646,21 @@ function Remates() {
             <option value="">--Selecciona una opción--</option>
             <option value="abat.">Abatible/Interiores</option>
             <option value="corre.">Corredero</option>
+          </select>
+        </div>
+        <div className="field-special">
+          <label htmlFor="tipoRemate">Tipo de remate:</label>
+          <select
+            id="tipoRemate"
+            onChange={handleTipoRemateChange} // Manejar el cambio
+            value={tipoRemate}
+            disabled={!isTipoRemateEnabled} // Usar el estado para habilitar/deshabilitar
+          >
+            <option value="">--Selecciona una opción--</option>
+            <option value="pared a pared">Pared a pared</option>
+            <option value="pared a costado visto">Pared a costado visto</option>
+            <option value="premarco">Premarco</option>
+            <option value="dos costados vistos">2 Costados vistos</option>
           </select>
         </div>
       </div>

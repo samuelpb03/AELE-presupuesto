@@ -601,7 +601,7 @@ console.log("Estructura de data.baldas:", data.baldas);
   startY = checkPageSpace(doc, startY);
 
 // Calcular los puntos finales con los desmontajes
-doc.text(`Precio total: ${((totalPuntos / 10) * 10).toFixed(2)}€`, 12, startY);
+doc.text(`Precio material: ${((totalPuntos / 10) * 10).toFixed(2)}€`, 12, startY);
 startY += 10;
 
 // Verificar si numFrentesInteriores y numArmariosCompletos son 0, si es así, asignar 115 al totalMontaje
