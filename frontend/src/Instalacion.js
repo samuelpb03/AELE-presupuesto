@@ -90,14 +90,14 @@ function Instalacion() {
     setIsLoading(true); // Mostrar la ventana de carga
 
     try {
-      console.log("Solicitando presupuesto con ID:", presupuestoId); // Log del ID solicitado
+      //console.log("Solicitando presupuesto con ID:", presupuestoId); // Log del ID solicitado
       const response = await fetch(`https://api.adpta.com/presupuesto/${presupuestoId}`);
       if (!response.ok) {
         throw new Error("No se pudo encontrar el presupuesto con el ID proporcionado.");
       }
 
       const presupuesto = await response.json();
-      console.log("Presupuesto recibido:", presupuesto); // Log del presupuesto recibido
+      //console.log("Presupuesto recibido:", presupuesto); // Log del presupuesto recibido
 
       // Verifica si el ID está presente
       if (!presupuesto.idPresupuestos) {
@@ -112,8 +112,8 @@ function Instalacion() {
       const tiendaUsuario = user?.tienda; // Identificador de la tienda del usuario
       const codigoTiendaUsuario = await obtenerCodigoTienda(tiendaUsuario); // Obtener el codigoTienda
 
-      console.log("Código de la tienda del usuario activo:", codigoTiendaUsuario); // Log del código de la tienda del usuario
-      console.log("Centro del presupuesto:", presupuesto.Centro); // Log del centro del presupuesto
+      //console.log("Código de la tienda del usuario activo:", codigoTiendaUsuario); // Log del código de la tienda del usuario
+      //console.log("Centro del presupuesto:", presupuesto.Centro); // Log del centro del presupuesto
 
       // Comprobar si el codigoTienda del usuario activo coincide con el centro del presupuesto
       if (codigoTiendaUsuario !== "AC1" && codigoTiendaUsuario !== presupuesto.Centro) {
@@ -132,11 +132,11 @@ function Instalacion() {
       if (presupuesto.email) {
         userInfo.email = presupuesto.email;
       }
-      console.log("Datos de usuario restaurados:", {
-        cliente: userInfo.cliente,
-        telefono: userInfo.telefono,
-        email: userInfo.email,
-      });
+      //console.log("Datos de usuario restaurados:", {
+        //cliente: userInfo.cliente,
+        //telefono: userInfo.telefono,
+        //email: userInfo.email,
+      //});
       restoreUserInfo(presupuesto.cliente, presupuesto.telefono, presupuesto.email);
 
       // Procesar y guardar los datos del presupuesto (mantén el resto de la lógica existente)
@@ -182,7 +182,7 @@ function Instalacion() {
         };
 
         saveData("frentes3", formattedFrentes3);
-        console.log("Datos guardados en frentes3:", formattedFrentes3);
+        //console.log("Datos guardados en frentes3:", formattedFrentes3);
       }
 
       // Procesar datos de frentes
@@ -228,7 +228,7 @@ function Instalacion() {
         };
 
         saveData("frentes", formattedFrentes);
-        console.log("Datos guardados en frentes:", formattedFrentes);
+        //console.log("Datos guardados en frentes:", formattedFrentes);
       }
 
       // Procesar datos de frentes2
@@ -275,7 +275,7 @@ function Instalacion() {
 
 
         saveData("frentes2", formattedFrentes2);
-        console.log("Datos guardados en frentes2:", formattedFrentes2);
+        //console.log("Datos guardados en frentes2:", formattedFrentes2);
       }
       // Procesar datos de remates
       if (presupuesto.remates) {
@@ -290,10 +290,11 @@ function Instalacion() {
           cantidadesOtros: rematesData.cantidadesOtros || Array(3).fill(1),
           tipoApertura: rematesData.tipoApertura || "",
           tipoRemate: rematesData.tipoRemate || "",
+          colorRemates: rematesData.colorRemates || "", // Restaurar el color de los remates
         };
 
         saveData("remates", formattedRemates);
-        console.log("Datos guardados en remates:", formattedRemates);
+        //console.log("Datos guardados en remates:", formattedRemates);
       }
       if (presupuesto.interiores) {
         const interioresData = typeof presupuesto.interiores === "string"
@@ -357,7 +358,7 @@ function Instalacion() {
         };
 
         saveData("interiores", formattedInteriores);
-        console.log("Datos guardados en interiores:", formattedInteriores);
+        //console.log("Datos guardados en interiores:", formattedInteriores);
       }
       if (presupuesto.tiradores) {
         const tiradoresData = typeof presupuesto.tiradores === "string"
@@ -380,7 +381,7 @@ function Instalacion() {
         };
 
         saveData("tiradores", formattedTiradores);
-        console.log("Datos guardados en tiradores:", formattedTiradores);
+        //console.log("Datos guardados en tiradores:", formattedTiradores);
       }
       if (presupuesto.baldas) {
         const baldasData = typeof presupuesto.baldas === "string"
@@ -403,7 +404,7 @@ function Instalacion() {
         };
 
         saveData("baldas", formattedBaldas);
-        console.log("Datos guardados en baldas:", formattedBaldas);
+        //console.log("Datos guardados en baldas:", formattedBaldas);
       }
       if (presupuesto.equipamiento) {
         const equipamiento3Data = typeof presupuesto.equipamiento === "string"
@@ -431,7 +432,7 @@ function Instalacion() {
         };
 
         saveData("equipamiento3", formattedEquipamiento3);
-        console.log("Datos guardados en equipamiento3:", formattedEquipamiento3);
+        //console.log("Datos guardados en equipamiento3:", formattedEquipamiento3);
       }
       alert("Datos restaurados correctamente. AVISO: La instalación y el nombre del cliente deben añadirse manualmente.");
       setShowRestoreModal(false); // Cerrar el modal
@@ -590,6 +591,6 @@ const obtenerCodigoTienda = async (tiendaId) => {
 };
 
 const saveData = (key, value) => {
-  console.log(`Guardando datos en ${key}:`, value); // Log de los datos que se están guardando
+  //console.log(`Guardando datos en ${key}:`, value); // Log de los datos que se están guardando
   localStorage.setItem(key, JSON.stringify(value));
 };

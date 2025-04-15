@@ -3,12 +3,24 @@ import { useTabs } from './TabsContext';  // Importamos el contexto
 
 function CamposUsuario() {
   const { userInfo, handleUserInfoChange } = useTabs();  // Obtenemos la info del usuario y el manejador del contexto
-  const handleDownload = () => {
+
+  const handleDownloadGuide = () => {
     // Ruta relativa al archivo en la carpeta raíz
     const fileUrl = '/Guía del nuevo presupuestador AELE.docx';
     const link = document.createElement('a');
     link.href = fileUrl;
     link.download = 'Guía del nuevo presupuestador AELE.docx';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleDownloadTarifa = () => {
+    // Ruta relativa al archivo en la carpeta raíz
+    const fileUrl = '/TarifaAele2025';
+    const link = document.createElement('a');
+    link.href = fileUrl;
+    link.download = 'TarifaAele2025';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -41,8 +53,11 @@ function CamposUsuario() {
         />
       </label>
       <div className="download-section">
-        <button className="download-guide-button" onClick={handleDownload}>
+        <button className="download-guide-button" onClick={handleDownloadGuide}>
           Descargar guía completa (en desarrollo)
+        </button>
+        <button className="download-guide-button" style={{ marginLeft: '10px' }} onClick={handleDownloadTarifa}>
+          Descargar tarifa 2025
         </button>
         <p className="restore-budget-text">
           <strong> * Para restaurar un presupuesto, diríjase a la pestaña de Instalación</strong>
