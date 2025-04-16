@@ -714,6 +714,12 @@ const precioTotalConIva = precioTotal; // Precio total con IVA
 doc.text(`Total presupuesto: ${precioTotalConIva.toFixed(2)}€`, valoresX, startY, { align: "right" });
 startY += 20;
 
+// Añadir la imagen seleccionada al PDF
+if (data.selectedImage) {
+  const imageY = pageHeight - 50; // Posición vertical para la imagen
+  doc.addImage(data.selectedImage, "JPEG", 10, imageY, 190, 40); // Ajustar tamaño y posición
+}
+
 // Crear el nombre del PDF y enviarlo
   
   const centroAbreviado = centro.substring(0, 6).toUpperCase();
