@@ -274,7 +274,7 @@ include("header.php")
 <script>
     // Verificar si hoy es lunes
     const today = new Date();
-    const isMonday = today.getDay() === 3; // 1 representa lunes en JavaScript
+    const isMonday = today.getDay() === 2; // 1 representa lunes en JavaScript
 
     // Seleccionar el elemento del texto
     const versionText = document.querySelector('#version-text');

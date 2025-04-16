@@ -3,7 +3,6 @@ import { useTabs } from './TabsContext';  // Importamos el contexto
 
 function CamposUsuario() {
   const { userInfo, handleUserInfoChange } = useTabs();  // Obtenemos la info del usuario y el manejador del contexto
-
   const handleDownloadGuide = () => {
     // Ruta relativa al archivo en la carpeta raíz
     const fileUrl = '/Guía del nuevo presupuestador AELE.docx';
@@ -14,7 +13,6 @@ function CamposUsuario() {
     link.click();
     document.body.removeChild(link);
   };
-
   const handleDownloadTarifa = () => {
     // Ruta relativa al archivo en la carpeta raíz
     const fileUrl = '/TarifaAele2025';
@@ -25,7 +23,6 @@ function CamposUsuario() {
     link.click();
     document.body.removeChild(link);
   };
-
   return (
     <div className="campos-usuario">
       <label>
@@ -66,8 +63,4 @@ function CamposUsuario() {
     </div>
   );
 }
-
 export default CamposUsuario;
-
-
-

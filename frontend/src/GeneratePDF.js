@@ -171,6 +171,22 @@ const obtenerValorPuntoPromo = async (tiendaId) => {
   }
 };
 
+const obtenerDatosEmpresa = async (empresaId) => {
+  try {
+    const response = await fetch(`https://api.adpta.com/empresaUsuario?empresaId=${empresaId}`);
+    const data = await response.json();
+
+    if (response.ok) {
+      console.log("Datos de la empresa:", data); // Imprimir los datos de la empresa en la consola
+      return data; // Retornar los datos de la empresa
+    } else {
+      console.error("Error al obtener los datos de la empresa:", data.message);
+    }
+  } catch (error) {
+    console.error("Error en la solicitud de datos de la empresa:", error);
+  }
+};
+
 export const generatePDF = async (data, userInfo) => {
   const doc = new jsPDF();
   const drawBorder = () => {
@@ -204,12 +220,17 @@ export const generatePDF = async (data, userInfo) => {
     }
   };
   
-  // Agregar logotipo
+  // Obtener el usuario desde el localStorage
   const user = JSON.parse(localStorage.getItem('user'));
+  const usuarioId = user?.id || 'Usuario no especificado';
+  const empresaId = user?.empresa || 'Empresa no especificada';
+
+  // Llamar a la función para obtener los datos de la empresa
+  const empresaData = await obtenerDatosEmpresa(empresaId);
+
   const codigoTienda = await obtenerCodigoTienda(user?.tienda);
   const centro = codigoTienda || 'Código no disponible';
   const empresa = user?.empresa || 'Empresa no especificada';
-  const idUsuario = user?.id || 'Usuario no especificado';
   let logo = 'logoLeroy.png';
   console.log(empresa);
   console.log(JSON.parse(localStorage.getItem('user')));
@@ -601,20 +622,20 @@ console.log("Estructura de data.baldas:", data.baldas);
   startY = checkPageSpace(doc, startY);
 
 // Calcular los puntos finales con los desmontajes
-doc.text(`Precio material: ${((totalPuntos / 10) * 10).toFixed(2)}€`, 12, startY);
-startY += 10;
+//doc.text(`Precio material: ${((totalPuntos / 10) * 10).toFixed(2)}€`, 12, startY);
+//startY += 10;
 
 // Verificar si numFrentesInteriores y numArmariosCompletos son 0, si es así, asignar 115 al totalMontaje
 if (numFrentesInteriores < 0.01 && numArmariosCompletos < 0.01) {
   totalMontaje = 115; // Asignar 115 si ambos son 0
-  doc.text(`Total portes/acarreo: ${totalMontaje.toFixed(2)}€`, 12, startY);
+  //doc.text(`Total portes/acarreo: ${totalMontaje.toFixed(2)}€`, 12, startY);
 } else {
   if (hayIluminacionSeleccionada === true) { 
     totalMontaje = Number(totalMontaje) + 50 + puntosEspecialesTotal + 62;
 } else {
     totalMontaje = Number(totalMontaje) + 50 + puntosEspecialesTotal;
 }
-  doc.text(`Total montaje: ${totalMontaje.toFixed(2)} €`, 12, startY);
+  //doc.text(`Total montaje: ${totalMontaje.toFixed(2)} €`, 12, startY);
 
    // Si no son 0, mostrar el totalMontaje actual
 }
@@ -624,7 +645,7 @@ startY += 10;
 // Calcular el precio total sumando puntosFinal y totalMontaje
 var precioTotal = Number(totalPuntos) + Number(totalMontaje) + Number(numDesmontaje * 121);
 if (numDesmontaje > 0.01) {
-  doc.text('Total desmontaje:' + Number(numDesmontaje * 121).toFixed(2) + '€', 12, startY);
+  //doc.text('Total desmontaje:' + Number(numDesmontaje * 121).toFixed(2) + '€', 12, startY);
   startY += 10;
 }
 const valorPuntoPromo = await obtenerValorPuntoPromo(user?.tienda);
@@ -634,11 +655,66 @@ if (valorPuntoPromo < 1) {
   doc.text(`Descuento por promoción del ${descuento.toFixed(0)}%`, 12, startY);
   startY += 10;
 }
-// Calcular el precio total con el valor del punto de promoción y solo añadir 2 decimales de máximo
-doc.text('Total precio: ' + precioTotal.toFixed(2) * valorPuntoPromo + '€', 12, startY);
+
+// Obtener el porcentaje de IVA de los datos de la empresa
+const porcentajeIva = empresaData?.porcentajeIva || 0; // Si no hay IVA, usar 0
+const divisorIva = 1 + porcentajeIva / 100; // Divisor para calcular precios sin IVA
+const multiplicadorIva = porcentajeIva / 100; // Multiplicador para calcular el valor del IVA
+
+// Cálculo de precios
+const precioMaterial = totalPuntos / divisorIva; // Precio material sin IVA
+const totalMontajeSinIva = totalMontaje / divisorIva; // Total montaje sin IVA
+const totalDesmontajeSinIva = (numDesmontaje * 121) / divisorIva; // Total desmontaje sin IVA
+
+// Calcular el valor del IVA
+const sumaSinIva = precioMaterial + totalMontajeSinIva + totalDesmontajeSinIva;
+const valorIva = sumaSinIva * multiplicadorIva;
+
+// Imprimir los valores en el PDF con fuente más grande, en negrita y alineados a la derecha
+doc.setFontSize(10); // Aumentar el tamaño de la fuente
+doc.setFont("helvetica", "bold"); // Cambiar a negrita
+
+// Calcular las referencias
+const codigoInterno = empresaData?.codigoInterno || "N/A";
+const tiendaId = userInfo.tienda || user?.tienda || "N/A"; // Asegurarse de que tiendaId tenga un valor válido
+const descuento = empresaData?.descuento || 1;
+
+// Referencia 1: Precio material con IVA
+const precioMaterialConIva = precioMaterial * divisorIva * descuento;
+const referencia1 = `${codigoInterno}48_${tiendaId}_${Math.floor(precioMaterialConIva)}`;
+
+// Referencia 2: Precio montaje con IVA
+const precioMontajeConIva = totalMontajeSinIva * divisorIva;
+const referencia2 = `${codigoInterno}49_${tiendaId}_${Math.floor(precioMontajeConIva)}`;
+
+// Imprimir las referencias a la izquierda de los otros campos
+doc.setFontSize(12); // Reducir el tamaño de la fuente para las referencias
+doc.setFont("helvetica", "bold"); // Cambiar a fuente negrita
+const referenciaX = 10; // Posición X para las referencias
+const valoresX = pageWidth - 20; // Posición X para los valores a la derecha
+
+// Imprimir las referencias y los valores en la misma línea vertical
+doc.text(`Referencia: ${referencia1}`, referenciaX, startY);
+doc.text(`Total armario: ${precioMaterial.toFixed(2)}€`, valoresX, startY, { align: "right" });
 startY += 10;
-//doc.text('C1: '+ (precioTotal * valorPuntoPromo) * 0.58 + '€', 12, startY);
-  // Crear el nombre del PDF y enviarlo
+
+doc.text(`Referencia: ${referencia2}`, referenciaX, startY);
+doc.text(`Total montaje: ${totalMontajeSinIva.toFixed(2)}€`, valoresX, startY, { align: "right" });
+startY += 10;
+
+if (numDesmontaje > 0) {
+  doc.text(`Total desmontaje: ${totalDesmontajeSinIva.toFixed(2)}€`, valoresX, startY, { align: "right" });
+  startY += 10;
+}
+
+doc.text(`% IVA: ${valorIva.toFixed(2)}€`, valoresX, startY, { align: "right" });
+startY += 10;
+//calcular el precio total con iva
+const precioTotalConIva = precioTotal; // Precio total con IVA
+doc.text(`Total presupuesto: ${precioTotalConIva.toFixed(2)}€`, valoresX, startY, { align: "right" });
+startY += 20;
+
+// Crear el nombre del PDF y enviarlo
   
   const centroAbreviado = centro.substring(0, 6).toUpperCase();
   fetch('https://api.adpta.com/presupuesto', {
@@ -684,4 +760,4 @@ startY += 10;
     .catch(error => {
       console.error("Error al enviar datos del presupuesto:", error);
     });
-}; 
+};

@@ -706,5 +706,37 @@ app.get("/getTiendaNameById", (req, res) => {
     return res.json({ tiendaId: data[0].id });
   });
 });
+
+// Ruta para obtener los datos de la empresa del usuario
+
+// Ruta para obtener los datos de la empresa directamente por su ID
+app.get("/empresaUsuario", (req, res) => {
+  const empresaId = req.query.empresaId; // ID de la empresa recibido desde el frontend
+
+  if (!empresaId) {
+    return res.status(400).json({ error: "El ID de la empresa es requerido" });
+  }
+
+  // Consulta para obtener los datos de la empresa directamente por su ID
+  const query = `
+    SELECT *
+    FROM empresa
+    WHERE id = ?;
+  `;
+
+  db.query(query, [empresaId], (err, data) => {
+    if (err) {
+      console.error("Error al obtener los datos de la empresa:", err);
+      return res.status(500).json({ error: "Error al obtener los datos de la empresa" });
+    }
+
+    if (data.length === 0) {
+      return res.status(404).json({ message: "No se encontraron datos para esta empresa" });
+    }
+
+    return res.json(data[0]); // Devuelve los datos de la empresa
+  });
+});
+
 // Monta Express en el puerto.
 

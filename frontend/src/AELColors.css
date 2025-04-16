@@ -312,6 +312,13 @@ h1, h2 {
   color: #333;
   transition: border-color 0.3s, box-shadow 0.3s; 
 }
+select {
+  transition: transform 0.2s ease-in-out; /* Transición suave */
+}
+
+select:hover {
+  transform: scale(1.05); /* Aumenta el tamaño al pasar el ratón */
+}
 .field-special-horizontal {
   display: flex;
   justify-content: space-around; /* Esto distribuirá uniformemente el espacio entre los elementos */

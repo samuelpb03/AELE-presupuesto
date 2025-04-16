@@ -290,11 +290,11 @@ function Instalacion() {
           cantidadesOtros: rematesData.cantidadesOtros || Array(3).fill(1),
           tipoApertura: rematesData.tipoApertura || "",
           tipoRemate: rematesData.tipoRemate || "",
-          colorRemates: rematesData.colorRemates || "", // Restaurar el color de los remates
+          selectedColores: rematesData.colorRemates || Array(3).fill(""), // Asigna colorRemates a selectedColores
         };
 
+        console.log("Datos de remates guardados:", formattedRemates); // Log para verificar los datos
         saveData("remates", formattedRemates);
-        //console.log("Datos guardados en remates:", formattedRemates);
       }
       if (presupuesto.interiores) {
         const interioresData = typeof presupuesto.interiores === "string"

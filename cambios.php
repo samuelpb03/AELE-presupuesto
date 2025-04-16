@@ -20,6 +20,9 @@ include("header.php");
             background: linear-gradient(to right, #f2f2f2, #ffffff);
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             padding-top: 40px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
         }
 
         .container {
@@ -29,6 +32,7 @@ include("header.php");
             box-shadow: 0 0 20px rgba(0,0,0,0.1);
             max-width: 800px;
             margin: auto;
+            flex: 1;
         }
 
         h1 {
@@ -37,6 +41,8 @@ include("header.php");
             margin-bottom: 30px;
             border-bottom: 2px solid #a67c42;
             padding-bottom: 10px;
+            text-align: center; /* Centrar el texto */
+            font-size: 28px; /* Ajustar el tamaño de la fuente */
         }
 
         ul {
@@ -60,11 +66,14 @@ include("header.php");
 
         footer {
             text-align: center;
-            margin-top: 60px;
+            margin-top: 20px;
             padding: 20px;
             background-color: #a67c42;
             color: white;
             border-radius: 0 0 10px 10px;
+            position: relative;
+            bottom: 0;
+            width: 100%;
         }
 
         .volver-btn {
@@ -84,51 +93,93 @@ include("header.php");
             background-color: #8a622d;
         }
 
-        #version-text {
-            text-align: left; /* Alinear el texto a la izquierda */
+        .accordion-header {
+            cursor: pointer;
+            background-color: #a67c42;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-weight: bold;
         }
 
-        .header-bar, .footer-bar {
-            position: fixed; /* Fija las barras en su posición */
-            left: 0; /* Alinea al borde izquierdo */
-            right: 0; /* Alinea al borde derecho */
-            height: 50px; /* Altura de las barras */
-            background-color: #a67c42; /* Color marrón */
-            z-index: 1000; /* Asegura que estén por encima de otros elementos */
+        .accordion-body {
+            display: none;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
         }
 
-        .header-bar {
-            top: 0; /* Fija la barra superior al borde superior */
+        .accordion-body ul li {
+            background: #eee2b4;
+            border-left: 5px solid #a67c42;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 8px;
         }
 
-        .footer-bar {
-            bottom: 0; /* Fija la barra inferior al borde inferior */
-            text-align: center; /* Centra el texto dentro de la barra */
-            color: white; /* Color del texto */
-            font-size: 12px; /* Tamaño del texto */
-            height: 50px; /* Altura de la barra */
-            line-height: 50px; /* Alinea el texto verticalmente */
+        .accordion-body.open {
+            display: block;
         }
     </style>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const headers = document.querySelectorAll(".accordion-header");
+            headers.forEach(header => {
+                header.addEventListener("click", () => {
+                    const body = header.nextElementSibling;
+                    body.style.display = body.style.display === "block" ? "none" : "block";
+                });
+            });
+
+            // Abre por defecto la sección de la versión 3.0.1
+            const firstBody = document.querySelector(".accordion-body");
+            if (firstBody) {
+                firstBody.style.display = "block";
+            }
+        });
+    </script>
 </head>
 <body>
-    <div class="header-bar"></div>
     <div class="container">
         <h1>🛠 Últimas mejoras del Presupuestador AELE</h1>
-        <ul>
-            <li>✅ Corregidos algunos errores en la pestaña de <strong>remates</strong> que hacían que no se mostraran los nombres al seleccionarse.</li>
-            <li>🎨 Añadidos <strong>colores</strong> a los remates (en caso de que el usuario quiera un color diferente).</li>
-            <li>📥 Añadida la funcionalidad de <strong>restaurar todos los datos</strong> de un presupuesto con su ID en un solo clic.</li>
-            <li>📘 Añadida una <strong>guía</strong> que irá siendo actualizada conforme se añadan nuevas funcionalidades y características.</li>
-            <li>🖼 Añadidas las <strong>imágenes de cada frente</strong> seleccionable para tener una mejor guía visual al elegir las puertas.</li>
-            <li>🎨 Modificado el <strong>aspecto visual</strong> de la aplicación para mejorar la experiencia del usuario.</li>
-            <li>🛠 Arreglado un problema con los <strong>colores del perfil</strong> en Puertas 3.</li>
-        </ul>
+        <div>
+            <!-- Versión 3.0.1 -->
+            <div>
+                <div class="accordion-header">Versión 3.0.1</div>
+                <div class="accordion-body open">
+                    <ul>
+                        <li>✅ Corregido un error que hacía que no se guardaran los presupuestos.</li>
+                        <li>🎨 Corregido un error en el que no se restauraban los colores de los remates.</li>
+                        <li>⚡ Optimizado el código para mejorar el rendimiento.</li>
+                        <li>📥 Añadida la tarifa actualizada para poder consultar todos los productos.</li>
+                        <li>💰 Cambiado el precio total de los materiales de "Precio total" a "Precio materiales".</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Versión 3.0.0 -->
+            <div>
+                <div class="accordion-header">Versión 3.0.0</div>
+                <div class="accordion-body">
+                    <ul>
+                        <li>✅ Corregidos algunos errores en la pestaña de <strong>remates</strong> que hacían que no se mostraran los nombres al seleccionarse.</li>
+                        <li>🎨 Añadidos <strong>colores</strong> a los remates (en caso de que el usuario quiera un color diferente).</li>
+                        <li>📥 Añadida la funcionalidad de <strong>restaurar todos los datos</strong> de un presupuesto con su ID en un solo clic.</li>
+                        <li>📘 Añadida una <strong>guía</strong> que irá siendo actualizada conforme se añadan nuevas funcionalidades y características.</li>
+                        <li>🖼 Añadidas las <strong>imágenes de cada frente</strong> seleccionable para tener una mejor guía visual al elegir las puertas.</li>
+                        <li>🎨 Modificado el <strong>aspecto visual</strong> de la aplicación para mejorar la experiencia del usuario.</li>
+                        <li>🛠 Arreglado un problema con los <strong>colores del perfil</strong> en Puertas 3.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
 
         <a href="index.html" class="volver-btn">← Ir al presupuestador</a>
     </div>
-    <div class="footer-bar">
+    <footer>
         © AELE - 2025
-    </div>
+    </footer>
 </body>
 </html>
